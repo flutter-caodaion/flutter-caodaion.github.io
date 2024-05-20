@@ -32,6 +32,9 @@ class _QRPageState extends State<QRPage> {
   Widget build(BuildContext context) {
     return ResponsiveScaffold(
       child: Scaffold(
+        appBar: AppBar(
+          title: const Text('Quét Mã QR'),
+        ),
         body: Column(
           children: <Widget>[
             Expanded(
@@ -43,15 +46,6 @@ class _QRPageState extends State<QRPage> {
                 ),
               ),
             ),
-            // Expanded(
-            //   flex: 1,
-            //   child: Center(
-            //     child: (result != null)
-            //         ? Text(
-            //             'Barcode Type: ${describeEnum(result!.format)}   Data: ${result!.code}')
-            //         : Text('Scan a code'),
-            //   ),
-            // )
           ],
         ),
       ),
@@ -63,8 +57,8 @@ class _QRPageState extends State<QRPage> {
     controller.scannedDataStream.listen((scanData) {
       setState(() {
         result = scanData.code;
-          final SnackBar snackBar = SnackBar(content: Text("$result"));
-          ScaffoldMessenger.of(context).showSnackBar(snackBar);
+        final SnackBar snackBar = SnackBar(content: Text("$result"));
+        ScaffoldMessenger.of(context).showSnackBar(snackBar);
       });
     });
   }

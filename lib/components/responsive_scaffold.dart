@@ -5,9 +5,8 @@ import 'package:go_router/go_router.dart';
 
 class ResponsiveScaffold extends StatelessWidget {
   final Widget child;
-  final int _currentIndex = 0;
 
-  const ResponsiveScaffold({required this.child, Key? key}) : super(key: key);
+  const ResponsiveScaffold({required this.child, super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -19,6 +18,9 @@ class ResponsiveScaffold extends StatelessWidget {
               body: Row(
                 children: [
                   NavigationRail(
+                    leading: const SizedBox(
+                      height: 12,
+                    ),
                     selectedIndex: _selectedIndex(context),
                     backgroundColor: ColorConstants.primaryBackground,
                     indicatorColor: ColorConstants.primaryIndicatorBackground,
@@ -31,30 +33,35 @@ class ResponsiveScaffold extends StatelessWidget {
                           'assets/icons/home.svg',
                         ),
                         label: const Text('Trang chủ'),
+                        padding: const EdgeInsets.only(top: 4, bottom: 4),
                       ),
                       NavigationRailDestination(
                         icon: SvgPicture.asset(
                           'assets/icons/book.svg',
                         ),
                         label: const Text('Kinh'),
+                        padding: const EdgeInsets.only(top: 4, bottom: 4),
                       ),
                       NavigationRailDestination(
                         icon: SvgPicture.asset(
                           'assets/icons/close_book.svg',
                         ),
                         label: const Text('TNHT'),
+                        padding: const EdgeInsets.only(top: 4, bottom: 4),
                       ),
                       NavigationRailDestination(
                         icon: SvgPicture.asset(
                           'assets/icons/calendar.svg',
                         ),
                         label: const Text('Lịch'),
+                        padding: const EdgeInsets.only(top: 4, bottom: 4),
                       ),
                       NavigationRailDestination(
                         icon: SvgPicture.asset(
                           'assets/icons/apps.svg',
                         ),
                         label: const Text('Ứng dụng'),
+                        padding: const EdgeInsets.only(top: 4, bottom: 4),
                       ),
                     ],
                   ),
@@ -67,57 +74,63 @@ class ResponsiveScaffold extends StatelessWidget {
           return SafeArea(
             child: Scaffold(
               body: child,
-              bottomNavigationBar: BottomNavigationBar(
-                currentIndex: _selectedIndex(context),
-                onTap: (index) => _onItemTapped(context, index),
-                selectedItemColor: ColorConstants.primaryColor,
-                items: <BottomNavigationBarItem>[
-                  BottomNavigationBarItem(
-                    icon: SvgPicture.asset(
-                      'assets/icons/home.svg',
-                      color: _selectedIndex(context) == 0
-                          ? ColorConstants.primaryColor
-                          : Colors.black,
+              bottomNavigationBar: Theme(
+                data: Theme.of(context).copyWith(
+                  canvasColor: ColorConstants.primaryBackground,
+                ),
+                child: BottomNavigationBar(
+                  currentIndex: _selectedIndex(context),
+                  onTap: (index) => _onItemTapped(context, index),
+                  selectedItemColor: ColorConstants.primaryColor,
+                  backgroundColor: ColorConstants.primaryBackground,
+                  items: <BottomNavigationBarItem>[
+                    BottomNavigationBarItem(
+                      icon: SvgPicture.asset(
+                        'assets/icons/home.svg',
+                        color: _selectedIndex(context) == 0
+                            ? ColorConstants.primaryColor
+                            : Colors.black,
+                      ),
+                      label: 'Trang chủ',
                     ),
-                    label: 'Trang chủ',
-                  ),
-                  BottomNavigationBarItem(
-                    icon: SvgPicture.asset(
-                      'assets/icons/book.svg',
-                      color: _selectedIndex(context) == 1
-                          ? ColorConstants.primaryColor
-                          : Colors.black,
+                    BottomNavigationBarItem(
+                      icon: SvgPicture.asset(
+                        'assets/icons/book.svg',
+                        color: _selectedIndex(context) == 1
+                            ? ColorConstants.primaryColor
+                            : Colors.black,
+                      ),
+                      label: 'Kinh',
                     ),
-                    label: 'Kinh',
-                  ),
-                  BottomNavigationBarItem(
-                    icon: SvgPicture.asset(
-                      'assets/icons/close_book.svg',
-                      color: _selectedIndex(context) == 2
-                          ? ColorConstants.primaryColor
-                          : Colors.black,
+                    BottomNavigationBarItem(
+                      icon: SvgPicture.asset(
+                        'assets/icons/close_book.svg',
+                        color: _selectedIndex(context) == 2
+                            ? ColorConstants.primaryColor
+                            : Colors.black,
+                      ),
+                      label: 'TNHT',
                     ),
-                    label: 'TNHT',
-                  ),
-                  BottomNavigationBarItem(
-                    icon: SvgPicture.asset(
-                      'assets/icons/calendar.svg',
-                      color: _selectedIndex(context) == 3
-                          ? ColorConstants.primaryColor
-                          : Colors.black,
+                    BottomNavigationBarItem(
+                      icon: SvgPicture.asset(
+                        'assets/icons/calendar.svg',
+                        color: _selectedIndex(context) == 3
+                            ? ColorConstants.primaryColor
+                            : Colors.black,
+                      ),
+                      label: 'Lịch',
                     ),
-                    label: 'Lịch',
-                  ),
-                  BottomNavigationBarItem(
-                    icon: SvgPicture.asset(
-                      'assets/icons/apps.svg',
-                      color: _selectedIndex(context) == 4
-                          ? ColorConstants.primaryColor
-                          : Colors.black,
+                    BottomNavigationBarItem(
+                      icon: SvgPicture.asset(
+                        'assets/icons/apps.svg',
+                        color: _selectedIndex(context) == 4
+                            ? ColorConstants.primaryColor
+                            : Colors.black,
+                      ),
+                      label: 'Ứng dụng',
                     ),
-                    label: 'Ứng dụng',
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           );
