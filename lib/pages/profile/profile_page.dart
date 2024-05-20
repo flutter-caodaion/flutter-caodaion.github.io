@@ -1,5 +1,5 @@
+import 'package:caodaion/components/responsive_scaffold.dart';
 import 'package:flutter/material.dart';
-import '../main.dart';
 
 class ProfilePage extends StatelessWidget {
   const ProfilePage({Key? key}) : super(key: key);

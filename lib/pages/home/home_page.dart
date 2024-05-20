@@ -1,6 +1,6 @@
 // home_page.dart
+import 'package:caodaion/components/responsive_scaffold.dart';
 import 'package:flutter/material.dart';
-import '../main.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({Key? key}) : super(key: key);

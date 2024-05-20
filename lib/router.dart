@@ -1,7 +1,11 @@
-import 'package:caodaion/pages/apps_page.dart';
-import 'package:caodaion/pages/home_page.dart';
-import 'package:caodaion/pages/profile_page.dart';
-import 'package:caodaion/pages/settings_page.dart';
+import 'package:caodaion/pages/apps/apps_page.dart';
+import 'package:caodaion/pages/calendar/calendar_page.dart';
+import 'package:caodaion/pages/home/home_page.dart';
+import 'package:caodaion/pages/kinh/kinh_page.dart';
+import 'package:caodaion/pages/profile/profile_page.dart';
+import 'package:caodaion/pages/qr/qr_page.dart';
+import 'package:caodaion/pages/settings/settings_page.dart';
+import 'package:caodaion/pages/tnht/tnht_page.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
@@ -32,6 +36,18 @@ final GoRouter router = GoRouter(
       pageBuilder: (context, state) => NoTransitionPage(child: const HomePage(), name: '/'),
     ),
     GoRoute(
+      path: '/kinh',
+      pageBuilder: (context, state) => NoTransitionPage(child: const KinhPage(), name: '/kinh'),
+    ),
+    GoRoute(
+      path: '/tnht',
+      pageBuilder: (context, state) => NoTransitionPage(child: const TNHTPage(), name: '/tnht'),
+    ),
+    GoRoute(
+      path: '/lich',
+      pageBuilder: (context, state) => NoTransitionPage(child: const CalendarPage(), name: '/lich'),
+    ),
+    GoRoute(
       path: '/settings',
       pageBuilder: (context, state) => NoTransitionPage(child: const SettingsPage(), name: '/settings'),
     ),
@@ -42,6 +58,10 @@ final GoRouter router = GoRouter(
     GoRoute(
       path: '/apps',
       pageBuilder: (context, state) => NoTransitionPage(child: const AppsPage(), name: '/apps'),
+    ),
+    GoRoute(
+      path: '/qr',
+      pageBuilder: (context, state) => NoTransitionPage(child: const QRPage(), name: '/qr'),
     ),
   ],
 );
