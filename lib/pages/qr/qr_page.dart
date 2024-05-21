@@ -1,8 +1,10 @@
 // qr_page.dart
 import 'dart:io';
-import 'package:caodaion/components/responsive_scaffold.dart';
+import 'package:caodaion/widgets/responsive_scaffold.dart';
 import 'package:flutter/material.dart';
 import 'package:qr_code_scanner/qr_code_scanner.dart';
+import 'package:flutter/services.dart'; // Add this import for PlatformException
+
 
 class QRPage extends StatefulWidget {
   const QRPage({Key? key}) : super(key: key);

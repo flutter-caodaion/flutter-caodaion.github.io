@@ -143,9 +143,9 @@ class ResponsiveScaffold extends StatelessWidget {
     final location = ModalRoute.of(context)?.settings?.name;
     if (location == '/kinh') {
       return 1;
-    } else if (location == '/lich') {
-      return 2;
     } else if (location == '/tnht') {
+      return 2;
+    } else if (location == '/lich') {
       return 3;
     } else if (location == '/apps') {
       return 4;
@@ -162,10 +162,10 @@ class ResponsiveScaffold extends StatelessWidget {
         context.go('/kinh');
         break;
       case 2:
-        context.go('/lich');
+        context.go('/tnht');
         break;
       case 3:
-        context.go('/tnht');
+        context.go('/lich');
         break;
       case 4:
         context.go('/apps');

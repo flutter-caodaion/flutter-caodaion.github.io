@@ -1,5 +1,5 @@
 // kinh_page.dart
-import 'package:caodaion/components/responsive_scaffold.dart';
+import 'package:caodaion/widgets/responsive_scaffold.dart';
 import 'package:flutter/material.dart';
 
 class KinhPage extends StatelessWidget {

@@ -1,5 +1,6 @@
 import 'package:caodaion/constants/constants.dart';
 import 'package:flutter/material.dart';
+import 'package:responsive_framework/responsive_framework.dart';
 import 'router.dart';
 
 void main() {
@@ -17,8 +18,17 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         useMaterial3: true,
         primaryColor: ColorConstants.primaryColor,
-        scaffoldBackgroundColor: ColorConstants.secondaryBackdround,
+        scaffoldBackgroundColor: ColorConstants.whiteBackdround,
         appBarTheme: AppBarTheme(backgroundColor: ColorConstants.secondaryBackdround),
+      ),
+      builder: (context, child) => ResponsiveBreakpoints.builder(
+        child: child!,
+        breakpoints: [
+          const Breakpoint(start: 0, end: 450, name: MOBILE),
+          const Breakpoint(start: 451, end: 800, name: TABLET),
+          const Breakpoint(start: 801, end: 1920, name: DESKTOP),
+          const Breakpoint(start: 1921, end: double.infinity, name: '4K'),
+        ],
       ),
     );
   }

@@ -1,5 +1,5 @@
 // home_page.dart
-import 'package:caodaion/components/responsive_scaffold.dart';
+import 'package:caodaion/widgets/responsive_scaffold.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
