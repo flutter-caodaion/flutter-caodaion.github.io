@@ -3,7 +3,7 @@ import 'package:caodaion/widgets/responsive_scaffold.dart';
 import 'package:flutter/material.dart';
 
 class KinhPage extends StatelessWidget {
-  const KinhPage({Key? key}) : super(key: key);
+  const KinhPage({super.key});
 
   @override
   Widget build(BuildContext context) {

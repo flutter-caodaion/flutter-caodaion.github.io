@@ -81,7 +81,7 @@ final GoRouter router = GoRouter(
     GoRoute(
       path: '/tu-tinh',
       pageBuilder: (context, state) =>
-          NoTransitionPage(child: SelfChartPage(), name: '/tu-tinh'),
+          NoTransitionPage(child: const SelfChartPage(), name: '/tu-tinh'),
     ),
   ],
 );
