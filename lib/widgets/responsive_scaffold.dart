@@ -141,16 +141,16 @@ class ResponsiveScaffold extends StatelessWidget {
 
   int _selectedIndex(BuildContext context) {
     final location = ModalRoute.of(context)?.settings?.name;
-    if (location == '/kinh') {
+    if (location == '/') {
+      return 0;
+    } else if (location == '/kinh') {
       return 1;
     } else if (location == '/tnht') {
       return 2;
     } else if (location == '/lich') {
       return 3;
-    } else if (location == '/apps') {
-      return 4;
     }
-    return 0;
+    return 4;
   }
 
   void _onItemTapped(BuildContext context, int index) {

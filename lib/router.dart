@@ -3,8 +3,10 @@ import 'package:caodaion/pages/calendar/calendar_page.dart';
 import 'package:caodaion/pages/clock/clock_page.dart';
 import 'package:caodaion/pages/home/home_page.dart';
 import 'package:caodaion/pages/kinh/kinh_page.dart';
+import 'package:caodaion/pages/maps/maps_page.dart';
 import 'package:caodaion/pages/profile/profile_page.dart';
 import 'package:caodaion/pages/qr/qr_page.dart';
+import 'package:caodaion/pages/self_chart/self_chart_page.dart';
 import 'package:caodaion/pages/settings/settings_page.dart';
 import 'package:caodaion/pages/tnht/tnht_page.dart';
 import 'package:go_router/go_router.dart';
@@ -70,6 +72,16 @@ final GoRouter router = GoRouter(
       path: '/dong-ho',
       pageBuilder: (context, state) =>
           NoTransitionPage(child: const ClockPage(), name: '/dong-ho'),
+    ),
+    GoRoute(
+      path: '/maps',
+      pageBuilder: (context, state) =>
+          NoTransitionPage(child: const MapsPage(), name: '/maps'),
+    ),
+    GoRoute(
+      path: '/tu-tinh',
+      pageBuilder: (context, state) =>
+          NoTransitionPage(child: SelfChartPage(), name: '/tu-tinh'),
     ),
   ],
 );

@@ -7,7 +7,7 @@ import 'package:go_router/go_router.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 
 class AppsPage extends StatefulWidget {
-  const AppsPage({Key? key}) : super(key: key);
+  const AppsPage({super.key});
 
   @override
   State<AppsPage> createState() => _AppsPageState();
@@ -64,6 +64,25 @@ class _AppsPageState extends State<AppsPage> {
           height: 32,
           width: 32,
           color: ColorConstants.kinhColor,
+        ),
+      },
+      {
+        'name': '/tu-tinh',
+        'label': 'Tự tỉnh',
+        'icon': SvgPicture.asset(
+          'assets/icons/chart.svg',
+          height: 32,
+          width: 32,
+          color: ColorConstants.chartColor,
+        ),
+      },
+      {
+        'name': '/maps',
+        'label': 'Bản đồ',
+        'icon': Icon(
+          Icons.map,
+          color: ColorConstants.mapsColor,
+          size: 32,
         ),
       },
     ];
