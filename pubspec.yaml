@@ -39,6 +39,7 @@ dependencies:
   latlong2: ^0.9.1
   flutter_map_cancellable_tile_provider: ^2.0.0
   fl_chart: ^0.68.0
+  flutter_markdown: ^0.7.1
 
 
   # The following adds the Cupertino Icons font to your application.
@@ -71,6 +72,8 @@ flutter:
   assets:
     - assets/
     - assets/icons/
+    - assets/document/
+    - assets/document/kinh/
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware

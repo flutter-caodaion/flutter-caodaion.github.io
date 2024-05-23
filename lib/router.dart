@@ -3,6 +3,7 @@ import 'package:caodaion/pages/calendar/calendar_page.dart';
 import 'package:caodaion/pages/clock/clock_page.dart';
 import 'package:caodaion/pages/home/home_page.dart';
 import 'package:caodaion/pages/kinh/kinh_page.dart';
+import 'package:caodaion/pages/kinh/reading_kinh/reading_kinh.dart';
 import 'package:caodaion/pages/maps/maps_page.dart';
 import 'package:caodaion/pages/profile/profile_page.dart';
 import 'package:caodaion/pages/qr/qr_page.dart';
@@ -37,6 +38,17 @@ final GoRouter router = GoRouter(
       path: '/kinh',
       pageBuilder: (context, state) =>
           NoTransitionPage(child: const KinhPage(), name: '/kinh'),
+      routes: [
+        GoRoute(
+          path: ':id',
+          pageBuilder: (context, state) {
+            final id = state.pathParameters['id'] as String;
+            return NoTransitionPage(
+              child: ReadingKinhPage(id: id),
+            );
+          },
+        )
+      ],
     ),
     GoRoute(
       path: '/tnht',

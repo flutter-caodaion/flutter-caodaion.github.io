@@ -21,7 +21,12 @@ class MyApp extends StatelessWidget {
         useMaterial3: true,
         primaryColor: ColorConstants.primaryColor,
         scaffoldBackgroundColor: ColorConstants.whiteBackdround,
-        appBarTheme: AppBarTheme(backgroundColor: ColorConstants.secondaryBackdround),
+        appBarTheme:
+            AppBarTheme(backgroundColor: ColorConstants.primaryBackground),
+        tabBarTheme: TabBarTheme(
+          labelColor: Colors.black,
+          indicatorColor: ColorConstants.primaryColor,
+        ),
       ),
       builder: (context, child) => ResponsiveBreakpoints.builder(
         child: child!,
