@@ -76,15 +76,15 @@ class _AppsPageState extends State<AppsPage> {
           color: ColorConstants.chartColor,
         ),
       },
-      {
-        'name': '/maps',
-        'label': 'Bản đồ',
-        'icon': Icon(
-          Icons.map,
-          color: ColorConstants.mapsColor,
-          size: 32,
-        ),
-      },
+      // {
+      //   'name': '/maps',
+      //   'label': 'Bản đồ',
+      //   'icon': Icon(
+      //     Icons.map,
+      //     color: ColorConstants.mapsColor,
+      //     size: 32,
+      //   ),
+      // },
     ];
 
     List<Map<String, dynamic>> pinnedApps = [
