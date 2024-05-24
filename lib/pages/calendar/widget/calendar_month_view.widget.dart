@@ -33,6 +33,38 @@ class _CalendarMonthViewState extends State<CalendarMonthView> {
           headerBuilder: (date) {
             return const SizedBox();
           },
+          weekDayBuilder: (day) {
+            String dayText = '';
+            switch (day) {
+              case 0:
+                dayText = 'T2';
+                break;
+              case 1:
+                dayText = 'T3';
+                break;
+              case 2:
+                dayText = 'T4';
+                break;
+              case 3:
+                dayText = 'T5';
+                break;
+              case 4:
+                dayText = 'T6';
+                break;
+              case 5:
+                dayText = 'T7';
+                break;
+              case 6:
+                dayText = 'CN';
+                break;
+              default:
+                break;
+            }
+            return Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Center(child: Text(dayText)),
+            );
+          },
           cellBuilder: (date, event, isToday, isInMonth, hideDaysNotInMonth) {
             final dateText = DateFormat.d().format(date);
             final Lunar gotLunar = Lunar.fromDate(date);

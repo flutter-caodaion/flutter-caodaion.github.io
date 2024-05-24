@@ -6,6 +6,7 @@ import 'package:caodaion/pages/calendar/widget/calendar_week_view.widget.dart';
 import 'package:caodaion/widgets/responsive_scaffold.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:intl/intl.dart';
 
 class CalendarPage extends StatefulWidget {
   final Map param;
@@ -17,7 +18,8 @@ class CalendarPage extends StatefulWidget {
 }
 
 class _CalendarPageState extends State<CalendarPage> {
-  final DateTime selectedTime = DateTime.now();
+  DateTime selectedTime = DateTime.now();
+  bool isShowMonthSection = false;
 
   @override
   void initState() {
@@ -25,19 +27,61 @@ class _CalendarPageState extends State<CalendarPage> {
     _loadInitMonth();
   }
 
+  @override
+  void didUpdateWidget(covariant CalendarPage oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    _loadInitMonth();
+  }
+
   _loadInitMonth() {}
 
+  void _onUpdateDate(String action) {
+    DateTime newTime = selectedTime;
+    switch (action) {
+      case "back":
+        switch (widget.param['mode']) {
+          case "ngay":
+            newTime = selectedTime.subtract(Duration(days: 1));
+            break;
+          case "tuan":
+            newTime = selectedTime.subtract(Duration(days: 7));
+            break;
+          default:
+            newTime = DateTime(selectedTime.year, selectedTime.month - 1, 1);
+            break;
+        }
+        break;
+      case "forward":
+        switch (widget.param['mode']) {
+          case "ngay":
+            newTime = selectedTime.add(Duration(days: 1));
+            break;
+          case "tuan":
+            newTime = selectedTime.add(Duration(days: 7));
+            break;
+          default:
+            newTime = DateTime(selectedTime.year, selectedTime.month + 1, 1);
+            break;
+        }
+        break;
+      default:
+        break;
+    }
+    setState(() {
+      selectedTime = newTime;
+    });
+  }
+
   Widget _buildCalendarView() {
-    print(widget.param);
     switch (widget.param['mode']) {
       case 'ngay':
         return const CalendarDayView();
       case 'tuan':
         return const CalendarWeekView();
-      case 'thang':
       default:
         return CalendarMonthView(
           initialMonth: selectedTime,
+          key: ValueKey(selectedTime),
         );
     }
   }
@@ -57,6 +101,42 @@ class _CalendarPageState extends State<CalendarPage> {
               );
             },
           ),
+          title: Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Tooltip(
+                message: "trước",
+                child: IconButton(
+                  onPressed: () {
+                    _onUpdateDate('back');
+                  },
+                  icon: const Icon(
+                    Icons.arrow_back_ios,
+                    size: 15,
+                  ),
+                ),
+              ),
+              Tooltip(
+                message: "sau",
+                child: IconButton(
+                  onPressed: () {
+                    _onUpdateDate('forward');
+                  },
+                  icon: const Icon(
+                    Icons.arrow_forward_ios,
+                    size: 15,
+                  ),
+                ),
+              ),
+              Builder(builder: (BuildContext context) {
+                final String month = DateFormat.M().format(selectedTime);
+                return Text(
+                  "Tháng $month",
+                  style: const TextStyle(fontSize: 14),
+                );
+              })
+            ],
+          ),
           actions: [
             Row(
               children: [
@@ -64,7 +144,9 @@ class _CalendarPageState extends State<CalendarPage> {
                   message: "Hôm nay",
                   child: IconButton(
                     onPressed: () {
-                      context.go("/lich/${widget.param['mode'] ?? ''}");
+                      setState(() {
+                        selectedTime = DateTime.now();
+                      });
                     },
                     icon: const Icon(Icons.today),
                   ),
