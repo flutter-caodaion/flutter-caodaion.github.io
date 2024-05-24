@@ -6,7 +6,9 @@ import 'package:lunar/calendar/Lunar.dart';
 
 class CalendarMonthView extends StatefulWidget {
   final DateTime initialMonth;
-  const CalendarMonthView({super.key, required this.initialMonth});
+  final ValueChanged<DateTime> onPageChange;
+  const CalendarMonthView(
+      {super.key, required this.initialMonth, required this.onPageChange});
 
   @override
   State<CalendarMonthView> createState() => _CalendarMonthViewState();
@@ -107,6 +109,9 @@ class _CalendarMonthViewState extends State<CalendarMonthView> {
                 ),
               ),
             );
+          },
+          onPageChange: (date, page) {
+            widget.onPageChange(date);
           },
         );
       },

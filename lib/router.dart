@@ -59,7 +59,7 @@ final GoRouter router = GoRouter(
       path: '/lich',
       pageBuilder: (context, state) => NoTransitionPage(
         child: const CalendarPage(
-          param: {},
+          params: {},
         ),
         name: '/lich',
       ),
@@ -69,7 +69,7 @@ final GoRouter router = GoRouter(
       pageBuilder: (context, state) {
         final mode = state.pathParameters['mode'] as String;
         return NoTransitionPage(
-          child: CalendarPage(param: {"mode": mode}),
+          child: CalendarPage(params: {"mode": mode}),
         );
       },
     ),
@@ -79,7 +79,7 @@ final GoRouter router = GoRouter(
         final mode = state.pathParameters['mode'] as String;
         final year = state.pathParameters['year'] as String;
         return NoTransitionPage(
-          child: CalendarPage(param: {"mode": mode, "year": year}),
+          child: CalendarPage(params: {"mode": mode, "year": year}),
         );
       },
     ),
@@ -91,7 +91,7 @@ final GoRouter router = GoRouter(
         final month = state.pathParameters['month'] as String;
         return NoTransitionPage(
           child:
-              CalendarPage(param: {"mode": mode, "year": year, "month": month}),
+              CalendarPage(params: {"mode": mode, "year": year, "month": month}),
         );
       },
     ),
@@ -104,7 +104,7 @@ final GoRouter router = GoRouter(
         final day = state.pathParameters['day'] as String;
         return NoTransitionPage(
           child: CalendarPage(
-              param: {"mode": mode, "year": year, "month": month, "day": day}),
+              params: {"mode": mode, "year": year, "month": month, "day": day}),
         );
       },
     ),

@@ -9,9 +9,9 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
 class CalendarPage extends StatefulWidget {
-  final Map param;
+  final Map params;
 
-  const CalendarPage({super.key, required this.param});
+  const CalendarPage({super.key, required this.params});
 
   @override
   State<CalendarPage> createState() => _CalendarPageState();
@@ -19,6 +19,7 @@ class CalendarPage extends StatefulWidget {
 
 class _CalendarPageState extends State<CalendarPage> {
   DateTime selectedTime = DateTime.now();
+  // DateTime selectedTime = DateTime.utc(2000);
   bool isShowMonthSection = false;
 
   @override
@@ -35,16 +36,31 @@ class _CalendarPageState extends State<CalendarPage> {
 
   _loadInitMonth() {}
 
+  String titleText() {
+    switch (widget.params['mode']) {
+      case "ngay":
+        return "${selectedTime.day}/${selectedTime.month}/${selectedTime.year}";
+      case "tuan":
+        final getDate = DateTime.parse(selectedTime.toString());
+        final fromDate = getDate.subtract(Duration(days: getDate.weekday - 1));
+        final toDate =
+            getDate.add(Duration(days: DateTime.daysPerWeek - getDate.weekday));
+        return "${fromDate.day}/${fromDate.month}${fromDate.year != toDate.year ? '/${fromDate.year}' : ''}-${toDate.day}/${toDate.month}/${toDate.year}";
+      default:
+        return "Tháng ${DateFormat.M().format(selectedTime)}";
+    }
+  }
+
   void _onUpdateDate(String action) {
     DateTime newTime = selectedTime;
     switch (action) {
       case "back":
-        switch (widget.param['mode']) {
+        switch (widget.params['mode']) {
           case "ngay":
-            newTime = selectedTime.subtract(Duration(days: 1));
+            newTime = selectedTime.subtract(const Duration(days: 1));
             break;
           case "tuan":
-            newTime = selectedTime.subtract(Duration(days: 7));
+            newTime = selectedTime.subtract(const Duration(days: 7));
             break;
           default:
             newTime = DateTime(selectedTime.year, selectedTime.month - 1, 1);
@@ -52,7 +68,7 @@ class _CalendarPageState extends State<CalendarPage> {
         }
         break;
       case "forward":
-        switch (widget.param['mode']) {
+        switch (widget.params['mode']) {
           case "ngay":
             newTime = selectedTime.add(Duration(days: 1));
             break;
@@ -73,15 +89,36 @@ class _CalendarPageState extends State<CalendarPage> {
   }
 
   Widget _buildCalendarView() {
-    switch (widget.param['mode']) {
+    switch (widget.params['mode']) {
       case 'ngay':
-        return const CalendarDayView();
+        return CalendarDayView(
+          initialDay: selectedTime,
+          key: ValueKey(selectedTime),
+          onPageChange: (value) {
+            setState(() {
+              selectedTime = value;
+            });
+          },
+        );
       case 'tuan':
-        return const CalendarWeekView();
+        return CalendarWeekView(
+          initialDay: selectedTime,
+          key: ValueKey(selectedTime),
+          onPageChange: (value) {
+            setState(() {
+              selectedTime = value;
+            });
+          },
+        );
       default:
         return CalendarMonthView(
           initialMonth: selectedTime,
           key: ValueKey(selectedTime),
+          onPageChange: (value) {
+            setState(() {
+              selectedTime = value;
+            });
+          },
         );
     }
   }
@@ -91,6 +128,7 @@ class _CalendarPageState extends State<CalendarPage> {
     return ResponsiveScaffold(
       child: Scaffold(
         appBar: AppBar(
+          titleSpacing: 0,
           leading: Builder(
             builder: (context) {
               return IconButton(
@@ -105,7 +143,8 @@ class _CalendarPageState extends State<CalendarPage> {
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               Tooltip(
-                message: "trước",
+                message:
+                    "${widget.params['mode'] == 'ngay' ? 'Ngày' : widget.params['mode'] == 'tuan' ? 'Tuần' : 'Tháng'} trước",
                 child: IconButton(
                   onPressed: () {
                     _onUpdateDate('back');
@@ -117,7 +156,8 @@ class _CalendarPageState extends State<CalendarPage> {
                 ),
               ),
               Tooltip(
-                message: "sau",
+                message:
+                    "${widget.params['mode'] == 'ngay' ? 'Ngày' : widget.params['mode'] == 'tuan' ? 'Tuần' : 'Tháng'} sau",
                 child: IconButton(
                   onPressed: () {
                     _onUpdateDate('forward');
@@ -128,13 +168,10 @@ class _CalendarPageState extends State<CalendarPage> {
                   ),
                 ),
               ),
-              Builder(builder: (BuildContext context) {
-                final String month = DateFormat.M().format(selectedTime);
-                return Text(
-                  "Tháng $month",
-                  style: const TextStyle(fontSize: 14),
-                );
-              })
+              Text(
+                titleText(),
+                style: const TextStyle(fontSize: 14),
+              )
             ],
           ),
           actions: [
