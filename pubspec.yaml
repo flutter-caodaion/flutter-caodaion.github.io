@@ -41,6 +41,8 @@ dependencies:
   fl_chart: ^0.68.0
   flutter_markdown: ^0.7.1
   shared_preferences: ^2.2.3
+  calendar_view: ^1.2.0
+  intl: ^0.19.0
 
 
   # The following adds the Cupertino Icons font to your application.

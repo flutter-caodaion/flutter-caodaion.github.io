@@ -57,8 +57,22 @@ final GoRouter router = GoRouter(
     ),
     GoRoute(
       path: '/lich',
-      pageBuilder: (context, state) =>
-          NoTransitionPage(child: const CalendarPage(), name: '/lich'),
+      pageBuilder: (context, state) => NoTransitionPage(
+          child: const CalendarPage(
+            mode: '',
+          ),
+          name: '/lich'),
+      routes: [
+        GoRoute(
+          path: ':mode',
+          pageBuilder: (context, state) {
+            final mode = state.pathParameters['mode'] as String;
+            return NoTransitionPage(
+              child: CalendarPage(mode: mode),
+            );
+          },
+        )
+      ],
     ),
     GoRoute(
       path: '/settings',
