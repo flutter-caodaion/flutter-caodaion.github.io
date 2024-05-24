@@ -1,4 +1,6 @@
+import 'package:caodaion/constants/constants.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class FontSizeDropdownMenu extends StatefulWidget {
   final ValueChanged<int> onFontSizeChanged;
@@ -30,6 +32,19 @@ class _FontSizeDropdownMenuState extends State<FontSizeDropdownMenu> {
   @override
   void initState() {
     super.initState();
+    _loadFontSize();
+  }
+
+  void _loadFontSize() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      selectedFontSize = prefs.getInt(TokenConstants.selectedFontSize) ?? 16;
+    });
+  }
+
+  void _saveFontSize(int fontSize) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setInt(TokenConstants.selectedFontSize, fontSize);
   }
 
   @override
@@ -40,6 +55,7 @@ class _FontSizeDropdownMenuState extends State<FontSizeDropdownMenu> {
       dropdownMenuEntries: fontSizeRange,
       onSelected: (value) {
         widget.onFontSizeChanged(value);
+        _saveFontSize(value);
       },
     );
   }

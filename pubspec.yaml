@@ -40,6 +40,7 @@ dependencies:
   flutter_map_cancellable_tile_provider: ^2.0.0
   fl_chart: ^0.68.0
   flutter_markdown: ^0.7.1
+  shared_preferences: ^2.2.3
 
 
   # The following adds the Cupertino Icons font to your application.

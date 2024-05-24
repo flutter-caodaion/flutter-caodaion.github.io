@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class ViewKinhPage extends StatefulWidget {
   final String id;
@@ -41,6 +42,7 @@ class _ViewKinhPageState extends State<ViewKinhPage> {
     final String content = await rootBundle.loadString(path);
     setState(() {
       _markdownContent = content;
+      _loadFontSize();
     });
   }
 
@@ -65,6 +67,14 @@ class _ViewKinhPageState extends State<ViewKinhPage> {
   }
 
   int fontSize = 16;
+  
+
+  void _loadFontSize() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      fontSize = prefs.getInt(TokenConstants.selectedFontSize) ?? 16;
+    });
+  }
 
   void _updateFontSize(int newSize) {
     setState(() {

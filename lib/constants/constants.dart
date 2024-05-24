@@ -22,3 +22,7 @@ class MapsConstants {
   static double caodaionLatitute = 11.9861833;
   static double caodaionLongitute = 108.4376802;
 }
+
+class TokenConstants {
+  static String selectedFontSize = 'RO4ozil6DSgF';
+}
