@@ -3,6 +3,7 @@ import 'dart:math';
 
 import 'package:caodaion/constants/constants.dart';
 import 'package:caodaion/pages/kinh/model/kinh.model.dart';
+import 'package:caodaion/pages/kinh/reading_kinh/widget/font_size_dropdown_menu.widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
@@ -63,20 +64,40 @@ class _ViewKinhPageState extends State<ViewKinhPage> {
     return responseData;
   }
 
+  int fontSize = 16;
+
+  void _updateFontSize(int newSize) {
+    setState(() {
+      fontSize = newSize;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     var data = kinhData();
     return Scaffold(
       appBar: AppBar(
         title: Text(data['name']),
+        actions: [
+          FontSizeDropdownMenu(
+            onFontSizeChanged: _updateFontSize,
+          ),
+        ],
       ),
       body: Column(
         children: [
           Expanded(
             child: _markdownContent.isEmpty
                 ? const Center(child: CircularProgressIndicator())
-                : Markdown(
-                    data: _markdownContent,
+                : SelectionArea(
+                    child: Markdown(
+                      data: _markdownContent,
+                      styleSheet: MarkdownStyleSheet(
+                        p: TextStyle(
+                          fontSize: fontSize.toDouble(),
+                        ),
+                      ),
+                    ),
                   ),
           ),
           Row(
