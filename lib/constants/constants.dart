@@ -25,6 +25,4 @@ class MapsConstants {
 
 class TokenConstants {
   static String selectedFontSize = 'RO4ozil6DSgF';
-  static String selectedKinhListDisplayMode = 'WZx4XTK8eOYA';
-  static String genimiAPIKey = 'AIzaSyBwKa0mxRUZ0AeaJZRC2pr5tP_aZ8SxVh8';
 }

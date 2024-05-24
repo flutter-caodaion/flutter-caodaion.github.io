@@ -1,7 +1,6 @@
 import 'package:caodaion/pages/apps/apps_page.dart';
 import 'package:caodaion/pages/calendar/calendar_page.dart';
 import 'package:caodaion/pages/clock/clock_page.dart';
-import 'package:caodaion/pages/gemini_ai/genimi_ai_page.dart';
 import 'package:caodaion/pages/home/home_page.dart';
 import 'package:caodaion/pages/kinh/kinh_page.dart';
 import 'package:caodaion/pages/kinh/reading_kinh/reading_kinh.dart';
@@ -95,11 +94,6 @@ final GoRouter router = GoRouter(
       path: '/tu-tinh',
       pageBuilder: (context, state) =>
           NoTransitionPage(child: const SelfChartPage(), name: '/tu-tinh'),
-    ),
-    GoRoute(
-      path: '/ai',
-      pageBuilder: (context, state) =>
-          NoTransitionPage(child: const GenimiAIPage(), name: '/ai'),
     ),
   ],
 );

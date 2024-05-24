@@ -4,7 +4,6 @@ import 'package:caodaion/pages/kinh/model/kinh.model.dart';
 import 'package:caodaion/pages/kinh/widget/kinh_list.dart';
 import 'package:caodaion/widgets/responsive_scaffold.dart';
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 class KinhPage extends StatefulWidget {
   const KinhPage({super.key});
@@ -29,23 +28,6 @@ class _KinhPageState extends State<KinhPage> {
   @override
   void initState() {
     super.initState();
-    _loadDisplayMode();
-  }
-
-  _loadDisplayMode() async {
-    final prefs = await SharedPreferences.getInstance();
-    int storedIndex =
-        prefs.getInt(TokenConstants.selectedKinhListDisplayMode) ?? 0;
-    setState(() {
-      for (int i = 0; i < isSelected.length; i++) {
-        isSelected[i] = storedIndex == i;
-      }
-    });
-  }
-
-  _saveDisplayMode(int index) async {
-    final prefs = await SharedPreferences.getInstance();
-    prefs.setInt(TokenConstants.selectedKinhListDisplayMode, index);
   }
 
   @override
@@ -125,7 +107,6 @@ class _KinhPageState extends State<KinhPage> {
                             for (int i = 0; i < isSelected.length; i++) {
                               isSelected[i] = index == i;
                             }
-                            _saveDisplayMode(index);
                           });
                         },
                         borderRadius: const BorderRadius.all(

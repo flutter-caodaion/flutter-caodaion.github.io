@@ -76,15 +76,6 @@ class _AppsPageState extends State<AppsPage> {
           color: ColorConstants.chartColor,
         ),
       },
-      {
-        'name': '/ai',
-        'label': 'Gemini AI',
-        'icon': SvgPicture.asset(
-          'assets/icons/gemini_sparkle_v002_d4735304ff6292a690345.svg',
-          height: 32,
-          width: 32,
-        ),
-      },
       // {
       //   'name': '/maps',
       //   'label': 'Bản đồ',
@@ -163,7 +154,7 @@ class _AppsPageState extends State<AppsPage> {
                       : ResponsiveBreakpoints.of(context).isTablet
                           ? 4
                           : ResponsiveBreakpoints.of(context).isDesktop
-                              ? 8
+                              ? 6
                               : 1,
                   crossAxisSpacing: 8.0,
                   mainAxisSpacing: 8.0,
@@ -174,7 +165,7 @@ class _AppsPageState extends State<AppsPage> {
                       child: TextButton(
                         style: ButtonStyle(
                           overlayColor:
-                              WidgetStateProperty.all(Colors.transparent),
+                              MaterialStateProperty.all(Colors.transparent),
                         ),
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
@@ -246,7 +237,7 @@ class _AppsPageState extends State<AppsPage> {
                       : ResponsiveBreakpoints.of(context).isTablet
                           ? 4
                           : ResponsiveBreakpoints.of(context).isDesktop
-                              ? 8
+                              ? 6
                               : 1,
                   crossAxisSpacing: 8.0,
                   mainAxisSpacing: 8.0,
@@ -257,7 +248,7 @@ class _AppsPageState extends State<AppsPage> {
                       child: TextButton(
                         style: ButtonStyle(
                           overlayColor:
-                              WidgetStateProperty.all(Colors.transparent),
+                              MaterialStateProperty.all(Colors.transparent),
                         ),
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
