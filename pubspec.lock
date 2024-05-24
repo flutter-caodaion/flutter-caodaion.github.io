@@ -280,6 +280,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.2.0"
+  lunar:
+    dependency: "direct main"
+    description:
+      name: lunar
+      sha256: "6723cc7c01bd05d862e121261ed0089c85fb9145f41c01db732243e13c9d765e"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.7.0"
   markdown:
     dependency: transitive
     description:

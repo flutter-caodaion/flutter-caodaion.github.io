@@ -58,21 +58,55 @@ final GoRouter router = GoRouter(
     GoRoute(
       path: '/lich',
       pageBuilder: (context, state) => NoTransitionPage(
-          child: const CalendarPage(
-            mode: '',
-          ),
-          name: '/lich'),
-      routes: [
-        GoRoute(
-          path: ':mode',
-          pageBuilder: (context, state) {
-            final mode = state.pathParameters['mode'] as String;
-            return NoTransitionPage(
-              child: CalendarPage(mode: mode),
-            );
-          },
-        )
-      ],
+        child: const CalendarPage(
+          param: {},
+        ),
+        name: '/lich',
+      ),
+    ),
+    GoRoute(
+      path: '/lich/:mode',
+      pageBuilder: (context, state) {
+        final mode = state.pathParameters['mode'] as String;
+        return NoTransitionPage(
+          child: CalendarPage(param: {"mode": mode}),
+        );
+      },
+    ),
+    GoRoute(
+      path: '/lich/:mode/:year',
+      pageBuilder: (context, state) {
+        final mode = state.pathParameters['mode'] as String;
+        final year = state.pathParameters['year'] as String;
+        return NoTransitionPage(
+          child: CalendarPage(param: {"mode": mode, "year": year}),
+        );
+      },
+    ),
+    GoRoute(
+      path: '/lich/:mode/:year/:month',
+      pageBuilder: (context, state) {
+        final mode = state.pathParameters['mode'] as String;
+        final year = state.pathParameters['year'] as String;
+        final month = state.pathParameters['month'] as String;
+        return NoTransitionPage(
+          child:
+              CalendarPage(param: {"mode": mode, "year": year, "month": month}),
+        );
+      },
+    ),
+    GoRoute(
+      path: '/lich/:mode/:year/:month/:day',
+      pageBuilder: (context, state) {
+        final mode = state.pathParameters['mode'] as String;
+        final year = state.pathParameters['year'] as String;
+        final month = state.pathParameters['month'] as String;
+        final day = state.pathParameters['day'] as String;
+        return NoTransitionPage(
+          child: CalendarPage(
+              param: {"mode": mode, "year": year, "month": month, "day": day}),
+        );
+      },
     ),
     GoRoute(
       path: '/settings',

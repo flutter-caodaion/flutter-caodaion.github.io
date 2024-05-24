@@ -8,18 +8,38 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 class CalendarPage extends StatefulWidget {
-  final String mode;
+  final Map param;
 
-  const CalendarPage({super.key, required this.mode});
+  const CalendarPage({super.key, required this.param});
 
   @override
   State<CalendarPage> createState() => _CalendarPageState();
 }
 
 class _CalendarPageState extends State<CalendarPage> {
+  final DateTime selectedTime = DateTime.now();
+
   @override
   void initState() {
     super.initState();
+    _loadInitMonth();
+  }
+
+  _loadInitMonth() {}
+
+  Widget _buildCalendarView() {
+    print(widget.param);
+    switch (widget.param['mode']) {
+      case 'ngay':
+        return const CalendarDayView();
+      case 'tuan':
+        return const CalendarWeekView();
+      case 'thang':
+      default:
+        return CalendarMonthView(
+          initialMonth: selectedTime,
+        );
+    }
   }
 
   @override
@@ -37,16 +57,27 @@ class _CalendarPageState extends State<CalendarPage> {
               );
             },
           ),
+          actions: [
+            Row(
+              children: [
+                Tooltip(
+                  message: "Hôm nay",
+                  child: IconButton(
+                    onPressed: () {
+                      context.go("/lich/${widget.param['mode'] ?? ''}");
+                    },
+                    icon: const Icon(Icons.today),
+                  ),
+                ),
+              ],
+            )
+          ],
         ),
         body: SizedBox(
           height: MediaQuery.of(context).size.height,
           child: CalendarControllerProvider(
             controller: EventController(),
-            child: widget.mode == 'ngay'
-                ? const CalendarDayView()
-                : widget.mode == 'tuan'
-                    ? const CalendarWeekView()
-                    : const CalendarMonthView(),
+            child: _buildCalendarView(),
           ),
         ),
         drawer: Drawer(
