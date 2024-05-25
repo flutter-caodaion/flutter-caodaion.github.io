@@ -1,5 +1,8 @@
+import 'dart:js_interop';
+
 import 'package:calendar_view/calendar_view.dart';
 import 'package:caodaion/constants/constants.dart';
+import 'package:caodaion/constants/calendar.dart';
 import 'package:caodaion/pages/calendar/widget/calendar_day_view.widget.dart';
 import 'package:caodaion/pages/calendar/widget/calendar_month_view.widget.dart';
 import 'package:caodaion/pages/calendar/widget/calendar_week_view.widget.dart';
@@ -23,17 +26,34 @@ class _CalendarPageState extends State<CalendarPage> {
   DateTime selectedTime = DateTime.now();
   // DateTime selectedTime = DateTime.utc(2000);
   bool isShowMonthSection = false;
+  bool isShowStaticGlobalEvents = true;
+  bool isShowFirstHaftMonthEvents = true;
+  bool isShowHumaneEventsColorEvents = true;
+  final EventController controller = EventController();
+  List<CalendarEventData> staticGlobalEvents = [];
+  final CalendarEventsConstants dataConverter = CalendarEventsConstants();
 
   @override
   void initState() {
     super.initState();
     _loadInitTime();
+    _loadGlobalStaticEvents();
   }
 
   @override
   void didUpdateWidget(covariant CalendarPage oldWidget) {
     super.didUpdateWidget(oldWidget);
     _loadInitTime();
+    _loadGlobalStaticEvents();
+  }
+
+  _loadGlobalStaticEvents() {
+    setState(() {
+      staticGlobalEvents = dataConverter.staticGlobalEvents(selectedTime);
+      if (staticGlobalEvents.isNotEmpty) {
+        controller.addAll(staticGlobalEvents);
+      }
+    });
   }
 
   _loadInitTime() {
@@ -58,7 +78,6 @@ class _CalendarPageState extends State<CalendarPage> {
         });
       }
     }
-    print(selectedTime);
   }
 
   String titleText() {
@@ -76,7 +95,7 @@ class _CalendarPageState extends State<CalendarPage> {
     }
   }
 
-  void _onUpdateDate(String action) {
+  void _onUpdateDate(String action, [String? mode]) {
     DateTime newTime = selectedTime;
     switch (action) {
       case "back":
@@ -105,14 +124,22 @@ class _CalendarPageState extends State<CalendarPage> {
             break;
         }
         break;
+      case "open":
+        newTime = selectedTime;
+        break;
       default:
         newTime = DateTime.now();
         break;
     }
     setState(() {
       selectedTime = newTime;
-      context.go(
-          '/lich/${widget.params['mode'] ?? 'thang'}/${selectedTime.year}/${selectedTime.month}/${selectedTime.day}');
+      if (action == 'open') {
+        context.go(
+            '/lich/${mode}/${selectedTime.year}/${selectedTime.month}/${selectedTime.day}');
+      } else {
+        context.go(
+            '/lich/${widget.params['mode'] ?? 'thang'}/${selectedTime.year}/${selectedTime.month}/${selectedTime.day}');
+      }
     });
   }
 
@@ -128,7 +155,7 @@ class _CalendarPageState extends State<CalendarPage> {
                 if (ResponsiveBreakpoints.of(context).isDesktop) {
                   setState(() {
                     _drawerContainerWidth =
-                        _drawerContainerWidth == 0 ? 250 : 0;
+                        _drawerContainerWidth == 0 ? 300 : 0;
                   });
                 } else {
                   Scaffold.of(context).openDrawer();
@@ -225,11 +252,17 @@ class _CalendarPageState extends State<CalendarPage> {
               selectedTime = value;
             });
           },
+          onOpenDate: (value) {
+            setState(() {
+              selectedTime = value;
+              _onUpdateDate('open', 'ngay');
+            });
+          },
         );
     }
   }
 
-  double _drawerContainerWidth = 250.0;
+  double _drawerContainerWidth = 300.0;
 
   Widget _buildSideNav(BuildContext context) {
     return AnimatedContainer(
@@ -238,11 +271,6 @@ class _CalendarPageState extends State<CalendarPage> {
       color: ColorConstants.primaryBackground,
       child: _drawerListView(context),
     );
-  }
-
-  onChangeMode(String mode, params) {
-    context.go('/lich/$mode');
-    Navigator.of(context).pop();
   }
 
   Widget _drawerListView(BuildContext context) {
@@ -279,7 +307,7 @@ class _CalendarPageState extends State<CalendarPage> {
                     leading: const Icon(Icons.view_day_rounded),
                     title: const Text('Ngày'),
                     onTap: () {
-                      onChangeMode('ngay', widget.params);
+                      _onUpdateDate('open', 'ngay');
                     },
                   ),
                 ),
@@ -299,7 +327,7 @@ class _CalendarPageState extends State<CalendarPage> {
                     leading: const Icon(Icons.view_week_rounded),
                     title: const Text('Tuần'),
                     onTap: () {
-                      onChangeMode('tuan', widget.params);
+                      _onUpdateDate('open', 'tuan');
                     },
                   ),
                 ),
@@ -321,9 +349,51 @@ class _CalendarPageState extends State<CalendarPage> {
                     leading: const Icon(Icons.calendar_view_month_rounded),
                     title: const Text('Tháng'),
                     onTap: () {
-                      onChangeMode('thang', widget.params);
+                      _onUpdateDate('open', 'thang');
                     },
                   ),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 12.0),
+                child: CheckboxListTile(
+                  value: isShowStaticGlobalEvents,
+                  onChanged: (value) {
+                    setState(() {
+                      isShowStaticGlobalEvents = value!;
+                    });
+                  },
+                  title: const Text("Sự kiện quan trọng"),
+                  controlAffinity: ListTileControlAffinity.leading,
+                  activeColor: ColorConstants.staticGlobalEventsColor,
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 12.0),
+                child: CheckboxListTile(
+                  value: isShowFirstHaftMonthEvents,
+                  onChanged: (value) {
+                    setState(() {
+                      isShowFirstHaftMonthEvents = value!;
+                    });
+                  },
+                  title: const Text("Sự kiện sóc vọng"),
+                  controlAffinity: ListTileControlAffinity.leading,
+                  activeColor: ColorConstants.firstHaftMonthEventsColor,
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 12.0),
+                child: CheckboxListTile(
+                  value: isShowHumaneEventsColorEvents,
+                  onChanged: (value) {
+                    setState(() {
+                      isShowHumaneEventsColorEvents = value!;
+                    });
+                  },
+                  title: const Text("Sự kiện quan hôn tang tế "),
+                  controlAffinity: ListTileControlAffinity.leading,
+                  activeColor: ColorConstants.humaneEventsColor,
                 ),
               ),
             ],
@@ -343,7 +413,7 @@ class _CalendarPageState extends State<CalendarPage> {
                   body: SizedBox(
                     height: MediaQuery.of(context).size.height,
                     child: CalendarControllerProvider(
-                      controller: EventController(),
+                      controller: controller,
                       child: _buildCalendarView(),
                     ),
                   ),

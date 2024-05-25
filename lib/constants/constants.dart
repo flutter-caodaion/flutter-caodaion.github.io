@@ -16,6 +16,9 @@ class ColorConstants {
   static Color clockColor = const Color(0xff454FE3);
   static Color textHorizontalDividerTextColor = const Color(0xff5F6368);
   static Color textHorizontalDividerDividerColor = const Color(0xffD9D9D9);
+  static Color staticGlobalEventsColor = const Color(0xffeb4132);
+  static Color firstHaftMonthEventsColor = const Color(0xff4285f4);
+  static Color humaneEventsColor = const Color(0xfffbbc05);
 }
 
 class MapsConstants {

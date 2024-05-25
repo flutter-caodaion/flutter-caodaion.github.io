@@ -8,8 +8,9 @@ import 'dart:ui_web';
 class CalendarMonthView extends StatefulWidget {
   final DateTime initialMonth;
   final ValueChanged<DateTime> onPageChange;
+  final ValueChanged<DateTime> onOpenDate;
   const CalendarMonthView(
-      {super.key, required this.initialMonth, required this.onPageChange});
+      {super.key, required this.initialMonth, required this.onPageChange, required this.onOpenDate});
 
   @override
   State<CalendarMonthView> createState() => _CalendarMonthViewState();
@@ -77,12 +78,19 @@ class _CalendarMonthViewState extends State<CalendarMonthView> {
               "day": gotLunar.getDay().toString(),
               "month": gotLunar.getMonth().toString(),
             };
+            if (event.isNotEmpty) {
+              // print(event);
+              // print(event[0]);
+              // print(event[0].title);
+            }
             return SizedBox(
               child: SingleChildScrollView(
                 child: Column(
                   children: [
                     TextButton(
-                      onPressed: () {},
+                      onPressed: () {
+                        widget.onOpenDate(date);
+                      },
                       style: TextButton.styleFrom(
                         backgroundColor: isToday
                             ? ColorConstants.primaryColor
@@ -105,6 +113,14 @@ class _CalendarMonthViewState extends State<CalendarMonthView> {
                           ),
                         ],
                       ),
+                    ),
+                    ...event.map(
+                      (event) {
+                        return TextButton(
+                          onPressed: () {},
+                          child: Text(event.title),
+                        );
+                      },
                     ),
                   ],
                 ),
