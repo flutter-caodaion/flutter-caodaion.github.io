@@ -1,6 +1,8 @@
 import 'package:calendar_view/calendar_view.dart';
+import 'package:caodaion/constants/constants.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:responsive_framework/responsive_framework.dart';
 
 class CalendarWeekView extends StatefulWidget {
   final DateTime initialDay;
@@ -22,7 +24,6 @@ class _CalendarWeekViewState extends State<CalendarWeekView> {
   Widget build(BuildContext context) {
     return WeekView(
       initialDay: widget.initialDay,
-      showLiveTimeLineInAllDays: true,
       weekPageHeaderBuilder: (startDate, endDate) {
         return const SizedBox();
       },
@@ -45,6 +46,47 @@ class _CalendarWeekViewState extends State<CalendarWeekView> {
           default:
         }
         return p0.toString();
+      },
+      eventTileBuilder: (date, events, boundary, startDuration, endDuration) {
+        return Column(
+          children: events.map((event) {
+            var eventData = event.event as Map<dynamic, dynamic>;
+            return TextButton(
+              onPressed: () {
+                // Handle button press, e.g., show event details
+                print('Event: ${event}');
+              },
+              style: ButtonStyle(
+                backgroundColor: WidgetStateProperty.all<Color>(
+                  eventData['eventGroup'] == 'staticGlobal'
+                      ? ColorConstants.staticGlobalEventsColor
+                      : ColorConstants.primaryBackground,
+                ),
+                padding: WidgetStateProperty.all<EdgeInsets>(
+                  const EdgeInsets.all(4),
+                ),
+                shape: WidgetStateProperty.all<RoundedRectangleBorder>(
+                  const RoundedRectangleBorder(
+                    borderRadius: BorderRadius.all(Radius.circular(3)),
+                  ),
+                ),
+              ),
+              child: SizedBox(
+                height: boundary.height,
+                child: Text(
+                  event.title,
+                  style: TextStyle(
+                    color: eventData['eventGroup'] == 'staticGlobal'
+                        ? Colors.white
+                        : Colors.black,
+                    fontSize:
+                        ResponsiveBreakpoints.of(context).isDesktop ? 16 : 10,
+                  ),
+                ),
+              ),
+            );
+          }).toList(),
+        );
       },
       onPageChange: (date, page) {
         widget.onPageChange(date);

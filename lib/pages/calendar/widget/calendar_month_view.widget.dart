@@ -1,16 +1,21 @@
+import 'dart:convert';
+
 import 'package:calendar_view/calendar_view.dart';
 import 'package:caodaion/constants/constants.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:lunar/calendar/Lunar.dart';
-import 'dart:ui_web';
+import 'package:responsive_framework/responsive_framework.dart';
 
 class CalendarMonthView extends StatefulWidget {
   final DateTime initialMonth;
   final ValueChanged<DateTime> onPageChange;
   final ValueChanged<DateTime> onOpenDate;
   const CalendarMonthView(
-      {super.key, required this.initialMonth, required this.onPageChange, required this.onOpenDate});
+      {super.key,
+      required this.initialMonth,
+      required this.onPageChange,
+      required this.onOpenDate});
 
   @override
   State<CalendarMonthView> createState() => _CalendarMonthViewState();
@@ -80,10 +85,9 @@ class _CalendarMonthViewState extends State<CalendarMonthView> {
             };
             if (event.isNotEmpty) {
               // print(event);
-              // print(event[0]);
-              // print(event[0].title);
             }
-            return SizedBox(
+            return Container(
+              color: isInMonth ? Colors.white : Colors.black.withOpacity(0.05),
               child: SingleChildScrollView(
                 child: Column(
                   children: [
@@ -116,9 +120,46 @@ class _CalendarMonthViewState extends State<CalendarMonthView> {
                     ),
                     ...event.map(
                       (event) {
-                        return TextButton(
-                          onPressed: () {},
-                          child: Text(event.title),
+                        var eventData = event.event as Map<dynamic, dynamic>;
+                        return Column(
+                          children: [
+                            TextButton(
+                              style: ButtonStyle(
+                                backgroundColor: WidgetStateProperty.all<Color>(
+                                  eventData['eventGroup'] == 'staticGlobal'
+                                      ? ColorConstants.staticGlobalEventsColor
+                                      : ColorConstants.primaryBackground,
+                                ),
+                                padding: WidgetStateProperty.all<EdgeInsets>(
+                                  const EdgeInsets.all(4),
+                                ),
+                                shape: WidgetStateProperty.all<
+                                    RoundedRectangleBorder>(
+                                  const RoundedRectangleBorder(
+                                    borderRadius:
+                                        BorderRadius.all(Radius.circular(3)),
+                                  ),
+                                ),
+                              ),
+                              onPressed: () {},
+                              child: Text(
+                                event.title,
+                                style: TextStyle(
+                                  color:
+                                      eventData['eventGroup'] == 'staticGlobal'
+                                          ? Colors.white
+                                          : Colors.black,
+                                  fontSize: ResponsiveBreakpoints.of(context)
+                                          .isDesktop
+                                      ? 12
+                                      : 10,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(
+                              height: 8,
+                            ),
+                          ],
                         );
                       },
                     ),

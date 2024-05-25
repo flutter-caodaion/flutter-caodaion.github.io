@@ -1,5 +1,3 @@
-import 'dart:js_interop';
-
 import 'package:calendar_view/calendar_view.dart';
 import 'package:caodaion/constants/constants.dart';
 import 'package:caodaion/constants/calendar.dart';
@@ -48,12 +46,15 @@ class _CalendarPageState extends State<CalendarPage> {
   }
 
   _loadGlobalStaticEvents() {
-    setState(() {
-      staticGlobalEvents = dataConverter.staticGlobalEvents(selectedTime);
-      if (staticGlobalEvents.isNotEmpty) {
-        controller.addAll(staticGlobalEvents);
-      }
-    });
+    controller.removeAll(staticGlobalEvents);
+    if (isShowStaticGlobalEvents) {
+      setState(() {
+        staticGlobalEvents = dataConverter.staticGlobalEvents(selectedTime);
+        if (staticGlobalEvents.isNotEmpty) {
+          controller.addAll(staticGlobalEvents);
+        }
+      });
+    }
   }
 
   _loadInitTime() {
@@ -140,6 +141,7 @@ class _CalendarPageState extends State<CalendarPage> {
         context.go(
             '/lich/${widget.params['mode'] ?? 'thang'}/${selectedTime.year}/${selectedTime.month}/${selectedTime.day}');
       }
+      Navigator.of(context).pop();
     });
   }
 
@@ -361,6 +363,7 @@ class _CalendarPageState extends State<CalendarPage> {
                   onChanged: (value) {
                     setState(() {
                       isShowStaticGlobalEvents = value!;
+                      _loadGlobalStaticEvents();
                     });
                   },
                   title: const Text("Sự kiện quan trọng"),
@@ -425,7 +428,7 @@ class _CalendarPageState extends State<CalendarPage> {
               body: SizedBox(
                 height: MediaQuery.of(context).size.height,
                 child: CalendarControllerProvider(
-                  controller: EventController(),
+                  controller: controller,
                   child: _buildCalendarView(),
                 ),
               ),
