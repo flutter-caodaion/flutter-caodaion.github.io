@@ -27,16 +27,39 @@ class _CalendarPageState extends State<CalendarPage> {
   @override
   void initState() {
     super.initState();
-    _loadInitMonth();
+    _loadInitTime();
   }
 
   @override
   void didUpdateWidget(covariant CalendarPage oldWidget) {
     super.didUpdateWidget(oldWidget);
-    _loadInitMonth();
+    _loadInitTime();
   }
 
-  _loadInitMonth() {}
+  _loadInitTime() {
+    if (widget.params['mode'] != null) {
+      if (widget.params['year'] != null) {
+        setState(() {
+          selectedTime = DateTime.utc(int.parse(widget.params['year']));
+        });
+      }
+      if (widget.params['month'] != null) {
+        setState(() {
+          selectedTime = DateTime.utc(int.parse(widget.params['year']),
+              int.parse(widget.params['month']));
+        });
+      }
+      if (widget.params['day'] != null) {
+        setState(() {
+          selectedTime = DateTime.utc(
+              int.parse(widget.params['year']),
+              int.parse(widget.params['month']),
+              int.parse(widget.params['day']));
+        });
+      }
+    }
+    print(selectedTime);
+  }
 
   String titleText() {
     switch (widget.params['mode']) {
@@ -49,7 +72,7 @@ class _CalendarPageState extends State<CalendarPage> {
             getDate.add(Duration(days: DateTime.daysPerWeek - getDate.weekday));
         return "${fromDate.day}/${fromDate.month}${fromDate.year != toDate.year ? '/${fromDate.year}' : ''}-${toDate.day}/${toDate.month}/${toDate.year}";
       default:
-        return "Tháng ${DateFormat.M().format(selectedTime)}";
+        return "Tháng ${DateFormat.M().format(selectedTime)}/${DateFormat.y().format(selectedTime)}";
     }
   }
 
@@ -83,10 +106,13 @@ class _CalendarPageState extends State<CalendarPage> {
         }
         break;
       default:
+        newTime = DateTime.now();
         break;
     }
     setState(() {
       selectedTime = newTime;
+      context.go(
+          '/lich/${widget.params['mode'] ?? 'thang'}/${selectedTime.year}/${selectedTime.month}/${selectedTime.day}');
     });
   }
 
@@ -144,7 +170,7 @@ class _CalendarPageState extends State<CalendarPage> {
           ),
           Text(
             titleText(),
-            style: const TextStyle(fontSize: 14),
+            style: const TextStyle(fontSize: 16),
           )
         ],
       ),
@@ -156,7 +182,7 @@ class _CalendarPageState extends State<CalendarPage> {
               child: IconButton(
                 onPressed: () {
                   setState(() {
-                    selectedTime = DateTime.now();
+                    _onUpdateDate('');
                   });
                 },
                 icon: const Icon(Icons.today),
@@ -214,6 +240,11 @@ class _CalendarPageState extends State<CalendarPage> {
     );
   }
 
+  onChangeMode(String mode, params) {
+    context.go('/lich/$mode');
+    Navigator.of(context).pop();
+  }
+
   Widget _drawerListView(BuildContext context) {
     return _drawerContainerWidth == 0
         ? Container(
@@ -248,7 +279,7 @@ class _CalendarPageState extends State<CalendarPage> {
                     leading: const Icon(Icons.view_day_rounded),
                     title: const Text('Ngày'),
                     onTap: () {
-                      context.go('/lich/ngay');
+                      onChangeMode('ngay', widget.params);
                     },
                   ),
                 ),
@@ -268,7 +299,7 @@ class _CalendarPageState extends State<CalendarPage> {
                     leading: const Icon(Icons.view_week_rounded),
                     title: const Text('Tuần'),
                     onTap: () {
-                      context.go('/lich/tuan');
+                      onChangeMode('tuan', widget.params);
                     },
                   ),
                 ),
@@ -290,7 +321,7 @@ class _CalendarPageState extends State<CalendarPage> {
                     leading: const Icon(Icons.calendar_view_month_rounded),
                     title: const Text('Tháng'),
                     onTap: () {
-                      context.go('/lich/thang');
+                      onChangeMode('thang', widget.params);
                     },
                   ),
                 ),
