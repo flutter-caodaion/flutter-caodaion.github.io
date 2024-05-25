@@ -2,6 +2,7 @@ import 'package:caodaion/constants/constants.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:go_router/go_router.dart';
+import 'package:responsive_framework/responsive_framework.dart';
 
 class ResponsiveScaffold extends StatelessWidget {
   final Widget child;
@@ -18,9 +19,6 @@ class ResponsiveScaffold extends StatelessWidget {
               body: Row(
                 children: [
                   NavigationRail(
-                    leading: const SizedBox(
-                      height: 12,
-                    ),
                     selectedIndex: _selectedIndex(context),
                     backgroundColor: ColorConstants.primaryBackground,
                     indicatorColor: ColorConstants.primaryIndicatorBackground,
@@ -29,36 +27,53 @@ class ResponsiveScaffold extends StatelessWidget {
                     labelType: NavigationRailLabelType.all,
                     destinations: <NavigationRailDestination>[
                       NavigationRailDestination(
-                        icon: SvgPicture.asset(
-                          'assets/icons/home.svg',
+                        icon: Tooltip(
+                          message: "Trang chủ",
+                          child: SvgPicture.asset(
+                            'assets/icons/caodaion-logo.svg',
+                            height: 32,
+                            width: 32,
+                          ),
                         ),
-                        label: const Text('Trang chủ'),
+                        label: const Text('CaoDaiON'),
                         padding: const EdgeInsets.only(top: 4, bottom: 4),
                       ),
                       NavigationRailDestination(
-                        icon: SvgPicture.asset(
-                          'assets/icons/book.svg',
+                        icon: Tooltip(
+                          message: "Kinh Cúng Tứ Thời & Quan Hôn Tang Tế",
+                          child: SvgPicture.asset(
+                            'assets/icons/book.svg',
+                          ),
                         ),
                         label: const Text('Kinh'),
                         padding: const EdgeInsets.only(top: 4, bottom: 4),
                       ),
                       NavigationRailDestination(
-                        icon: SvgPicture.asset(
-                          'assets/icons/close_book.svg',
+                        icon: Tooltip(
+                          message: "Thánh Ngôn Hiệp Tuyển",
+                          child: SvgPicture.asset(
+                            'assets/icons/close_book.svg',
+                          ),
                         ),
                         label: const Text('TNHT'),
                         padding: const EdgeInsets.only(top: 4, bottom: 4),
                       ),
                       NavigationRailDestination(
-                        icon: SvgPicture.asset(
-                          'assets/icons/calendar.svg',
+                        icon: Tooltip(
+                          message: "Lịch âm dương",
+                          child: SvgPicture.asset(
+                            'assets/icons/calendar.svg',
+                          ),
                         ),
                         label: const Text('Lịch'),
                         padding: const EdgeInsets.only(top: 4, bottom: 4),
                       ),
                       NavigationRailDestination(
-                        icon: SvgPicture.asset(
-                          'assets/icons/apps.svg',
+                        icon: Tooltip(
+                          message: "Các ứng dụng",
+                          child: SvgPicture.asset(
+                            'assets/icons/apps.svg',
+                          ),
                         ),
                         label: const Text('Ứng dụng'),
                         padding: const EdgeInsets.only(top: 4, bottom: 4),
@@ -85,47 +100,61 @@ class ResponsiveScaffold extends StatelessWidget {
                   backgroundColor: ColorConstants.primaryBackground,
                   items: <BottomNavigationBarItem>[
                     BottomNavigationBarItem(
-                      icon: SvgPicture.asset(
-                        'assets/icons/home.svg',
-                        color: _selectedIndex(context) == 0
-                            ? ColorConstants.primaryColor
-                            : Colors.black,
-                      ),
-                      label: 'Trang chủ',
-                    ),
-                    BottomNavigationBarItem(
-                      icon: SvgPicture.asset(
-                        'assets/icons/book.svg',
-                        color: _selectedIndex(context) == 1
-                            ? ColorConstants.primaryColor
-                            : Colors.black,
+                      icon: Tooltip(
+                        message: "Kinh Cúng Tứ Thời & Quan Hôn Tang Tế",
+                        child: SvgPicture.asset(
+                          'assets/icons/book.svg',
+                          color: _selectedIndex(context) == 0
+                              ? ColorConstants.primaryColor
+                              : Colors.black,
+                        ),
                       ),
                       label: 'Kinh',
                     ),
                     BottomNavigationBarItem(
-                      icon: SvgPicture.asset(
-                        'assets/icons/close_book.svg',
-                        color: _selectedIndex(context) == 2
-                            ? ColorConstants.primaryColor
-                            : Colors.black,
+                      icon: Tooltip(
+                        message: "Thánh Ngôn Hiệp Tuyển",
+                        child: SvgPicture.asset(
+                          'assets/icons/close_book.svg',
+                          color: _selectedIndex(context) == 1
+                              ? ColorConstants.primaryColor
+                              : Colors.black,
+                        ),
                       ),
                       label: 'TNHT',
                     ),
                     BottomNavigationBarItem(
-                      icon: SvgPicture.asset(
-                        'assets/icons/calendar.svg',
-                        color: _selectedIndex(context) == 3
-                            ? ColorConstants.primaryColor
-                            : Colors.black,
+                      icon: Tooltip(
+                        message: "Trang chủ CaoDaiON",
+                        child: SvgPicture.asset(
+                          'assets/icons/caodaion-logo.svg',
+                          height: 32,
+                          width: 32,
+                        ),
+                      ),
+                      label: 'CaoDaiON',
+                    ),
+                    BottomNavigationBarItem(
+                      icon: Tooltip(
+                        message: "Lịch âm dương",
+                        child: SvgPicture.asset(
+                          'assets/icons/calendar.svg',
+                          color: _selectedIndex(context) == 3
+                              ? ColorConstants.primaryColor
+                              : Colors.black,
+                        ),
                       ),
                       label: 'Lịch',
                     ),
                     BottomNavigationBarItem(
-                      icon: SvgPicture.asset(
-                        'assets/icons/apps.svg',
-                        color: _selectedIndex(context) == 4
-                            ? ColorConstants.primaryColor
-                            : Colors.black,
+                      icon: Tooltip(
+                        message: "Các ứng dụng",
+                        child: SvgPicture.asset(
+                          'assets/icons/apps.svg',
+                          color: _selectedIndex(context) == 4
+                              ? ColorConstants.primaryColor
+                              : Colors.black,
+                        ),
                       ),
                       label: 'Ứng dụng',
                     ),
@@ -141,35 +170,71 @@ class ResponsiveScaffold extends StatelessWidget {
 
   int _selectedIndex(BuildContext context) {
     final location = ModalRoute.of(context)?.settings.name;
-    if (location == '/') {
-      return 0;
-    } else if (location == '/kinh') {
-      return 1;
-    } else if (location == '/tnht') {
-      return 2;
-    } else if (location == '/lich') {
-      return 3;
+    if (ResponsiveBreakpoints.of(context).isDesktop) {
+      if (location == '/') {
+        return 0;
+      } else if (location == '/kinh') {
+        return 1;
+      } else if (location == '/tnht') {
+        return 2;
+      } else if (location == '/lich') {
+        return 3;
+      }
+      return 4;
+    }
+    if (!ResponsiveBreakpoints.of(context).isDesktop) {
+      if (location == '/') {
+        return 2;
+      } else if (location == '/kinh') {
+        return 0;
+      } else if (location == '/tnht') {
+        return 1;
+      } else if (location == '/lich') {
+        return 3;
+      }
+      return 4;
     }
     return 4;
   }
 
   void _onItemTapped(BuildContext context, int index) {
-    switch (index) {
-      case 0:
-        context.go('/');
-        break;
-      case 1:
-        context.go('/kinh');
-        break;
-      case 2:
-        context.go('/tnht');
-        break;
-      case 3:
-        context.go('/lich');
-        break;
-      case 4:
-        context.go('/apps');
-        break;
+    if (ResponsiveBreakpoints.of(context).isDesktop) {
+      switch (index) {
+        case 0:
+          context.go('/');
+          break;
+        case 1:
+          context.go('/kinh');
+          break;
+        case 2:
+          context.go('/tnht');
+          break;
+        case 3:
+          context.go('/lich');
+          break;
+        case 4:
+          context.go('/apps');
+          break;
+      }
+    }
+    if (!ResponsiveBreakpoints.of(context).isDesktop) {
+      switch (index) {
+        case 0:
+          context.go('/kinh');
+          break;
+        case 1:
+          context.go('/tnht');
+          break;
+        case 2:
+          context.go('/');
+          break;
+        case 3:
+          context.go('/lich');
+          break;
+        case 4:
+          context.go('/apps');
+          break;
+      }
     }
   }
 }

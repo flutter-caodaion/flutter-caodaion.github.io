@@ -3,6 +3,7 @@ import 'package:caodaion/constants/constants.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:lunar/calendar/Lunar.dart';
+import 'dart:ui_web';
 
 class CalendarMonthView extends StatefulWidget {
   final DateTime initialMonth;
@@ -25,10 +26,12 @@ class _CalendarMonthViewState extends State<CalendarMonthView> {
     return LayoutBuilder(
       builder: (context, constraints) {
         final double screenWidth = constraints.maxWidth;
-        final double screenHeight = constraints.maxHeight;
+        final double screenHeight = constraints.maxHeight - 36;
         const int numberOfRows = 6;
         const int numberOfColumns = 7;
-        final double cellAspectRatio = screenWidth / screenHeight;
+        final double cellWidth = screenWidth / numberOfColumns;
+        final double cellHeight = screenHeight / numberOfRows;
+        final double cellAspectRatio = cellWidth / cellHeight;
         return MonthView(
           initialMonth: widget.initialMonth,
           cellAspectRatio: cellAspectRatio,
@@ -75,8 +78,6 @@ class _CalendarMonthViewState extends State<CalendarMonthView> {
               "month": gotLunar.getMonth().toString(),
             };
             return SizedBox(
-              width: screenWidth / numberOfColumns,
-              height: screenHeight / numberOfRows,
               child: SingleChildScrollView(
                 child: Column(
                   children: [
