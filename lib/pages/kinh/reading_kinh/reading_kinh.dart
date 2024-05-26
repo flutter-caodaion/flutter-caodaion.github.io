@@ -1,8 +1,6 @@
-import 'package:caodaion/constants/constants.dart';
 import 'package:caodaion/pages/kinh/reading_kinh/widget/view_kinh.dart';
 import 'package:caodaion/widgets/responsive_scaffold.dart';
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 
 class ReadingKinhPage extends StatefulWidget {

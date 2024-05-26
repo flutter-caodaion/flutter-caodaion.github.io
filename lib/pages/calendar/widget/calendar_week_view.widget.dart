@@ -1,7 +1,6 @@
 import 'package:calendar_view/calendar_view.dart';
 import 'package:caodaion/constants/constants.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 
 class CalendarWeekView extends StatefulWidget {
@@ -54,7 +53,7 @@ class _CalendarWeekViewState extends State<CalendarWeekView> {
             return TextButton(
               onPressed: () {
                 // Handle button press, e.g., show event details
-                print('Event: ${event}');
+                print('Event: $event');
               },
               style: ButtonStyle(
                 backgroundColor: WidgetStateProperty.all<Color>(

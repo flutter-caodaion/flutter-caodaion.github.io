@@ -165,7 +165,7 @@ class _AppsPageState extends State<AppsPage> {
                       child: TextButton(
                         style: ButtonStyle(
                           overlayColor:
-                              MaterialStateProperty.all(Colors.transparent),
+                              WidgetStateProperty.all(Colors.transparent),
                         ),
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
@@ -248,7 +248,7 @@ class _AppsPageState extends State<AppsPage> {
                       child: TextButton(
                         style: ButtonStyle(
                           overlayColor:
-                              MaterialStateProperty.all(Colors.transparent),
+                              WidgetStateProperty.all(Colors.transparent),
                         ),
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,

@@ -136,7 +136,7 @@ class _CalendarPageState extends State<CalendarPage> {
       selectedTime = newTime;
       if (action == 'open') {
         context.go(
-            '/lich/${mode}/${selectedTime.year}/${selectedTime.month}/${selectedTime.day}');
+            '/lich/$mode/${selectedTime.year}/${selectedTime.month}/${selectedTime.day}');
       } else {
         context.go(
             '/lich/${widget.params['mode'] ?? 'thang'}/${selectedTime.year}/${selectedTime.month}/${selectedTime.day}');
