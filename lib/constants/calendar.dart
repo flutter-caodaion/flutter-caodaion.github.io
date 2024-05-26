@@ -3,15 +3,21 @@ import 'package:lunar/calendar/Lunar.dart';
 import 'package:lunar/calendar/Solar.dart';
 
 class CalendarEventsConstants {
-  List<CalendarEventData> staticGlobalEvents(selectedTime) {
+  List<CalendarEventData> staticGlobalEvents(DateTime selectedTime) {
     List<CalendarEventData> responseStaticGlobalEvents = [];
     for (var item in rawStaticGlobalEvents) {
-      Map<dynamic, dynamic> responseData = {};
+      Map<String, dynamic> responseData = {};
       if (item['title'] != null) {
         responseData['title'] = item['title'];
       }
       if (item['solar'] != null) {
-        responseData['date'] = item['date'];
+        if (item['solar'].toString().contains('yearly')) {
+          List<String> parts = item['solar'].toString().split("-");
+          int year = selectedTime.year;
+          int month = int.parse(parts[1]);
+          int day = int.parse(parts[2]);
+          responseData['date'] = DateTime.utc(year, month, day);
+        }
       }
       if (item['lunar'] != null) {
         if (item['lunar'].toString().contains('yearly')) {
@@ -27,61 +33,132 @@ class CalendarEventsConstants {
         }
       }
       if (responseData['title'] != null && responseData['date'] != null) {
-        if (item['tuThoi'] != null && item['tuThoi'] == true) {
-          final DateTime date = responseData['date'];
-          final DateTime fromDate = date.subtract(const Duration(days: 1));
-          final CalendarEventData responseEventTY = CalendarEventData(
-              title: "Thời TÝ ${responseData['title']}",
-              date: fromDate,
-              startTime: DateTime.utc(
-                  fromDate.year, fromDate.month, fromDate.day, 23, 0, 0),
-              endTime: DateTime.utc(date.year, date.month, date.day, 1, 0, 0),
-              endDate: date,
-              description: responseData['title'],
-              event: {"raw": item, "eventGroup": "staticGlobal"});
-          responseStaticGlobalEvents.add(responseEventTY);
-          final CalendarEventData responseEventMEO = CalendarEventData(
-              title: "Thời MẸO ${responseData['title']}",
-              date: date,
-              startTime: DateTime.utc(date.year, date.month, date.day, 5, 0, 0),
-              endTime: DateTime.utc(date.year, date.month, date.day, 7, 0, 0),
-              event: {"raw": item, "eventGroup": "staticGlobal"});
-          responseStaticGlobalEvents.add(responseEventMEO);
-          final CalendarEventData responseEventNGO = CalendarEventData(
-              title: "Thời NGỌ ${responseData['title']}",
-              date: date,
-              startTime:
-                  DateTime.utc(date.year, date.month, date.day, 11, 0, 0),
-              endTime: DateTime.utc(date.year, date.month, date.day, 13, 0, 0),
-              event: {"raw": item, "eventGroup": "staticGlobal"});
-          responseStaticGlobalEvents.add(responseEventNGO);
-          final CalendarEventData responseEventDAU = CalendarEventData(
-              title: "Thời DẬU ${responseData['title']}",
-              date: date,
-              startTime:
-                  DateTime.utc(date.year, date.month, date.day, 17, 0, 0),
-              endTime: DateTime.utc(date.year, date.month, date.day, 19, 0, 0),
-              event: {"raw": item, "eventGroup": "staticGlobal"});
-          responseStaticGlobalEvents.add(responseEventDAU);
-        } else {
-          final CalendarEventData responseEvent = CalendarEventData(
-              title: responseData['title'],
-              date: responseData['date'],
-              event: {"raw": item, "eventGroup": "staticGlobal"});
-          responseStaticGlobalEvents.add(responseEvent);
-        }
+        DateTime date = responseData['date'];
+        responseStaticGlobalEvents.add(
+          CalendarEventData(
+            title: "${responseData['title']}",
+            date: date,
+            event: {"raw": item, "eventGroup": "staticGlobal"},
+          ),
+        );
       }
     }
-    // print(responseStaticGlobalEvents);
     return responseStaticGlobalEvents;
   }
 
-  List<Map<dynamic, dynamic>> rawStaticGlobalEvents = [
+  List<Map<String, dynamic>> rawStaticGlobalEvents = [
     {
       "key": "dai-le-via-duc-chi-ton",
       "title": "ĐẠI LỄ VÍA ĐỨC CHÍ TÔN",
       "lunar": "yearly-01-09",
       "tuThoi": true
-    }
+    },
+    {
+      "key": "dai-le-thuong-nguong",
+      "title": "ĐẠI LỄ THƯỢNG NGƯƠNG",
+      "lunar": "yearly-01-15",
+      "tuThoi": true
+    },
+    {
+      "key": "dai-le-via-duc-thai-thuong-lao-quan",
+      "title": "ĐẠI LỄ VÍA ĐỨC THÁI THƯỢNG LÃO QUÂN",
+      "lunar": "yearly-02-15",
+      "tuThoi": true
+    },
+    {
+      "key": "le-ky-niem-duc-giao-tong-dac-dao",
+      "title": "LỄ KỶ NIỆM ĐỨC GIÁO TÔNG ĐẮC ĐẠO",
+      "lunar": "yearly-02-25",
+      "tuThoi": true
+    },
+    {
+      "key": "le-ky-niem-duc-giao-tong-tho-phong",
+      "title": "LỄ KỶ NIỆM ĐỨC GIÁO TÔNG THỌ PHONG",
+      "lunar": "yearly-03-13",
+      "tuThoi": true
+    },
+    {
+      "key": "dai-le-via-duc-thich-ca-mau-ni-the-ton",
+      "title": "ĐẠI LỄ VÍA ĐỨC THÍCH CA MÂU NI THẾ TÔN",
+      "lunar": "yearly-04-08",
+      "tuThoi": true
+    },
+    {
+      "key": "dai-le-ky-niem-sinh-nhut-duc-giao-tong-nguyen-ngoc-tuong",
+      "title": "ĐẠI LỄ KỶ NIỆM SINH NHỰT ĐỨC GIÁO TÔNG NGUYỄN NGỌC TƯƠNG",
+      "lunar": "yearly-05-26",
+      "tuThoi": true
+    },
+    {
+      "key": "dai-le-trung-nguong",
+      "title": "ĐẠI LỄ TRUNG NGƯƠNG",
+      "lunar": "yearly-07-15",
+      "tuThoi": true
+    },
+    {
+      "key": "dai-le-via-duc-dieu-tri-kim-mau",
+      "title": "ĐẠI LỄ VÍA ĐỨC DIÊU TRÌ KIM MẪU",
+      "lunar": "yearly-08-15",
+      "tuThoi": true
+    },
+    {
+      "key": "dai-le-ha-nguong-va-ky-niem-khai-dao",
+      "title": "ĐẠI LỄ HẠ NGƯƠNG và KỶ NIỆM KHAI ĐẠO",
+      "lunar": "yearly-10-15",
+      "tuThoi": true
+    },
+    {
+      "key": "dai-le-ky-niem-sanh-nhut-duc-gia-to-giao-chu",
+      "title": "ĐẠI LỄ KỶ NIỆM SANH NHỰT ĐỨC GIA TÔ GIÁO CHỦ",
+      "solar": "yearly-12-25",
+      "tuThoi": true
+    },
+    {
+      "key": "tet-nguyen-dan-mung-1-dai-le-tan-nien",
+      "title": "TẾT NGUYÊN ĐÁN | MÙNG 1 | ĐẠI LỄ TÂN NIÊN",
+      "lunar": "yearly-01-01",
+      "tuThoi": true
+    },
+    {
+      "key": "tet-nguyen-dan-mung-2-dai-le-tan-nien",
+      "title": "TẾT NGUYÊN ĐÁN | MÙNG 2 | ĐẠI LỄ TÂN NIÊN",
+      "lunar": "yearly-01-02",
+      "tuThoi": true
+    },
+    {
+      "key": "tet-nguyen-dan-mung-3-dai-le-tan-nien",
+      "title": "TẾT NGUYÊN ĐÁN | MÙNG 3 | ĐẠI LỄ TÂN NIÊN",
+      "lunar": "yearly-01-03",
+      "tuThoi": true
+    },
   ];
+
+  List<CalendarEventData> firstHaflEvents(DateTime selectedTime) {
+    List<CalendarEventData> responseFirstHaflEvents = [];
+    for (var i = 1; i <= 12; i++) {
+      Lunar lunarFirst = Lunar.fromYmd(selectedTime.year, i, 1);
+      Solar solarFirst = lunarFirst.getSolar();
+      DateTime solarDateTimeFirst = DateTime(
+          solarFirst.getYear(), solarFirst.getMonth(), solarFirst.getDay());
+      responseFirstHaflEvents.add(
+        CalendarEventData(
+          title: 'Sóc nhựt tháng $i',
+          date: solarDateTimeFirst,
+          event: const {"eventGroup": "firstHalf"},
+        ),
+      );
+      Lunar lunarHalf = Lunar.fromYmd(selectedTime.year, i, 15);
+      Solar solarHalf = lunarHalf.getSolar();
+      DateTime solarDateTimeHalf = DateTime(
+          solarFirst.getYear(), solarHalf.getMonth(), solarHalf.getDay());
+      responseFirstHaflEvents.add(
+        CalendarEventData(
+          title: 'Vọng nhựt tháng $i',
+          date: solarDateTimeHalf,
+          event: const {"eventGroup": "firstHalf"},
+        ),
+      );
+    }
+    return responseFirstHaflEvents;
+  }
 }

@@ -1,4 +1,3 @@
-
 import 'package:calendar_view/calendar_view.dart';
 import 'package:caodaion/constants/constants.dart';
 import 'package:flutter/material.dart';
@@ -127,7 +126,10 @@ class _CalendarMonthViewState extends State<CalendarMonthView> {
                                 backgroundColor: WidgetStateProperty.all<Color>(
                                   eventData['eventGroup'] == 'staticGlobal'
                                       ? ColorConstants.staticGlobalEventsColor
-                                      : ColorConstants.primaryBackground,
+                                      : eventData['eventGroup'] == 'firstHalf'
+                                          ? ColorConstants
+                                              .firstHaftMonthEventsColor
+                                          : ColorConstants.primaryBackground,
                                 ),
                                 padding: WidgetStateProperty.all<EdgeInsets>(
                                   const EdgeInsets.all(4),
@@ -144,10 +146,11 @@ class _CalendarMonthViewState extends State<CalendarMonthView> {
                               child: Text(
                                 event.title,
                                 style: TextStyle(
-                                  color:
-                                      eventData['eventGroup'] == 'staticGlobal'
-                                          ? Colors.white
-                                          : Colors.black,
+                                  color: eventData['eventGroup'] ==
+                                              'staticGlobal' ||
+                                          eventData['eventGroup'] == 'firstHalf'
+                                      ? Colors.white
+                                      : Colors.black,
                                   fontSize: ResponsiveBreakpoints.of(context)
                                           .isDesktop
                                       ? 12

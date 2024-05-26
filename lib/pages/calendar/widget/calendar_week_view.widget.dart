@@ -59,7 +59,9 @@ class _CalendarWeekViewState extends State<CalendarWeekView> {
                 backgroundColor: WidgetStateProperty.all<Color>(
                   eventData['eventGroup'] == 'staticGlobal'
                       ? ColorConstants.staticGlobalEventsColor
-                      : ColorConstants.primaryBackground,
+                      : eventData['eventGroup'] == 'firstHalf'
+                          ? ColorConstants.firstHaftMonthEventsColor
+                          : ColorConstants.primaryBackground,
                 ),
                 padding: WidgetStateProperty.all<EdgeInsets>(
                   const EdgeInsets.all(4),
@@ -75,7 +77,51 @@ class _CalendarWeekViewState extends State<CalendarWeekView> {
                 child: Text(
                   event.title,
                   style: TextStyle(
-                    color: eventData['eventGroup'] == 'staticGlobal'
+                    color: eventData['eventGroup'] == 'staticGlobal' ||
+                            eventData['eventGroup'] == 'firstHalf'
+                        ? Colors.white
+                        : Colors.black,
+                    fontSize:
+                        ResponsiveBreakpoints.of(context).isDesktop ? 16 : 10,
+                  ),
+                ),
+              ),
+            );
+          }).toList(),
+        );
+      },
+      fullDayEventBuilder: (events, date) {
+        return Column(
+          children: events.map((event) {
+            var eventData = event.event as Map<dynamic, dynamic>;
+            return TextButton(
+              onPressed: () {
+                // Handle button press, e.g., show event details
+                print('Event: $event');
+              },
+              style: ButtonStyle(
+                backgroundColor: WidgetStateProperty.all<Color>(
+                  eventData['eventGroup'] == 'staticGlobal'
+                      ? ColorConstants.staticGlobalEventsColor
+                      : eventData['eventGroup'] == 'firstHalf'
+                          ? ColorConstants.firstHaftMonthEventsColor
+                          : ColorConstants.primaryBackground,
+                ),
+                padding: WidgetStateProperty.all<EdgeInsets>(
+                  const EdgeInsets.all(4),
+                ),
+                shape: WidgetStateProperty.all<RoundedRectangleBorder>(
+                  const RoundedRectangleBorder(
+                    borderRadius: BorderRadius.all(Radius.circular(3)),
+                  ),
+                ),
+              ),
+              child: SizedBox(
+                child: Text(
+                  event.title,
+                  style: TextStyle(
+                    color: eventData['eventGroup'] == 'staticGlobal' ||
+                            eventData['eventGroup'] == 'firstHalf'
                         ? Colors.white
                         : Colors.black,
                     fontSize:

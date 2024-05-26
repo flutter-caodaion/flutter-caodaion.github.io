@@ -29,6 +29,7 @@ class _CalendarPageState extends State<CalendarPage> {
   bool isShowHumaneEventsColorEvents = true;
   final EventController controller = EventController();
   List<CalendarEventData> staticGlobalEvents = [];
+  List<CalendarEventData> firstHalfEvents = [];
   final CalendarEventsConstants dataConverter = CalendarEventsConstants();
 
   @override
@@ -36,6 +37,7 @@ class _CalendarPageState extends State<CalendarPage> {
     super.initState();
     _loadInitTime();
     _loadGlobalStaticEvents();
+    _loadFirstHalfEvents();
   }
 
   @override
@@ -43,6 +45,7 @@ class _CalendarPageState extends State<CalendarPage> {
     super.didUpdateWidget(oldWidget);
     _loadInitTime();
     _loadGlobalStaticEvents();
+    _loadFirstHalfEvents();
   }
 
   _loadGlobalStaticEvents() {
@@ -52,6 +55,18 @@ class _CalendarPageState extends State<CalendarPage> {
         staticGlobalEvents = dataConverter.staticGlobalEvents(selectedTime);
         if (staticGlobalEvents.isNotEmpty) {
           controller.addAll(staticGlobalEvents);
+        }
+      });
+    }
+  }
+
+  _loadFirstHalfEvents() {
+    controller.removeAll(firstHalfEvents);
+    if (isShowFirstHaftMonthEvents) {
+      setState(() {
+        firstHalfEvents = dataConverter.firstHaflEvents(selectedTime);
+        if (firstHalfEvents.isNotEmpty) {
+          controller.addAll(firstHalfEvents);
         }
       });
     }
@@ -356,6 +371,12 @@ class _CalendarPageState extends State<CalendarPage> {
                   ),
                 ),
               ),
+              const Padding(
+                padding: EdgeInsets.only(top: 24, bottom: 12),
+                child: Divider(
+                  height: 1,
+                ),
+              ),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 12.0),
                 child: CheckboxListTile(
@@ -378,6 +399,7 @@ class _CalendarPageState extends State<CalendarPage> {
                   onChanged: (value) {
                     setState(() {
                       isShowFirstHaftMonthEvents = value!;
+                      _loadFirstHalfEvents();
                     });
                   },
                   title: const Text("Sự kiện sóc vọng"),
@@ -385,20 +407,21 @@ class _CalendarPageState extends State<CalendarPage> {
                   activeColor: ColorConstants.firstHaftMonthEventsColor,
                 ),
               ),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 12.0),
-                child: CheckboxListTile(
-                  value: isShowHumaneEventsColorEvents,
-                  onChanged: (value) {
-                    setState(() {
-                      isShowHumaneEventsColorEvents = value!;
-                    });
-                  },
-                  title: const Text("Sự kiện quan hôn tang tế "),
-                  controlAffinity: ListTileControlAffinity.leading,
-                  activeColor: ColorConstants.humaneEventsColor,
-                ),
-              ),
+              // TODO: do this section after implement the fetch sheet service
+              // Padding(
+              //   padding: const EdgeInsets.symmetric(horizontal: 12.0),
+              //   child: CheckboxListTile(
+              //     value: isShowHumaneEventsColorEvents,
+              //     onChanged: (value) {
+              //       setState(() {
+              //         isShowHumaneEventsColorEvents = value!;
+              //       });
+              //     },
+              //     title: const Text("Sự kiện quan hôn tang tế "),
+              //     controlAffinity: ListTileControlAffinity.leading,
+              //     activeColor: ColorConstants.humaneEventsColor,
+              //   ),
+              // ),
             ],
           );
   }
