@@ -10,7 +10,6 @@ import 'package:caodaion/pages/qr/qr_page.dart';
 import 'package:caodaion/pages/self_chart/self_chart_page.dart';
 import 'package:caodaion/pages/settings/settings_page.dart';
 import 'package:caodaion/pages/tnht/tnht_page.dart';
-import 'package:caodaion/pages/widgets/home_screen.dart';
 import 'package:go_router/go_router.dart';
 
 class NoTransitionPage<T> extends CustomTransitionPage<T> {
@@ -143,11 +142,6 @@ final GoRouter router = GoRouter(
       path: '/tu-tinh',
       pageBuilder: (context, state) =>
           NoTransitionPage(child: const SelfChartPage(), name: '/tu-tinh'),
-    ),
-    GoRoute(
-      path: '/widgets',
-      pageBuilder: (context, state) =>
-          NoTransitionPage(child: const MyHomePage(), name: '/widgets'),
     ),
   ],
 );

@@ -76,11 +76,6 @@ class _AppsPageState extends State<AppsPage> {
           color: ColorConstants.chartColor,
         ),
       },
-      {
-        'name': '/widgets',
-        'label': 'Widget',
-        'icon': Icon(Icons.widgets),
-      },
       // {
       //   'name': '/maps',
       //   'label': 'Bản đồ',
