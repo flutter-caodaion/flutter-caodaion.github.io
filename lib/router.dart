@@ -10,6 +10,7 @@ import 'package:caodaion/pages/qr/qr_page.dart';
 import 'package:caodaion/pages/self_chart/self_chart_page.dart';
 import 'package:caodaion/pages/settings/settings_page.dart';
 import 'package:caodaion/pages/tnht/tnht_page.dart';
+import 'package:caodaion/pages/widgets/widgets_page.dart';
 import 'package:go_router/go_router.dart';
 
 class NoTransitionPage<T> extends CustomTransitionPage<T> {
@@ -90,8 +91,8 @@ final GoRouter router = GoRouter(
         final year = state.pathParameters['year'] as String;
         final month = state.pathParameters['month'] as String;
         return NoTransitionPage(
-          child:
-              CalendarPage(params: {"mode": mode, "year": year, "month": month}),
+          child: CalendarPage(
+              params: {"mode": mode, "year": year, "month": month}),
         );
       },
     ),
@@ -142,6 +143,11 @@ final GoRouter router = GoRouter(
       path: '/tu-tinh',
       pageBuilder: (context, state) =>
           NoTransitionPage(child: const SelfChartPage(), name: '/tu-tinh'),
+    ),
+    GoRoute(
+      path: '/widgets',
+      pageBuilder: (context, state) =>
+          NoTransitionPage(child: const WidgetsPage(), name: '/widgets'),
     ),
   ],
 );

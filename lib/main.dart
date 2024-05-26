@@ -4,6 +4,7 @@ import 'package:responsive_framework/responsive_framework.dart';
 import 'router.dart';
 
 void main() {
+  WidgetsFlutterBinding.ensureInitialized();
   runApp(const MyApp());
 }
 
