@@ -1,3 +1,4 @@
+import 'package:caodaion/util/platform.dart';
 import 'package:caodaion/widgets/responsive_scaffold.dart';
 import 'package:caodaion/constants/constants.dart';
 import 'package:caodaion/widgets/text_horizontal_divider.dart';
@@ -17,15 +18,16 @@ class _AppsPageState extends State<AppsPage> {
   @override
   Widget build(BuildContext context) {
     List<Map<String, dynamic>> appList = [
-      {
-        'name': '/qr',
-        'label': 'Quét QR',
-        'icon': Icon(
-          Icons.qr_code_scanner_outlined,
-          color: ColorConstants.qrColor,
-          size: 32,
-        ),
-      },
+      if (!isWindows())
+        {
+          'name': '/qr',
+          'label': 'Quét QR',
+          'icon': Icon(
+            Icons.qr_code_scanner_outlined,
+            color: ColorConstants.qrColor,
+            size: 32,
+          ),
+        },
       {
         'name': '/dong-ho',
         'label': 'Đồng hồ',
@@ -76,11 +78,12 @@ class _AppsPageState extends State<AppsPage> {
           color: ColorConstants.chartColor,
         ),
       },
-      {
-        'name': '/widgets',
-        'label': 'Widgets',
-        'icon': Icon(Icons.widgets),
-      },
+      if (isPhone())
+        {
+          'name': '/widgets',
+          'label': 'Widgets',
+          'icon': const Icon(Icons.widgets),
+        },
       // {
       //   'name': '/maps',
       //   'label': 'Bản đồ',
