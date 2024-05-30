@@ -61,7 +61,9 @@ class _CalendarWeekViewState extends State<CalendarWeekView> {
                       ? ColorConstants.staticGlobalEventsColor
                       : eventData['eventGroup'] == 'firstHalf'
                           ? ColorConstants.firstHaftMonthEventsColor
-                          : ColorConstants.primaryBackground,
+                          : eventData['eventGroup'] == 'humane'
+                              ? ColorConstants.humaneEventsColor
+                              : ColorConstants.primaryBackground,
                 ),
                 padding: WidgetStateProperty.all<EdgeInsets>(
                   const EdgeInsets.all(4),
@@ -105,7 +107,9 @@ class _CalendarWeekViewState extends State<CalendarWeekView> {
                       ? ColorConstants.staticGlobalEventsColor
                       : eventData['eventGroup'] == 'firstHalf'
                           ? ColorConstants.firstHaftMonthEventsColor
-                          : ColorConstants.primaryBackground,
+                          : eventData['eventGroup'] == 'humane'
+                              ? ColorConstants.humaneEventsColor
+                              : ColorConstants.primaryBackground,
                 ),
                 padding: WidgetStateProperty.all<EdgeInsets>(
                   const EdgeInsets.all(4),

@@ -28,4 +28,58 @@ class MapsConstants {
 
 class TokenConstants {
   static String selectedFontSize = 'RO4ozil6DSgF';
+  static String humane = 'FVrLJEg7Hb1to';
+}
+
+class TimeConstants {
+  static List<Map<String, dynamic>> lunarTimes = [
+    {
+      "name": "TÝ",
+      "range": "23:00-01:00",
+    },
+    {
+      "name": "SỬU",
+      "range": "01:00-03:00",
+    },
+    {
+      "name": "DẦN",
+      "range": "03:00-05:00",
+    },
+    {
+      "name": "MẸO",
+      "range": "05:00-07:00",
+    },
+    {
+      "name": "THÌN",
+      "range": "07:00-09:00",
+    },
+    {
+      "name": "TỴ",
+      "range": "09:00-11:00",
+    },
+    {
+      "name": "NGỌ",
+      "range": "11:00-13:00",
+    },
+    {
+      "name": "MÙI",
+      "range": "13:00-15:00",
+    },
+    {
+      "name": "THÂN",
+      "range": "15:00-17:00",
+    },
+    {
+      "name": "DẬU",
+      "range": "17:00-19:00",
+    },
+    {
+      "name": "TUẤT",
+      "range": "19:00-21:00",
+    },
+    {
+      "name": "HỢI",
+      "range": "21:00-23:00",
+    },
+  ];
 }

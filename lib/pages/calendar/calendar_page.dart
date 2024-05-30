@@ -1,15 +1,20 @@
+import 'dart:convert';
+
 import 'package:calendar_view/calendar_view.dart';
 import 'package:caodaion/constants/constants.dart';
-import 'package:caodaion/constants/calendar.dart';
+import 'package:caodaion/constants/calendar.constants.dart';
+import 'package:caodaion/pages/calendar/service/calendar_event_service.dart';
 import 'package:caodaion/pages/calendar/widget/calendar_day_view.widget.dart';
 import 'package:caodaion/pages/calendar/widget/calendar_month_view.widget.dart';
 import 'package:caodaion/pages/calendar/widget/calendar_week_view.widget.dart';
+import 'package:caodaion/pages/calendar/widget/subscribe_dialog.dart';
 import 'package:caodaion/widgets/responsive_scaffold.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:responsive_framework/responsive_framework.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class CalendarPage extends StatefulWidget {
   final Map params;
@@ -26,11 +31,16 @@ class _CalendarPageState extends State<CalendarPage> {
   bool isShowMonthSection = false;
   bool isShowStaticGlobalEvents = true;
   bool isShowFirstHaftMonthEvents = true;
-  bool isShowHumaneEventsColorEvents = true;
+  bool isShowHumaneEventsColorEvents = false;
   final EventController controller = EventController();
   List<CalendarEventData> staticGlobalEvents = [];
   List<CalendarEventData> firstHalfEvents = [];
-  final CalendarEventsConstants dataConverter = CalendarEventsConstants();
+  List<Map<String, dynamic>> humaneEvents = [];
+  List<Map<String, dynamic>> thanhSoList = [];
+  List selectedThanhSo = [];
+  final CalendarEventsConstants calendarEventsConstants =
+      CalendarEventsConstants();
+  final CalendarEventService calendarEventService = CalendarEventService();
 
   @override
   void initState() {
@@ -38,6 +48,7 @@ class _CalendarPageState extends State<CalendarPage> {
     _loadInitTime();
     _loadGlobalStaticEvents();
     _loadFirstHalfEvents();
+    _loadThanhSoFromSheet();
   }
 
   @override
@@ -46,13 +57,121 @@ class _CalendarPageState extends State<CalendarPage> {
     _loadInitTime();
     _loadGlobalStaticEvents();
     _loadFirstHalfEvents();
+    _loadThanhSoFromSheet();
+  }
+
+  _loadThanhSoFromSheet() async {
+    var thanhSoResponse = await calendarEventService.fetchThanhSo();
+    setState(() {
+      thanhSoList = thanhSoResponse!['data'];
+      _loadSubscribedThanhSo();
+    });
+  }
+
+  _loadSubscribedThanhSo() async {
+    final prefs = await SharedPreferences.getInstance();
+    final subscribedThanhSo = prefs.getString(TokenConstants.humane);
+
+    if (subscribedThanhSo == null) {
+      print('No data found for the given key.');
+      return;
+    }
+
+    try {
+      final subscribedThanhSoData =
+          json.decode(subscribedThanhSo) as List<dynamic>;
+      for (var element in subscribedThanhSoData) {
+        final foundThanhSo = thanhSoList
+            .firstWhere((tsl) => tsl['thanhSoSheet'] == element['key']);
+        foundThanhSo['checked'] = element['checked'];
+        setState(() {
+          humaneEvents.add({
+            "data": foundThanhSo,
+          });
+          _fetchEventFromThanhSo();
+        });
+      }
+    } catch (e) {
+      print('Error decoding JSON: $e');
+    }
+  }
+
+  void onAddCalendarSelected(selected) {
+    switch (selected) {
+      case "subscribe":
+        showDialog(
+          context: context,
+          builder: (BuildContext context) => Dialog(
+            backgroundColor: Colors.white,
+            child: SubscribeDialog(
+              thanhSoList: thanhSoList,
+              onUpdateSelected: (value) {
+                setState(() {
+                  humaneEvents = value.map((item) => {"data": item}).toList();
+                  _fetchEventFromThanhSo();
+                });
+              },
+            ),
+          ),
+        );
+        break;
+      default:
+        break;
+    }
+  }
+
+  _fetchEventFromThanhSo() async {
+    for (var element in humaneEvents) {
+      if (element['events'] != null && element['events'].length > 0) {
+        if (element['data']['checked'] == true) {
+          setState(() {
+            controller.addAll(element['events']);
+          });
+        } else {
+          setState(() {
+            controller.removeAll(element['events']);
+          });
+        }
+      } else {
+        if (element['data']['checked'] == true) {
+          try {
+            var thanhSoResponse = await calendarEventService
+                .fetchThanhSoEvent(element['data']['thanhSoSheet']);
+            setState(() {
+              try {
+                element['events'] = calendarEventsConstants.humaneEvents(
+                    selectedTime, thanhSoResponse!['data']);
+                controller.addAll(element['events']);
+              } catch (e) {
+                print(e);
+              }
+            });
+          } catch (e) {
+            print(e);
+          }
+        }
+      }
+    }
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(
+      TokenConstants.humane,
+      jsonEncode(
+        humaneEvents
+            .map((toElement) => {
+                  "key": toElement['data']['thanhSoSheet'],
+                  "checked": toElement['data']['checked'],
+                })
+            .toList(),
+      ),
+    );
   }
 
   _loadGlobalStaticEvents() {
     controller.removeAll(staticGlobalEvents);
     if (isShowStaticGlobalEvents) {
       setState(() {
-        staticGlobalEvents = dataConverter.staticGlobalEvents(selectedTime);
+        staticGlobalEvents =
+            calendarEventsConstants.staticGlobalEvents(selectedTime);
         if (staticGlobalEvents.isNotEmpty) {
           controller.addAll(staticGlobalEvents);
         }
@@ -64,7 +183,7 @@ class _CalendarPageState extends State<CalendarPage> {
     controller.removeAll(firstHalfEvents);
     if (isShowFirstHaftMonthEvents) {
       setState(() {
-        firstHalfEvents = dataConverter.firstHaflEvents(selectedTime);
+        firstHalfEvents = calendarEventsConstants.firstHaflEvents(selectedTime);
         if (firstHalfEvents.isNotEmpty) {
           controller.addAll(firstHalfEvents);
         }
@@ -377,6 +496,15 @@ class _CalendarPageState extends State<CalendarPage> {
                   height: 1,
                 ),
               ),
+              const Padding(
+                padding: EdgeInsets.symmetric(horizontal: 24),
+                child: Text(
+                  "Sự kiện",
+                  style: TextStyle(
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 12.0),
                 child: CheckboxListTile(
@@ -407,21 +535,63 @@ class _CalendarPageState extends State<CalendarPage> {
                   activeColor: ColorConstants.firstHaftMonthEventsColor,
                 ),
               ),
-              // TODO: do this section after implement the fetch sheet service
-              // Padding(
-              //   padding: const EdgeInsets.symmetric(horizontal: 12.0),
-              //   child: CheckboxListTile(
-              //     value: isShowHumaneEventsColorEvents,
-              //     onChanged: (value) {
-              //       setState(() {
-              //         isShowHumaneEventsColorEvents = value!;
-              //       });
-              //     },
-              //     title: const Text("Sự kiện quan hôn tang tế "),
-              //     controlAffinity: ListTileControlAffinity.leading,
-              //     activeColor: ColorConstants.humaneEventsColor,
-              //   ),
-              // ),
+              const Padding(
+                padding: EdgeInsets.only(top: 24, bottom: 12),
+                child: Divider(
+                  height: 1,
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 24),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Text(
+                      "Lịch khác",
+                      style: TextStyle(
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    PopupMenuButton(
+                      color: Colors.white,
+                      icon: const Icon(Icons.add),
+                      itemBuilder: (BuildContext context) {
+                        return [
+                          if (thanhSoList.isNotEmpty)
+                            const PopupMenuItem(
+                              value: 'subscribe',
+                              child: Text('Hiện sự kiện từ Thánh Sở'),
+                            ),
+                          // const PopupMenuItem(
+                          //   value: 'subscribe',
+                          //   child: Text('Đăng ký hiển thị lịch lên CaoDaiON'),
+                          // )
+                        ];
+                      },
+                      onSelected: (value) {
+                        onAddCalendarSelected(value);
+                      },
+                    ),
+                  ],
+                ),
+              ),
+              ...humaneEvents.map((item) {
+                return Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 12.0),
+                  child: CheckboxListTile(
+                    value: item['data']['checked'],
+                    onChanged: (value) {
+                      setState(() {
+                        item['data']['checked'] = value;
+                        _fetchEventFromThanhSo();
+                      });
+                    },
+                    title: Text(item['data']['thanhSo']),
+                    controlAffinity: ListTileControlAffinity.leading,
+                    activeColor: ColorConstants.humaneEventsColor,
+                  ),
+                );
+              }),
             ],
           );
   }

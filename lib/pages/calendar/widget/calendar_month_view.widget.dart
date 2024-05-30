@@ -129,7 +129,10 @@ class _CalendarMonthViewState extends State<CalendarMonthView> {
                                       : eventData['eventGroup'] == 'firstHalf'
                                           ? ColorConstants
                                               .firstHaftMonthEventsColor
-                                          : ColorConstants.primaryBackground,
+                                          : eventData['eventGroup'] == 'humane'
+                                              ? ColorConstants.humaneEventsColor
+                                              : ColorConstants
+                                                  .primaryBackground,
                                 ),
                                 padding: WidgetStateProperty.all<EdgeInsets>(
                                   const EdgeInsets.all(4),

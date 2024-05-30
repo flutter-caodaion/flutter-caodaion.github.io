@@ -1,4 +1,7 @@
+import 'dart:convert';
+
 import 'package:calendar_view/calendar_view.dart';
+import 'package:caodaion/constants/constants.dart';
 import 'package:lunar/calendar/Lunar.dart';
 import 'package:lunar/calendar/Solar.dart';
 
@@ -160,5 +163,73 @@ class CalendarEventsConstants {
       );
     }
     return responseFirstHaflEvents;
+  }
+
+  List<CalendarEventData> humaneEvents(
+      DateTime selectedTime, List<Map<String, dynamic>> rawHumaneEvents) {
+    List<CalendarEventData> responseHumaneEvents = [];
+    for (var item in rawHumaneEvents) {
+      Map<String, dynamic> responseData = {};
+
+      if (item['eventName'] != null) {
+        responseData['title'] = item['eventName'];
+      }
+
+      if (item['data'] != null) {
+        final data = json.decode(item['data']) as Map<dynamic, dynamic>;
+
+        if (data['eventDate'] != null && data['eventMonth'] != null) {
+          int year = selectedTime.year;
+          int month = data['eventMonth'];
+          int day = data['eventDate'];
+          Lunar lunar = Lunar.fromYmd(year, month, day);
+          Solar solar = lunar.getSolar();
+          DateTime solarDateTime =
+              DateTime(solar.getYear(), solar.getMonth(), solar.getDay());
+          if (data['eventTime'] != null) {
+            final List<Map<String, dynamic>> lunarTimes =
+                TimeConstants.lunarTimes;
+            final foundTime = lunarTimes.firstWhere(
+              (lnt) => lnt['name'] == data['eventTime'],
+              orElse: () => {},
+            );
+
+            if (foundTime.isNotEmpty) {
+              final range = foundTime['range'];
+              final startTime = DateTime(
+                solar.getYear(),
+                solar.getMonth(),
+                solar.getDay(),
+                int.parse(range.split('-')[0].split(':')[0]),
+              );
+              final endTime = DateTime(
+                solar.getYear(),
+                solar.getMonth(),
+                solar.getDay(),
+                int.parse(range.split('-')[1].split(':')[0]),
+              );
+              responseData['startTime'] = startTime;
+              responseData['endTime'] = endTime;
+            }
+          }
+
+          responseData['date'] = solarDateTime;
+        }
+
+        if (responseData['title'] != null && responseData['date'] != null) {
+          DateTime date = responseData['date'];
+          responseHumaneEvents.add(
+            CalendarEventData(
+              title: "${responseData['title']}",
+              startTime: responseData['startTime'],
+              endTime: responseData['endTime'],
+              date: date,
+              event: {"raw": item, "eventGroup": "humane"},
+            ),
+          );
+        }
+      }
+    }
+    return responseHumaneEvents;
   }
 }
