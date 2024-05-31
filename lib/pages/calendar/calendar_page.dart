@@ -557,7 +557,7 @@ class _CalendarPageState extends State<CalendarPage> {
                       icon: const Icon(Icons.add),
                       itemBuilder: (BuildContext context) {
                         return [
-                          if (thanhSoList.isNotEmpty)
+                          // if (thanhSoList.isNotEmpty)
                             const PopupMenuItem(
                               value: 'subscribe',
                               child: Text('Hiện sự kiện từ Thánh Sở'),
