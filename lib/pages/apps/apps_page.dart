@@ -84,6 +84,15 @@ class _AppsPageState extends State<AppsPage> {
           'label': 'Widgets',
           'icon': const Icon(Icons.widgets),
         },
+      {
+        'name': '/ai',
+        'label': 'Gemini AI',
+        'icon': SvgPicture.asset(
+          'assets/icons/gemini_sparkle_v002_d4735304ff6292a690345.svg',
+          height: 32,
+          width: 32,
+        ),
+      },
       // {
       //   'name': '/maps',
       //   'label': 'Bản đồ',

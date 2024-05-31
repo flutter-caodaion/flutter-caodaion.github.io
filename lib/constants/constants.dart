@@ -29,6 +29,8 @@ class MapsConstants {
 class TokenConstants {
   static String selectedFontSize = 'RO4ozil6DSgF';
   static String humane = 'FVrLJEg7Hb1to';
+  static String selectedKinhListDisplayMode = 'WZx4XTK8eOYA';
+  static String genimiAPIKey = 'AIzaSyBwKa0mxRUZ0AeaJZRC2pr5tP_aZ8SxVh8';
 }
 
 class TimeConstants {

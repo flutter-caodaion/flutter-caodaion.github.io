@@ -27,6 +27,17 @@ class _FontSizeDropdownMenuState extends State<FontSizeDropdownMenu> {
     const DropdownMenuEntry(value: 22, label: '22'),
     const DropdownMenuEntry(value: 23, label: '23'),
     const DropdownMenuEntry(value: 24, label: '24'),
+    const DropdownMenuEntry(value: 25, label: '25'),
+    const DropdownMenuEntry(value: 26, label: '26'),
+    const DropdownMenuEntry(value: 27, label: '27'),
+    const DropdownMenuEntry(value: 29, label: '29'),
+    const DropdownMenuEntry(value: 30, label: '30'),
+    const DropdownMenuEntry(value: 31, label: '31'),
+    const DropdownMenuEntry(value: 32, label: '32'),
+    const DropdownMenuEntry(value: 33, label: '33'),
+    const DropdownMenuEntry(value: 34, label: '34'),
+    const DropdownMenuEntry(value: 35, label: '35'),
+    const DropdownMenuEntry(value: 36, label: '36'),
   ];
 
   @override
