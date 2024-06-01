@@ -171,7 +171,7 @@ class _AppsPageState extends State<AppsPage> {
                       : ResponsiveBreakpoints.of(context).isTablet
                           ? 4
                           : ResponsiveBreakpoints.of(context).isDesktop
-                              ? 6
+                              ? 8
                               : 1,
                   crossAxisSpacing: 8.0,
                   mainAxisSpacing: 8.0,
@@ -254,7 +254,7 @@ class _AppsPageState extends State<AppsPage> {
                       : ResponsiveBreakpoints.of(context).isTablet
                           ? 4
                           : ResponsiveBreakpoints.of(context).isDesktop
-                              ? 6
+                              ? 8
                               : 1,
                   crossAxisSpacing: 8.0,
                   mainAxisSpacing: 8.0,

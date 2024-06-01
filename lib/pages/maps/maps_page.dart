@@ -1,9 +1,12 @@
 // maps_page.dart
+import 'dart:convert';
 import 'package:caodaion/constants/constants.dart';
-import 'package:caodaion/widgets/responsive_scaffold.dart';
+import 'package:caodaion/pages/maps/service/maps_service.dart';
+import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:go_router/go_router.dart';
 import 'package:latlong2/latlong.dart';
 
@@ -15,52 +18,346 @@ class MapsPage extends StatefulWidget {
 }
 
 class _MapsPageState extends State<MapsPage> {
-  List<Marker> markers = [
+  final List<Marker> _allMarkers = [
     Marker(
       point: LatLng(
         MapsConstants.caodaionLatitute,
         MapsConstants.caodaionLongitute,
       ),
-      height: 32,
-      width: 32,
       child: SvgPicture.asset('assets/icons/caodaion-pin.svg'),
+      alignment: Alignment.topCenter,
     )
   ];
+  List<Marker> _displayMarkers = [];
+
+  LatLng _currentPosition = LatLng(
+    MapsConstants.caodaionLatitute,
+    MapsConstants.caodaionLongitute,
+  );
+  final MapController _mapController = MapController();
+  MapsService mapsService = MapsService();
+  double searchRadius = 999999999999999;
+
+  Future<List<LatLng>> fetchRoute(LatLng start, LatLng end) async {
+    final url =
+        'http://router.project-osrm.org/route/v1/driving/${start.longitude},${start.latitude};${end.longitude},${end.latitude}?geometries=geojson';
+    final response = await http.get(Uri.parse(url));
+
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+      final coords = data['routes'][0]['geometry']['coordinates'] as List;
+      return coords.map((c) => LatLng(c[1], c[0])).toList();
+    } else {
+      throw Exception('Failed to load route');
+    }
+  }
+
+  List<LatLng> routePoints = [];
+
+  Future<void> _getRoute(LatLng start, LatLng end) async {
+    final points = await fetchRoute(start, end);
+    setState(() {
+      routePoints = points;
+    });
+
+    if (points.isNotEmpty) {
+      final bounds = calculateBounds(points);
+      _mapController.fitBounds(
+        bounds,
+        options: FitBoundsOptions(padding: EdgeInsets.all(20)),
+      );
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _getCurrentLocation();
+    _initializeMarkers();
+  }
+
+  @override
+  void didUpdateWidget(covariant MapsPage oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    _getCurrentLocation();
+    _initializeMarkers();
+  }
+
+  Future<void> _getCurrentLocation() async {
+    bool serviceEnabled;
+    LocationPermission permission;
+
+    serviceEnabled = await Geolocator.isLocationServiceEnabled();
+    if (!serviceEnabled) {
+      return Future.error('Location services are disabled.');
+    }
+
+    permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.denied) {
+      permission = await Geolocator.requestPermission();
+      if (permission == LocationPermission.denied) {
+        return Future.error('Location permissions are denied');
+      }
+    }
+
+    if (permission == LocationPermission.deniedForever) {
+      return Future.error(
+          'Location permissions are permanently denied, we cannot request permissions.');
+    }
+
+    Position position = await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.high);
+
+    setState(() {
+      _currentPosition = LatLng(position.latitude, position.longitude);
+      _mapController.move(_currentPosition, 15.0);
+    });
+  }
+
+  _showMarkerDetails(element) {
+    showModalBottomSheet(
+      context: context,
+      builder: (BuildContext context) {
+        return Container(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                element['name'],
+                style: const TextStyle(
+                  fontSize: 20.0,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              if (element['address'].isNotEmpty)
+                Stack(
+                  children: [
+                    const SizedBox(height: 8.0),
+                    ListTile(
+                      leading: const Icon(Icons.location_on_outlined),
+                      title: Text(element['address']),
+                    ),
+                  ],
+                ),
+              if (element['phone'].isNotEmpty)
+                Stack(
+                  children: [
+                    const SizedBox(height: 8.0),
+                    ListTile(
+                      leading: const Icon(Icons.phone),
+                      title: Text(element['phone']),
+                    ),
+                  ],
+                ),
+              if (element['organization'].isNotEmpty)
+                Stack(
+                  children: [
+                    const SizedBox(height: 8.0),
+                    ListTile(
+                      leading: const Icon(Icons.diversity_2_rounded),
+                      title: Text(element['organization']),
+                    )
+                  ],
+                ),
+              const SizedBox(height: 8.0),
+              Row(
+                children: [
+                  if (!double.parse(element['latLng'].split(',')[0]).isNaN &&
+                      !double.parse(element['latLng'].split(',')[1]).isNaN)
+                    ElevatedButton(
+                      onPressed: () {
+                        _getRoute(
+                          _currentPosition,
+                          LatLng(
+                            double.parse(element['latLng'].split(',')[0]),
+                            double.parse(element['latLng'].split(',')[1]),
+                          ),
+                        );
+                        Navigator.of(context).pop();
+                      },
+                      child: const Row(
+                        children: [
+                          Icon(Icons.directions),
+                          Text('Chỉ đường'),
+                        ],
+                      ),
+                    ),
+                ],
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  void _initializeMarkers() async {
+    final mapResponse = await mapsService.fetchThanhSo();
+    if (mapResponse!['data'].isNotEmpty) {
+      for (var element in mapResponse['data']) {
+        if (element['key'].isNotEmpty &&
+            element['latLng'].isNotEmpty &&
+            !element['key'].contains('edit')) {
+          _allMarkers.add(
+            Marker(
+              point: LatLng(
+                double.parse(element['latLng'].split(',')[0]),
+                double.parse(element['latLng'].split(',')[1]),
+              ),
+              child: GestureDetector(
+                onTap: () => _showMarkerDetails(element),
+                child: SvgPicture.asset('assets/icons/thanhSo.svg'),
+              ),
+              alignment: Alignment.topCenter,
+            ),
+          );
+        }
+      }
+    }
+    setState(() {
+      _displayMarkers = List.from(_allMarkers);
+    });
+  }
+
+  List<Marker> _searchMarkers(LatLng location, double radius) {
+    final Distance distance = Distance();
+    return _allMarkers.where((marker) {
+      final double markerDistance = distance.as(
+        LengthUnit.Meter,
+        location,
+        marker.point,
+      );
+      return markerDistance <= radius;
+    }).toList();
+  }
+
+  void _performSearch() {
+    LatLng searchLocation = _currentPosition;
+
+    List<Marker> searchResults = _searchMarkers(searchLocation, searchRadius);
+
+    setState(() {
+      _displayMarkers = searchResults;
+    });
+  }
+
+  LatLngBounds calculateBounds(List<LatLng> points) {
+    double minLat = points.first.latitude;
+    double maxLat = points.first.latitude;
+    double minLng = points.first.longitude;
+    double maxLng = points.first.longitude;
+
+    for (var point in points) {
+      if (point.latitude < minLat) minLat = point.latitude;
+      if (point.latitude > maxLat) maxLat = point.latitude;
+      if (point.longitude < minLng) minLng = point.longitude;
+      if (point.longitude > maxLng) maxLng = point.longitude;
+    }
+
+    return LatLngBounds(LatLng(minLat, minLng), LatLng(maxLat, maxLng));
+  }
 
   @override
   Widget build(BuildContext context) {
-    return ResponsiveScaffold(
-      child: Scaffold(
-        appBar: AppBar(
-          leading: IconButton(
-            icon: const Icon(Icons.arrow_back_ios),
-            onPressed: () {
-              context.go('/');
-            },
-          ),
-          backgroundColor: ColorConstants.whiteBackdround,
+    return Scaffold(
+      appBar: AppBar(
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_ios),
+          onPressed: () {
+            context.go('/');
+          },
         ),
-        body: FlutterMap(
-          options: MapOptions(
-            initialCenter: LatLng(
-              MapsConstants.caodaionLatitute,
-              MapsConstants.caodaionLongitute,
-            ),
-            initialZoom: 18,
-          ),
+        title: Row(
           children: [
-            TileLayer(
-              urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-              userAgentPackageName: 'com.caodaion.app',
+            Icon(
+              Icons.map,
+              color: ColorConstants.mapsColor,
             ),
-            // const RichAttributionWidget(
-            //   attributions: [],
-            // ),
-            MarkerLayer(
-              markers: markers,
+            const SizedBox(
+              width: 8,
             ),
+            const Text("Bản đồ"),
           ],
         ),
+        backgroundColor: ColorConstants.whiteBackdround,
+      ),
+      body: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Row(
+              children: [
+                Expanded(
+                  child: TextField(
+                    decoration: const InputDecoration(
+                      labelText: 'Tìm theo phạm vi (mét)',
+                    ),
+                    keyboardType: TextInputType.number,
+                    onChanged: (value) {
+                      setState(() {
+                        searchRadius =
+                            double.tryParse(value) ?? 999999999999999.0;
+                      });
+                    },
+                  ),
+                ),
+                ElevatedButton(
+                  onPressed: _performSearch,
+                  child: const Text('Tìm kiếm'),
+                ),
+              ],
+            ),
+          ),
+          Expanded(
+            child: _currentPosition == null
+                ? const Center(child: CircularProgressIndicator())
+                : FlutterMap(
+                    mapController: _mapController,
+                    options: MapOptions(
+                      initialCenter: _currentPosition,
+                      initialZoom: 18,
+                    ),
+                    children: [
+                      TileLayer(
+                        urlTemplate:
+                            'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                        userAgentPackageName: 'com.caodaion.app',
+                      ),
+                      // const RichAttributionWidget(
+                      //   attributions: [],
+                      // ),
+                      MarkerLayer(
+                        markers: [
+                          Marker(
+                            point: _currentPosition,
+                            child: const Icon(Icons.arrow_downward_rounded),
+                            alignment: Alignment.topCenter,
+                          ),
+                          ..._displayMarkers
+                        ],
+                      ),
+                      PolylineLayer(
+                        polylines: [
+                          Polyline(
+                            points: routePoints,
+                            strokeWidth: 8,
+                            color: const Color(0xff0f53ff),
+                            borderColor: const Color(0xff0f28f5),
+                            borderStrokeWidth: 1,
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+          ),
+        ],
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: _getCurrentLocation,
+        tooltip: "Vị trí hiện tại",
+        child: const Icon(Icons.my_location),
       ),
     );
   }

@@ -4,6 +4,7 @@ import 'package:caodaion/widgets/responsive_scaffold.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:go_router/go_router.dart';
 import 'package:google_generative_ai/google_generative_ai.dart';
 
 class GenimiAIPage extends StatefulWidget {
@@ -61,6 +62,12 @@ class _GenimiAIPageState extends State<GenimiAIPage> {
     return ResponsiveScaffold(
       child: Scaffold(
         appBar: AppBar(
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back_ios),
+            onPressed: () {
+              context.go('/');
+            },
+          ),
           title: Row(
             children: [
               SvgPicture.asset(
@@ -72,6 +79,7 @@ class _GenimiAIPageState extends State<GenimiAIPage> {
               const Text('Genimi'),
             ],
           ),
+          backgroundColor: ColorConstants.whiteBackdround,
         ),
         body: Column(
           children: [
