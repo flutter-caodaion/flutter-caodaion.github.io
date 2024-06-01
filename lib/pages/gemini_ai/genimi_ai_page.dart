@@ -32,8 +32,7 @@ class _GenimiAIPageState extends State<GenimiAIPage> {
       final content = [Content.text(value)];
       final response = await model.generateContent(content);
       setState(() {
-        final text =
-            "${response.text}\n---\n**LƯU Ý:**\nNội dung trên chỉ mang tính chất tham khảo vì chúng mình vẫn đang trong quá trình thử nghiệm";
+        final text = "${response.text}";
         chatHistory.add({"from": 'gemini', "content": text});
         isLoading = false;
       });
@@ -88,6 +87,7 @@ class _GenimiAIPageState extends State<GenimiAIPage> {
                             child: Padding(
                               padding: const EdgeInsets.all(8.0),
                               child: Markdown(
+                                physics: const NeverScrollableScrollPhysics(),
                                 shrinkWrap: true,
                                 data: chatHistory[index]['content'] as String,
                               ),
@@ -96,6 +96,7 @@ class _GenimiAIPageState extends State<GenimiAIPage> {
                         : Padding(
                             padding: const EdgeInsets.all(8.0),
                             child: Markdown(
+                              physics: const NeverScrollableScrollPhysics(),
                               shrinkWrap: true,
                               data: chatHistory[index]['content'] as String,
                             ),
@@ -107,7 +108,16 @@ class _GenimiAIPageState extends State<GenimiAIPage> {
             if (isLoading)
               const Padding(
                 padding: EdgeInsets.all(8.0),
-                child: CircularProgressIndicator(),
+                child: Column(
+                  children: [
+                    Markdown(
+                      shrinkWrap: true,
+                      data:
+                          "**LƯU Ý:**\nNội dung trên chỉ mang tính chất tham khảo vì chúng mình vẫn đang trong quá trình thử nghiệm **Đặc biệt là những câu hỏi về Đạo bạn không nên vội tin nhé!**",
+                    ),
+                    CircularProgressIndicator(),
+                  ],
+                ),
               ),
             Padding(
               padding: const EdgeInsets.all(12.0),
@@ -115,6 +125,8 @@ class _GenimiAIPageState extends State<GenimiAIPage> {
                 color: ColorConstants.primaryBackground,
                 child: ListTile(
                   title: TextField(
+                    keyboardType: TextInputType.multiline,
+                    maxLines: null,
                     controller: controller,
                     autofocus: true,
                     decoration:
