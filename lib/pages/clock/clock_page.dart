@@ -1,17 +1,17 @@
 // clock_page.dart
-import 'package:caodaion/widgets/responsive_scaffold.dart';
+import 'package:caodaion/pages/clock/screens/home.dart';
 import 'package:flutter/material.dart';
 
-class ClockPage extends StatelessWidget {
+class ClockPage extends StatefulWidget {
   const ClockPage({super.key});
 
   @override
+  State<ClockPage> createState() => _ClockPageState();
+}
+
+class _ClockPageState extends State<ClockPage> {
+  @override
   Widget build(BuildContext context) {
-    return ResponsiveScaffold(
-      child: Scaffold(
-        appBar: AppBar(title: const Text('Clock')),
-        body: const Center(child: Text('Clock Page')),
-      ),
-    );
+    return ExampleAlarmHomeScreen();
   }
 }
