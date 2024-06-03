@@ -1,4 +1,4 @@
-// clock_page.dart
+import 'package:caodaion/constants/constants.dart';
 import 'package:caodaion/pages/clock/screens/home.dart';
 import 'package:flutter/material.dart';
 
@@ -11,7 +11,42 @@ class ClockPage extends StatefulWidget {
 
 class _ClockPageState extends State<ClockPage> {
   @override
+  void initState() {
+    super.initState();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return ExampleAlarmHomeScreen();
+    return DefaultTabController(
+      length: 2,
+      child: Scaffold(
+        appBar: AppBar(
+          bottom: TabBar(
+            tabs: const [
+              Tab(
+                text: 'Hẹn giờ',
+              ),
+              Tab(
+                text: 'Chế độ tập trung',
+              ),
+            ],
+            overlayColor: WidgetStateProperty.resolveWith<Color?>(
+              (Set<WidgetState> states) {
+                if (states.contains(WidgetState.pressed)) {
+                  return ColorConstants.primaryBackground;
+                }
+                return null;
+              },
+            ),
+          ),
+        ),
+        body: TabBarView(
+          children: [
+            ExampleAlarmHomeScreen(),
+            ExampleAlarmHomeScreen(),
+          ],
+        ),
+      ),
+    );
   }
 }

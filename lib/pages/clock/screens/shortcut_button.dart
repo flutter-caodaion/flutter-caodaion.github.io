@@ -10,7 +10,7 @@ class ExampleAlarmHomeShortcutButton extends StatefulWidget {
     super.key,
   });
 
-  final void Function() refreshAlarms;
+  final ValueChanged refreshAlarms;
 
   @override
   State<ExampleAlarmHomeShortcutButton> createState() =>
@@ -31,21 +31,21 @@ class _ExampleAlarmHomeShortcutButtonState
     }
 
     setState(() => showMenu = false);
-
+    final id = DateTime.now().millisecondsSinceEpoch % 10000;
     final alarmSettings = AlarmSettings(
-      id: DateTime.now().millisecondsSinceEpoch % 10000,
+      id: id,
       dateTime: dateTime,
-      assetAudioPath: 'assets/audio/tune.mp3',
+      assetAudioPath: 'assets/audio/one_piece.mp3',
       volume: volume,
       notificationTitle: 'Alarm example',
       notificationBody:
-          'Shortcut button alarm with delay of $delayInHours hours',
+          'Shortcut $id button alarm with delay of $delayInHours hours',
       enableNotificationOnKill: Platform.isIOS,
     );
 
     await Alarm.set(alarmSettings: alarmSettings);
 
-    widget.refreshAlarms();
+    widget.refreshAlarms(id);
   }
 
   @override

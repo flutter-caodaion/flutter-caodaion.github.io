@@ -1,6 +1,8 @@
 import 'package:caodaion/pages/apps/apps_page.dart';
 import 'package:caodaion/pages/calendar/calendar_page.dart';
 import 'package:caodaion/pages/clock/clock_page.dart';
+import 'package:caodaion/pages/clock/screens/home.dart';
+import 'package:caodaion/pages/clock/screens/ring.dart';
 import 'package:caodaion/pages/gemini_ai/genimi_ai_page.dart';
 import 'package:caodaion/pages/home/home_page.dart';
 import 'package:caodaion/pages/kinh/kinh_page.dart';
@@ -133,7 +135,15 @@ final GoRouter router = GoRouter(
     GoRoute(
       path: '/dong-ho',
       pageBuilder: (context, state) =>
-          NoTransitionPage(child: const ClockPage(), name: '/dong-ho'),
+          NoTransitionPage(child: const ExampleAlarmHomeScreen(), name: '/dong-ho'),
+    ),
+    GoRoute(
+      path: '/dong-ho/:id',
+      pageBuilder: (context, state) {
+        final id = state.pathParameters['id'] as String;
+        return NoTransitionPage(
+            child: AlarmRingScreen(id: id), name: '/dong-ho');
+      },
     ),
     GoRoute(
       path: '/maps',

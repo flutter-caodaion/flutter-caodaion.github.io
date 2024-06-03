@@ -3,10 +3,10 @@ import 'dart:async';
 import 'package:alarm/alarm.dart';
 import 'package:alarm/model/alarm_settings.dart';
 import 'package:caodaion/pages/clock/screens/edit_alarm.dart';
-import 'package:caodaion/pages/clock/screens/ring.dart';
 import 'package:caodaion/pages/clock/screens/shortcut_button.dart';
 import 'package:caodaion/pages/clock/widgets/tile.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 class ExampleAlarmHomeScreen extends StatefulWidget {
@@ -18,7 +18,6 @@ class ExampleAlarmHomeScreen extends StatefulWidget {
 
 class _ExampleAlarmHomeScreenState extends State<ExampleAlarmHomeScreen> {
   late List<AlarmSettings> alarms;
-
   static StreamSubscription<AlarmSettings>? subscription;
 
   @override
@@ -28,26 +27,38 @@ class _ExampleAlarmHomeScreenState extends State<ExampleAlarmHomeScreen> {
       checkAndroidNotificationPermission();
       checkAndroidScheduleExactAlarmPermission();
     }
-    loadAlarms();
-    subscription ??= Alarm.ringStream.stream.listen(navigateToRingScreen);
-  }
-
-  void loadAlarms() {
-    setState(() {
-      alarms = Alarm.getAlarms();
-      alarms.sort((a, b) => a.dateTime.isBefore(b.dateTime) ? 0 : 1);
+    loadAlarms(0);
+    subscription ??= Alarm.ringStream.stream.listen((alarmSettings) {
+      navigateToRingScreen(alarmSettings);
     });
   }
 
-  Future<void> navigateToRingScreen(AlarmSettings alarmSettings) async {
-    await Navigator.push(
-      context,
-      MaterialPageRoute<void>(
-        builder: (context) =>
-            ExampleAlarmRingScreen(alarmSettings: alarmSettings),
-      ),
-    );
-    loadAlarms();
+  @override
+  void didUpdateWidget(covariant ExampleAlarmHomeScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    loadAlarms(0);
+    subscription ??= Alarm.ringStream.stream.listen((alarmSettings) {
+      navigateToRingScreen(alarmSettings);
+    });
+  }
+
+  void loadAlarms(int? id) {
+    setState(() {
+      alarms = Alarm.getAlarms();
+      alarms.sort((a, b) => a.dateTime.compareTo(b.dateTime));
+      if (id != 0 && alarms.isNotEmpty) {
+        final foundActiveAlarm = alarms.firstWhere((item) => item.id == id);
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted) {
+            GoRouter.of(context).go('/dong-ho/${foundActiveAlarm.id}');
+          }
+        });
+      }
+    });
+  }
+
+  void navigateToRingScreen(AlarmSettings alarmSettings) {
+    loadAlarms(alarmSettings.id);
   }
 
   Future<void> navigateToAlarmScreen(AlarmSettings? settings) async {
@@ -65,40 +76,26 @@ class _ExampleAlarmHomeScreenState extends State<ExampleAlarmHomeScreen> {
       },
     );
 
-    if (res != null && res == true) loadAlarms();
+    if (res != null && res == true) loadAlarms(0);
   }
 
   Future<void> checkAndroidNotificationPermission() async {
     final status = await Permission.notification.status;
     if (status.isDenied) {
-      alarmPrint('Requesting notification permission...');
+      print('Requesting notification permission...');
       final res = await Permission.notification.request();
-      alarmPrint(
-        'Notification permission ${res.isGranted ? '' : 'not '}granted',
-      );
-    }
-  }
-
-  Future<void> checkAndroidExternalStoragePermission() async {
-    final status = await Permission.storage.status;
-    if (status.isDenied) {
-      alarmPrint('Requesting external storage permission...');
-      final res = await Permission.storage.request();
-      alarmPrint(
-        'External storage permission ${res.isGranted ? '' : 'not'} granted',
-      );
+      print('Notification permission ${res.isGranted ? '' : 'not '}granted');
     }
   }
 
   Future<void> checkAndroidScheduleExactAlarmPermission() async {
     final status = await Permission.scheduleExactAlarm.status;
-    alarmPrint('Schedule exact alarm permission: $status.');
+    print('Schedule exact alarm permission: $status.');
     if (status.isDenied) {
-      alarmPrint('Requesting schedule exact alarm permission...');
+      print('Requesting schedule exact alarm permission...');
       final res = await Permission.scheduleExactAlarm.request();
-      alarmPrint(
-        'Schedule exact alarm permission ${res.isGranted ? '' : 'not'} granted',
-      );
+      print(
+          'Schedule exact alarm permission ${res.isGranted ? '' : 'not '}granted');
     }
   }
 
@@ -111,7 +108,6 @@ class _ExampleAlarmHomeScreenState extends State<ExampleAlarmHomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('alarm 3.1.4')),
       body: SafeArea(
         child: alarms.isNotEmpty
             ? ListView.separated(
@@ -126,7 +122,7 @@ class _ExampleAlarmHomeScreenState extends State<ExampleAlarmHomeScreen> {
                     ).format(context),
                     onPressed: () => navigateToAlarmScreen(alarms[index]),
                     onDismissed: () {
-                      Alarm.stop(alarms[index].id).then((_) => loadAlarms());
+                      stopAlarm(alarms[index].id);
                     },
                   );
                 },
@@ -143,7 +139,11 @@ class _ExampleAlarmHomeScreenState extends State<ExampleAlarmHomeScreen> {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            ExampleAlarmHomeShortcutButton(refreshAlarms: loadAlarms),
+            ExampleAlarmHomeShortcutButton(refreshAlarms: (value) {
+              loadAlarms(
+                value,
+              );
+            }),
             FloatingActionButton(
               onPressed: () => navigateToAlarmScreen(null),
               child: const Icon(Icons.alarm_add_rounded, size: 33),
@@ -153,5 +153,9 @@ class _ExampleAlarmHomeScreenState extends State<ExampleAlarmHomeScreen> {
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
     );
+  }
+
+  void stopAlarm(int id) {
+    Alarm.stop(id).then((_) => loadAlarms(id));
   }
 }
