@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:alarm/alarm.dart';
 import 'package:alarm/model/alarm_settings.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class ExampleAlarmEditScreen extends StatefulWidget {
   const ExampleAlarmEditScreen({super.key, this.alarmSettings});
@@ -22,6 +23,10 @@ class _ExampleAlarmEditScreenState extends State<ExampleAlarmEditScreen> {
   late bool vibrate;
   late double? volume;
   late String assetAudio;
+  late String notificationTitle = '';
+  TextEditingController notificationTitleController = TextEditingController();
+  late String notificationBody = '';
+  TextEditingController notificationBodyController = TextEditingController();
 
   @override
   void initState() {
@@ -34,7 +39,7 @@ class _ExampleAlarmEditScreenState extends State<ExampleAlarmEditScreen> {
       loopAudio = true;
       vibrate = true;
       volume = null;
-      assetAudio = 'assets/audio/one_piece.mp3';
+      assetAudio = 'assets/audio/tune.mp3';
     } else {
       selectedDateTime = widget.alarmSettings!.dateTime;
       loopAudio = widget.alarmSettings!.loopAudio;
@@ -51,11 +56,11 @@ class _ExampleAlarmEditScreenState extends State<ExampleAlarmEditScreen> {
 
     switch (difference) {
       case 0:
-        return 'Today';
+        return 'Hôm nay';
       case 1:
-        return 'Tomorrow';
+        return 'Ngày mai';
       case 2:
-        return 'After tomorrow';
+        return 'Ngày mốt';
       default:
         return 'In $difference days';
     }
@@ -90,16 +95,20 @@ class _ExampleAlarmEditScreenState extends State<ExampleAlarmEditScreen> {
         : widget.alarmSettings!.id;
 
     final alarmSettings = AlarmSettings(
-      id: id,
-      dateTime: selectedDateTime,
-      loopAudio: loopAudio,
-      vibrate: vibrate,
-      volume: volume,
-      assetAudioPath: assetAudio,
-      notificationTitle: 'Alarm example',
-      notificationBody: 'Your alarm ($id) is ringing',
-      enableNotificationOnKill: Platform.isIOS,
-    );
+        id: id,
+        dateTime: selectedDateTime,
+        loopAudio: loopAudio,
+        vibrate: vibrate,
+        volume: volume,
+        assetAudioPath: assetAudio,
+        notificationTitle: notificationTitle.isNotEmpty
+            ? notificationTitle
+            : "Hẹn giờ ${selectedDateTime.hour}:${selectedDateTime.minute}",
+        notificationBody: notificationBody.isNotEmpty
+            ? notificationBody
+            : "Hẹn giờ ${selectedDateTime.hour}:${selectedDateTime.minute} Ngày ${selectedDateTime.day} tháng ${selectedDateTime.month} năm ${selectedDateTime.year}",
+        enableNotificationOnKill: Platform.isIOS,
+        fadeDuration: 5);
     return alarmSettings;
   }
 
@@ -131,7 +140,7 @@ class _ExampleAlarmEditScreenState extends State<ExampleAlarmEditScreen> {
               TextButton(
                 onPressed: () => Navigator.pop(context, false),
                 child: Text(
-                  'Cancel',
+                  'Đóng',
                   style: Theme.of(context)
                       .textTheme
                       .titleLarge!
@@ -143,12 +152,46 @@ class _ExampleAlarmEditScreenState extends State<ExampleAlarmEditScreen> {
                 child: loading
                     ? const CircularProgressIndicator()
                     : Text(
-                        'Save',
+                        'Lưu',
                         style: Theme.of(context)
                             .textTheme
                             .titleLarge!
                             .copyWith(color: Colors.blueAccent),
                       ),
+              ),
+            ],
+          ),
+          Column(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              TextField(
+                controller: notificationTitleController,
+                decoration: const InputDecoration(hintText: "Tiêu đề hẹn giờ"),
+                onChanged: (value) {
+                  setState(
+                    () {
+                      notificationTitle = value;
+                    },
+                  );
+                },
+              ),
+            ],
+          ),
+          Column(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              TextField(
+                maxLines: null,
+                keyboardType: TextInputType.multiline,
+                controller: notificationBodyController,
+                decoration: const InputDecoration(hintText: "Nội dung hẹn giờ"),
+                onChanged: (value) {
+                  setState(
+                    () {
+                      notificationBody = value;
+                    },
+                  );
+                },
               ),
             ],
           ),
@@ -177,7 +220,7 @@ class _ExampleAlarmEditScreenState extends State<ExampleAlarmEditScreen> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'Loop alarm audio',
+                'Lặp âm báo',
                 style: Theme.of(context).textTheme.titleMedium,
               ),
               Switch(
@@ -190,7 +233,7 @@ class _ExampleAlarmEditScreenState extends State<ExampleAlarmEditScreen> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'Vibrate',
+                'Rung',
                 style: Theme.of(context).textTheme.titleMedium,
               ),
               Switch(
@@ -203,16 +246,7 @@ class _ExampleAlarmEditScreenState extends State<ExampleAlarmEditScreen> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'Sound',
-                style: Theme.of(context).textTheme.titleMedium,
-              ),
-            ],
-          ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                'Custom volume',
+                'Tùy chỉnh âm lượng',
                 style: Theme.of(context).textTheme.titleMedium,
               ),
               Switch(
@@ -251,7 +285,7 @@ class _ExampleAlarmEditScreenState extends State<ExampleAlarmEditScreen> {
             TextButton(
               onPressed: deleteAlarm,
               child: Text(
-                'Delete Alarm',
+                'Xóa hẹn giờ',
                 style: Theme.of(context)
                     .textTheme
                     .titleMedium!

@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:alarm/alarm.dart';
 import 'package:alarm/model/alarm_settings.dart';
@@ -8,6 +9,7 @@ import 'package:caodaion/pages/clock/widgets/tile.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class ExampleAlarmHomeScreen extends StatefulWidget {
   const ExampleAlarmHomeScreen({super.key});
@@ -33,31 +35,27 @@ class _ExampleAlarmHomeScreenState extends State<ExampleAlarmHomeScreen> {
     });
   }
 
-  @override
-  void didUpdateWidget(covariant ExampleAlarmHomeScreen oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    loadAlarms(0);
-    subscription ??= Alarm.ringStream.stream.listen((alarmSettings) {
-      navigateToRingScreen(alarmSettings);
-    });
-  }
-
   void loadAlarms(int? id) {
     setState(() {
       alarms = Alarm.getAlarms();
       alarms.sort((a, b) => a.dateTime.compareTo(b.dateTime));
-      if (id != 0 && alarms.isNotEmpty) {
-        final foundActiveAlarm = alarms.firstWhere((item) => item.id == id);
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          if (mounted) {
-            GoRouter.of(context).go('/dong-ho/${foundActiveAlarm.id}');
-          }
-        });
-      }
+      print("Loaded alarms: $alarms");
+      storeAlarms();
     });
   }
 
+  storeAlarms() async {
+    final prefs = await SharedPreferences.getInstance();
+    prefs.setString(
+      'alarms',
+      jsonEncode(
+        alarms.toList(),
+      ),
+    );
+  }
+
   void navigateToRingScreen(AlarmSettings alarmSettings) {
+    print("Navigating to ring screen for alarm: ${alarmSettings.id}");
     loadAlarms(alarmSettings.id);
   }
 
@@ -129,7 +127,7 @@ class _ExampleAlarmHomeScreenState extends State<ExampleAlarmHomeScreen> {
               )
             : Center(
                 child: Text(
-                  'No alarms set',
+                  'Chưa có hẹn giờ nào được lưu',
                   style: Theme.of(context).textTheme.titleMedium,
                 ),
               ),
@@ -137,13 +135,13 @@ class _ExampleAlarmHomeScreenState extends State<ExampleAlarmHomeScreen> {
       floatingActionButton: Padding(
         padding: const EdgeInsets.all(10),
         child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          mainAxisAlignment: MainAxisAlignment.end,
           children: [
-            ExampleAlarmHomeShortcutButton(refreshAlarms: (value) {
-              loadAlarms(
-                value,
-              );
-            }),
+            // ExampleAlarmHomeShortcutButton(refreshAlarms: (value) {
+            //   loadAlarms(
+            //     value,
+            //   );
+            // }),
             FloatingActionButton(
               onPressed: () => navigateToAlarmScreen(null),
               child: const Icon(Icons.alarm_add_rounded, size: 33),

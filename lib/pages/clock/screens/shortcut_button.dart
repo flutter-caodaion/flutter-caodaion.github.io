@@ -35,7 +35,7 @@ class _ExampleAlarmHomeShortcutButtonState
     final alarmSettings = AlarmSettings(
       id: id,
       dateTime: dateTime,
-      assetAudioPath: 'assets/audio/one_piece.mp3',
+      assetAudioPath: 'assets/audio/tune.mp3',
       volume: volume,
       notificationTitle: 'Alarm example',
       notificationBody:

@@ -1,6 +1,7 @@
 import 'package:caodaion/constants/constants.dart';
 import 'package:caodaion/pages/clock/screens/home.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 class ClockPage extends StatefulWidget {
   const ClockPage({super.key});
@@ -21,6 +22,12 @@ class _ClockPageState extends State<ClockPage> {
       length: 2,
       child: Scaffold(
         appBar: AppBar(
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back_ios),
+            onPressed: () {
+              context.go('/');
+            },
+          ),
           bottom: TabBar(
             tabs: const [
               Tab(

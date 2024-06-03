@@ -1,13 +1,57 @@
+import 'dart:convert';
+
 import 'package:caodaion/constants/constants.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:responsive_framework/responsive_framework.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
-class ResponsiveScaffold extends StatelessWidget {
+class ResponsiveScaffold extends StatefulWidget {
   final Widget child;
 
   const ResponsiveScaffold({required this.child, super.key});
+
+  @override
+  State<ResponsiveScaffold> createState() => _ResponsiveScaffoldState();
+}
+
+class _ResponsiveScaffoldState extends State<ResponsiveScaffold> {
+  @override
+  void initState() {
+    getAlarms();
+    super.initState();
+  }
+
+  @override
+  void didUpdateWidget(covariant ResponsiveScaffold oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    getAlarms();
+  }
+
+  getAlarms() async {
+    final prefs = await SharedPreferences.getInstance();
+    final storage = prefs.getString('alarms');
+    final List<dynamic> storageAlarms = jsonDecode(storage!);
+    if (storageAlarms.isNotEmpty) {
+      final foundActiveAlarm = storageAlarms.firstWhere((item) {
+        final now = DateTime.now();
+        final itemDate = DateTime.fromMicrosecondsSinceEpoch(item['dateTime']);
+        return now.year == itemDate.year &&
+            now.month == itemDate.month &&
+            now.day == itemDate.day &&
+            now.hour == itemDate.hour &&
+            now.minute >= itemDate.minute;
+      }, orElse: () => -1);
+      if (foundActiveAlarm != -1) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted) {
+            GoRouter.of(context).go('/dong-ho/${foundActiveAlarm['id']}');
+          }
+        });
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -80,7 +124,7 @@ class ResponsiveScaffold extends StatelessWidget {
                       ),
                     ],
                   ),
-                  Expanded(child: child),
+                  Expanded(child: widget.child),
                 ],
               ),
             ),
@@ -88,7 +132,7 @@ class ResponsiveScaffold extends StatelessWidget {
         } else {
           return SafeArea(
             child: Scaffold(
-              body: child,
+              body: widget.child,
               bottomNavigationBar: Theme(
                 data: Theme.of(context).copyWith(
                   canvasColor: ColorConstants.primaryBackground,

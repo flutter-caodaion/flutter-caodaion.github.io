@@ -135,7 +135,7 @@ final GoRouter router = GoRouter(
     GoRoute(
       path: '/dong-ho',
       pageBuilder: (context, state) =>
-          NoTransitionPage(child: const ExampleAlarmHomeScreen(), name: '/dong-ho'),
+          NoTransitionPage(child: const ClockPage(), name: '/dong-ho'),
     ),
     GoRoute(
       path: '/dong-ho/:id',
