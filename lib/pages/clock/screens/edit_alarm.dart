@@ -48,7 +48,7 @@ class _ExampleAlarmEditScreenState extends State<ExampleAlarmEditScreen> {
       selectedDateTime = selectedDateTime.copyWith(second: 0, millisecond: 0);
       loopAudio = true;
       vibrate = true;
-      volume = 0.0;
+      volume = 1.0;
       assetAudio = 'assets/audio/tune.mp3';
     } else {
       if (widget.alarmSettings.runtimeType.toString() == 'AlarmSettings') {
