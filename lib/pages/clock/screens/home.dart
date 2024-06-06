@@ -20,6 +20,7 @@ class ExampleAlarmHomeScreen extends StatefulWidget {
 
 class _ExampleAlarmHomeScreenState extends State<ExampleAlarmHomeScreen> {
   late List<AlarmSettings> alarms;
+  late List loopAlarmList = [];
   static StreamSubscription<AlarmSettings>? subscription;
 
   @override
@@ -39,9 +40,108 @@ class _ExampleAlarmHomeScreenState extends State<ExampleAlarmHomeScreen> {
     setState(() {
       alarms = Alarm.getAlarms();
       alarms.sort((a, b) => a.dateTime.compareTo(b.dateTime));
-      print("Loaded alarms: $alarms");
       storeAlarms();
+      storeLoopAlarm();
     });
+  }
+
+  storeLoopAlarm() async {
+    final prefs = await SharedPreferences.getInstance();
+    final List loopAlarms = jsonDecode(prefs.getString('loopAlarms') ?? '[]');
+    setState(() {
+      loopAlarmList = loopAlarms;
+      loopAlarmList.sort((a, b) {
+        var aDateTime = DateTime.utc(
+            DateTime.now().year,
+            DateTime.now().month,
+            DateTime.now().day,
+            DateTime.parse(a['dateTime']).hour,
+            DateTime.parse(a['dateTime']).minute);
+        var bDateTime = DateTime.utc(
+            DateTime.now().year,
+            DateTime.now().month,
+            DateTime.now().day,
+            DateTime.parse(b['dateTime']).hour,
+            DateTime.parse(b['dateTime']).minute);
+        return aDateTime.compareTo(bDateTime);
+      });
+      for (var element in loopAlarmList) {
+        if (element['active'] == true) {
+          var parseDateTime = DateTime.parse(element['dateTime']);
+          var foundAlarm = alarms.firstWhere(
+            (test) =>
+                test.dateTime.hour == parseDateTime.hour &&
+                test.dateTime.minute == parseDateTime.minute,
+            orElse: () => AlarmSettings(
+              id: element['id'],
+              dateTime: parseDateTime,
+              assetAudioPath: element['assetAudioPath'],
+              notificationTitle: element['notificationTitle'],
+              notificationBody: element['notificationBody'],
+              enableNotificationOnKill: element['enableNotificationOnKill'],
+              fadeDuration: element['fadeDuration'],
+              loopAudio: element['loopAudio'],
+              vibrate: element['vibrate'],
+              volume: element['volume'],
+            ),
+          );
+          var elementWeekday = foundAlarm.dateTime.weekday;
+          var operatorWeekday = foundAlarm.dateTime.weekday;
+          while (element['selectedDays'][elementWeekday - 1] != true) {
+            if (elementWeekday == 7) {
+              elementWeekday = 1;
+            } else {
+              elementWeekday++;
+            }
+            operatorWeekday++;
+          }
+          var addedDate = foundAlarm.dateTime.add(
+              Duration(days: operatorWeekday - foundAlarm.dateTime.weekday));
+          var newAlarmSettings = AlarmSettings(
+            id: foundAlarm.id,
+            dateTime: addedDate,
+            loopAudio: foundAlarm.loopAudio,
+            vibrate: foundAlarm.vibrate,
+            volume: foundAlarm.volume,
+            assetAudioPath: foundAlarm.assetAudioPath,
+            notificationTitle: foundAlarm.notificationTitle,
+            notificationBody: foundAlarm.notificationBody,
+            enableNotificationOnKill: foundAlarm.enableNotificationOnKill,
+            fadeDuration: foundAlarm.fadeDuration,
+          );
+          Alarm.set(alarmSettings: newAlarmSettings).then(
+            (res) async {
+              if (res) {
+                setState(() {
+                  alarms = Alarm.getAlarms();
+                  alarms.sort((a, b) => a.dateTime.compareTo(b.dateTime));
+                });
+              }
+            },
+          );
+        }
+      }
+    });
+  }
+
+  toggleActiveLoopAlarm(value) async {
+    final prefs = await SharedPreferences.getInstance();
+    var indexLa =
+        loopAlarmList.indexWhere((la) => la['id'] == value['data']['id']);
+    loopAlarmList[indexLa]['active'] = !loopAlarmList[indexLa]['active'];
+    await prefs.setString('loopAlarms', jsonEncode(loopAlarmList.toList()));
+    var foundList = alarms.where((item) =>
+        item.dateTime.hour == DateTime.parse(value['data']['dateTime']).hour &&
+        item.dateTime.minute ==
+            DateTime.parse(value['data']['dateTime']).minute);
+    if (!loopAlarmList[indexLa]['active']) {
+      if (foundList.isNotEmpty) {
+        for (var element in foundList) {
+          stopAlarm(element.id);
+        }
+      }
+    }
+    storeLoopAlarm();
   }
 
   storeAlarms() async {
@@ -55,11 +155,10 @@ class _ExampleAlarmHomeScreenState extends State<ExampleAlarmHomeScreen> {
   }
 
   void navigateToRingScreen(AlarmSettings alarmSettings) {
-    print("Navigating to ring screen for alarm: ${alarmSettings.id}");
     loadAlarms(alarmSettings.id);
   }
 
-  Future<void> navigateToAlarmScreen(AlarmSettings? settings) async {
+  Future<void> navigateToAlarmScreen(settings) async {
     final res = await showModalBottomSheet<bool?>(
       context: context,
       isScrollControlled: true,
@@ -67,9 +166,13 @@ class _ExampleAlarmHomeScreenState extends State<ExampleAlarmHomeScreen> {
         borderRadius: BorderRadius.circular(10),
       ),
       builder: (context) {
+        var mapSettings = settings;
         return FractionallySizedBox(
           heightFactor: 0.75,
-          child: ExampleAlarmEditScreen(alarmSettings: settings),
+          child: ExampleAlarmEditScreen(
+            alarmSettings: mapSettings,
+            loopData: mapSettings,
+          ),
         );
       },
     );
@@ -77,23 +180,25 @@ class _ExampleAlarmHomeScreenState extends State<ExampleAlarmHomeScreen> {
     if (res != null && res == true) loadAlarms(0);
   }
 
+  removeLoopAlarm(id) async {
+    final prefs = await SharedPreferences.getInstance();
+    final List loopAlarms = jsonDecode(prefs.getString('loopAlarms') ?? '[]');
+    loopAlarms.removeWhere((la) => la['id'] == id);
+    await prefs.setString('loopAlarms', jsonEncode(loopAlarms.toList()));
+    storeLoopAlarm();
+  }
+
   Future<void> checkAndroidNotificationPermission() async {
     final status = await Permission.notification.status;
     if (status.isDenied) {
-      print('Requesting notification permission...');
       final res = await Permission.notification.request();
-      print('Notification permission ${res.isGranted ? '' : 'not '}granted');
     }
   }
 
   Future<void> checkAndroidScheduleExactAlarmPermission() async {
     final status = await Permission.scheduleExactAlarm.status;
-    print('Schedule exact alarm permission: $status.');
     if (status.isDenied) {
-      print('Requesting schedule exact alarm permission...');
       final res = await Permission.scheduleExactAlarm.request();
-      print(
-          'Schedule exact alarm permission ${res.isGranted ? '' : 'not '}granted');
     }
   }
 
@@ -107,30 +212,109 @@ class _ExampleAlarmHomeScreenState extends State<ExampleAlarmHomeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: SafeArea(
-        child: alarms.isNotEmpty
-            ? ListView.separated(
-                itemCount: alarms.length,
-                separatorBuilder: (context, index) => const Divider(height: 1),
-                itemBuilder: (context, index) {
-                  return ExampleAlarmTile(
-                    key: Key(alarms[index].id.toString()),
-                    title: TimeOfDay(
-                      hour: alarms[index].dateTime.hour,
-                      minute: alarms[index].dateTime.minute,
-                    ).format(context),
-                    onPressed: () => navigateToAlarmScreen(alarms[index]),
-                    onDismissed: () {
-                      stopAlarm(alarms[index].id);
-                    },
-                  );
-                },
-              )
-            : Center(
-                child: Text(
-                  'Chưa có hẹn giờ nào được lưu',
-                  style: Theme.of(context).textTheme.titleMedium,
-                ),
+        child: CustomScrollView(
+          slivers: [
+            SliverList(
+              delegate: SliverChildListDelegate(
+                [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Text(
+                          "Danh sách hẹn giờ",
+                          style: Theme.of(context).textTheme.titleLarge,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const Divider(),
+                  loopAlarmList.isNotEmpty
+                      ? ListView.separated(
+                          physics: const NeverScrollableScrollPhysics(),
+                          itemCount: loopAlarmList.length,
+                          separatorBuilder: (context, index) => const Padding(
+                            padding: EdgeInsets.symmetric(horizontal: 8.0),
+                            child: Divider(height: 1),
+                          ),
+                          itemBuilder: (context, index) {
+                            var data = loopAlarmList[index];
+                            var dateTime = DateTime.parse(data['dateTime']);
+                            return data.isNotEmpty
+                                ? ExampleAlarmTile(
+                                    key: Key(data['id'].toString()),
+                                    dateTime: dateTime,
+                                    loopData: {
+                                      "selectedDays": data['selectedDays'],
+                                      "active": data['active'] ?? false,
+                                      "data": data,
+                                    },
+                                    onPressed: () =>
+                                        navigateToAlarmScreen(data),
+                                    onDismissed: () {
+                                      removeLoopAlarm(data['id']);
+                                    },
+                                    toggleActiveLoopAlarm: (value) {
+                                      toggleActiveLoopAlarm(value);
+                                    },
+                                  )
+                                : const SizedBox();
+                          },
+                          shrinkWrap: true,
+                        )
+                      : Center(
+                          child: Text(
+                            'Chưa có hẹn giờ nào được lưu',
+                            style: Theme.of(context).textTheme.titleMedium,
+                          ),
+                        ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Text(
+                          "Hẹn giờ sắp tới",
+                          style: Theme.of(context).textTheme.titleLarge,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const Divider(),
+                  alarms.isNotEmpty
+                      ? ListView.separated(
+                          physics: const NeverScrollableScrollPhysics(),
+                          itemCount: alarms.length,
+                          separatorBuilder: (context, index) => const Padding(
+                            padding: EdgeInsets.symmetric(horizontal: 8.0),
+                            child: Divider(height: 1),
+                          ),
+                          itemBuilder: (context, index) {
+                            return ExampleAlarmTile(
+                              key: Key(alarms[index].id.toString()),
+                              loopData: {},
+                              dateTime: alarms[index].dateTime,
+                              onPressed: () =>
+                                  navigateToAlarmScreen(alarms[index]),
+                              onDismissed: () {
+                                stopAlarm(alarms[index].id);
+                              },
+                            );
+                          },
+                          shrinkWrap: true,
+                        )
+                      : Center(
+                          child: Text(
+                            'Hẹn giờ sắp tới chưa có',
+                            style: Theme.of(context).textTheme.titleMedium,
+                          ),
+                        ),
+                ],
               ),
+            ),
+          ],
+        ),
       ),
       floatingActionButton: Padding(
         padding: const EdgeInsets.all(10),

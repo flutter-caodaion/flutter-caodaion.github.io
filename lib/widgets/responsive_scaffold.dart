@@ -32,7 +32,7 @@ class _ResponsiveScaffoldState extends State<ResponsiveScaffold> {
   getAlarms() async {
     final prefs = await SharedPreferences.getInstance();
     final storage = prefs.getString('alarms');
-    final List<dynamic> storageAlarms = jsonDecode(storage!);
+    final List<dynamic> storageAlarms = jsonDecode(storage ?? '[]');
     if (storageAlarms.isNotEmpty) {
       final foundActiveAlarm = storageAlarms.firstWhere((item) {
         final now = DateTime.now();

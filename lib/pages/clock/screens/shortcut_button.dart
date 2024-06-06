@@ -27,7 +27,7 @@ class _ExampleAlarmHomeShortcutButtonState
 
     if (delayInHours != 0) {
       dateTime = dateTime.copyWith(second: 0, millisecond: 0);
-      volume = 0.5;
+      volume = 1;
     }
 
     setState(() => showMenu = false);
@@ -36,7 +36,7 @@ class _ExampleAlarmHomeShortcutButtonState
       id: id,
       dateTime: dateTime,
       assetAudioPath: 'assets/audio/tune.mp3',
-      volume: volume,
+      volume: 1,
       notificationTitle: 'Alarm example',
       notificationBody:
           'Shortcut $id button alarm with delay of $delayInHours hours',

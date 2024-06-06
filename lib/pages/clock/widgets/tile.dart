@@ -1,22 +1,31 @@
 import 'package:flutter/material.dart';
 
-class ExampleAlarmTile extends StatelessWidget {
+class ExampleAlarmTile extends StatefulWidget {
   const ExampleAlarmTile({
-    required this.title,
+    required this.dateTime,
     required this.onPressed,
     super.key,
     this.onDismissed,
+    this.toggleActiveLoopAlarm,
+    required this.loopData,
   });
 
-  final String title;
+  final DateTime dateTime;
+  final Map loopData;
   final void Function() onPressed;
   final void Function()? onDismissed;
+  final ValueChanged? toggleActiveLoopAlarm;
 
+  @override
+  State<ExampleAlarmTile> createState() => _ExampleAlarmTileState();
+}
+
+class _ExampleAlarmTileState extends State<ExampleAlarmTile> {
   @override
   Widget build(BuildContext context) {
     return Dismissible(
-      key: key!,
-      direction: onDismissed != null
+      key: widget.key!,
+      direction: widget.onDismissed != null
           ? DismissDirection.endToStart
           : DismissDirection.none,
       background: Container(
@@ -29,23 +38,81 @@ class ExampleAlarmTile extends StatelessWidget {
           color: Colors.white,
         ),
       ),
-      onDismissed: (_) => onDismissed?.call(),
+      onDismissed: (_) => widget.onDismissed?.call(),
       child: RawMaterialButton(
-        onPressed: onPressed,
+        onPressed: widget.onPressed,
         child: Container(
-          height: 100,
-          padding: const EdgeInsets.all(35),
+          padding: const EdgeInsets.all(20),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                title,
-                style: const TextStyle(
-                  fontSize: 28,
-                  fontWeight: FontWeight.w500,
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    widget.loopData.isNotEmpty
+                        ? Builder(
+                            builder: (context) {
+                              var data = widget.loopData['data'];
+                              return Text(data!['notificationTitle']);
+                            },
+                          )
+                        : const SizedBox(),
+                    Text(
+                      TimeOfDay(
+                        hour: widget.dateTime.hour,
+                        minute: widget.dateTime.minute,
+                      ).format(context),
+                      style: const TextStyle(
+                        fontSize: 28,
+                        fontWeight: FontWeight.w500,
+                      ),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    widget.loopData.isNotEmpty
+                        ? Builder(
+                            builder: (BuildContext context) {
+                              List<String> days = [
+                                'T2',
+                                'T3',
+                                'T4',
+                                'T5',
+                                'T6',
+                                'T7',
+                                'CN'
+                              ];
+                              if (widget.loopData['selectedDays'] is List) {
+                                return Wrap(
+                                  children: widget.loopData['selectedDays']
+                                      .asMap()
+                                      .entries
+                                      .map<Widget>(
+                                    (entry) {
+                                      int index = entry.key;
+                                      return Text(
+                                        entry.value ? "${days[index]} " : '',
+                                      );
+                                    },
+                                  ).toList(),
+                                );
+                              } else {
+                                return const Text("No selected days");
+                              }
+                            },
+                          )
+                        : Text(
+                            "${widget.dateTime.day}/${widget.dateTime.month}/${widget.dateTime.year}",
+                          ),
+                  ],
                 ),
               ),
-              const Icon(Icons.keyboard_arrow_right_rounded, size: 35),
+              widget.loopData.isNotEmpty
+                  ? Switch(
+                      value: widget.loopData['active'] ?? false,
+                      onChanged: (value) =>
+                          widget.toggleActiveLoopAlarm!(widget.loopData),
+                    )
+                  : const Icon(Icons.keyboard_arrow_right_rounded, size: 35),
             ],
           ),
         ),

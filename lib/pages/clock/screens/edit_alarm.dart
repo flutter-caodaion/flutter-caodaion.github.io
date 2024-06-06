@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:alarm/alarm.dart';
@@ -6,9 +7,11 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class ExampleAlarmEditScreen extends StatefulWidget {
-  const ExampleAlarmEditScreen({super.key, this.alarmSettings});
+  const ExampleAlarmEditScreen(
+      {super.key, required this.alarmSettings, required this.loopData});
 
-  final AlarmSettings? alarmSettings;
+  final alarmSettings;
+  final loopData;
 
   @override
   State<ExampleAlarmEditScreen> createState() => _ExampleAlarmEditScreenState();
@@ -18,35 +21,88 @@ class _ExampleAlarmEditScreenState extends State<ExampleAlarmEditScreen> {
   bool loading = false;
 
   late bool creating;
-  late DateTime selectedDateTime;
-  late bool loopAudio;
-  late bool vibrate;
-  late double? volume;
+  late DateTime selectedDateTime = DateTime.now();
+  late bool loopAudio = true;
+  late bool vibrate = true;
+  late double volume = 1;
   late String assetAudio;
   late String notificationTitle = '';
   TextEditingController notificationTitleController = TextEditingController();
   late String notificationBody = '';
   TextEditingController notificationBodyController = TextEditingController();
 
+  late List<bool> selectedDays = List.filled(7, false);
+  late bool active = true;
+  var alarmSettings;
+  var loopData;
+
   @override
   void initState() {
     super.initState();
     creating = widget.alarmSettings == null;
 
+    selectedDays = List.filled(7, false);
+    active = true;
     if (creating) {
       selectedDateTime = DateTime.now().add(const Duration(minutes: 1));
       selectedDateTime = selectedDateTime.copyWith(second: 0, millisecond: 0);
       loopAudio = true;
       vibrate = true;
-      volume = null;
+      volume = 0.0;
       assetAudio = 'assets/audio/tune.mp3';
     } else {
-      selectedDateTime = widget.alarmSettings!.dateTime;
-      loopAudio = widget.alarmSettings!.loopAudio;
-      vibrate = widget.alarmSettings!.vibrate;
-      volume = widget.alarmSettings!.volume;
-      assetAudio = widget.alarmSettings!.assetAudioPath;
+      if (widget.alarmSettings.runtimeType.toString() == 'AlarmSettings') {
+        Map<dynamic, dynamic> widgetAlarmSettings = {
+          'id': widget.alarmSettings.id,
+          'dateTime': widget.alarmSettings.dateTime.toString(),
+          'loopAudio': widget.alarmSettings.loopAudio,
+          'vibrate': widget.alarmSettings.vibrate,
+          'volume': widget.alarmSettings.volume ?? 1.0,
+          'assetAudioPath': widget.alarmSettings.assetAudioPath,
+          'notificationTitle': widget.alarmSettings.notificationTitle,
+          'notificationBody': widget.alarmSettings.notificationBody,
+          'enableNotificationOnKill':
+              widget.alarmSettings.enableNotificationOnKill,
+          'fadeDuration': widget.alarmSettings.fadeDuration,
+          'selectedDays': List.filled(7, false),
+          'active': true,
+        };
+        alarmSettings = widgetAlarmSettings;
+        loopData = widgetAlarmSettings;
+      } else {
+        alarmSettings = widget.alarmSettings;
+        loopData = widget.alarmSettings;
+      }
+      selectedDateTime = alarmSettings['dateTime'] is String
+          ? DateTime.parse(alarmSettings['dateTime'])
+          : alarmSettings['dateTime'];
+      loopAudio = alarmSettings['loopAudio'];
+      vibrate = alarmSettings['vibrate'];
+      volume = alarmSettings['volume'] ?? 1.0;
+      assetAudio = alarmSettings['assetAudioPath'];
+      for (var i = 0; i < loopData['selectedDays'].length; i++) {
+        selectedDays[i] = loopData['selectedDays'][i].toString() == 'true';
+      }
+      active = loopData['active'];
     }
+  }
+
+  Widget buildDaySelector() {
+    List<String> days = ['T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'CN'];
+    return Wrap(
+      alignment: WrapAlignment.center,
+      children: List.generate(7, (index) {
+        return ChoiceChip(
+          label: Text(days[index]),
+          selected: selectedDays[index],
+          onSelected: (selected) {
+            setState(() {
+              selectedDays[index] = selected;
+            });
+          },
+        );
+      }),
+    );
   }
 
   String getDay() {
@@ -70,6 +126,8 @@ class _ExampleAlarmEditScreenState extends State<ExampleAlarmEditScreen> {
     final res = await showTimePicker(
       initialTime: TimeOfDay.fromDateTime(selectedDateTime),
       context: context,
+      cancelText: "Đóng",
+      helpText: "Chọn thời gian",
     );
 
     if (res != null) {
@@ -92,14 +150,16 @@ class _ExampleAlarmEditScreenState extends State<ExampleAlarmEditScreen> {
   AlarmSettings buildAlarmSettings() {
     final id = creating
         ? DateTime.now().millisecondsSinceEpoch % 10000 + 1
-        : widget.alarmSettings!.id;
+        : widget.alarmSettings.runtimeType.toString() == 'AlarmSettings'
+            ? widget.alarmSettings.id
+            : widget.alarmSettings['id'];
 
     final alarmSettings = AlarmSettings(
         id: id,
         dateTime: selectedDateTime,
         loopAudio: loopAudio,
         vibrate: vibrate,
-        volume: volume,
+        volume: volume ?? 1.0,
         assetAudioPath: assetAudio,
         notificationTitle: notificationTitle.isNotEmpty
             ? notificationTitle
@@ -115,15 +175,59 @@ class _ExampleAlarmEditScreenState extends State<ExampleAlarmEditScreen> {
   void saveAlarm() {
     if (loading) return;
     setState(() => loading = true);
-    Alarm.set(alarmSettings: buildAlarmSettings()).then((res) {
-      if (res) Navigator.pop(context, true);
+    final buildedAlarmSettings = buildAlarmSettings();
+    Alarm.set(alarmSettings: buildAlarmSettings()).then((res) async {
+      if (res) {
+        Navigator.pop(context, true);
+        if (selectedDays.where((sd) => sd == true).isNotEmpty) {
+          Map<dynamic, dynamic> alarmSettings = {
+            'id': buildedAlarmSettings.id,
+            'dateTime': buildedAlarmSettings.dateTime.toString(),
+            'loopAudio': buildedAlarmSettings.loopAudio,
+            'vibrate': buildedAlarmSettings.vibrate,
+            'volume': buildedAlarmSettings.volume,
+            'assetAudioPath': buildedAlarmSettings.assetAudioPath,
+            'notificationTitle': buildedAlarmSettings.notificationTitle,
+            'notificationBody': buildedAlarmSettings.notificationBody,
+            'enableNotificationOnKill':
+                buildedAlarmSettings.enableNotificationOnKill,
+            'fadeDuration': buildedAlarmSettings.fadeDuration,
+            'selectedDays': selectedDays,
+            'active': true,
+          };
+          final prefs = await SharedPreferences.getInstance();
+          final List loopAlarms =
+              jsonDecode(prefs.getString('loopAlarms') ?? '[]');
+          var foundLoopAlarms = loopAlarms.firstWhere(
+            (la) => la['id'] == alarmSettings['id'],
+            orElse: () => {},
+          );
+          if (foundLoopAlarms.isEmpty) {
+            loopAlarms.add(alarmSettings);
+          } else {
+            foundLoopAlarms = alarmSettings;
+            var indexLa =
+                loopAlarms.indexWhere((la) => la['id'] == alarmSettings['id']);
+            loopAlarms[indexLa] = foundLoopAlarms;
+          }
+          await prefs.setString('loopAlarms', jsonEncode(loopAlarms.toList()));
+        }
+      }
       setState(() => loading = false);
     });
   }
 
   void deleteAlarm() {
-    Alarm.stop(widget.alarmSettings!.id).then((res) {
-      if (res) Navigator.pop(context, true);
+    Alarm.stop(alarmSettings['id']).then((res) async {
+      if (res) {
+        Navigator.pop(context, true);
+        final prefs = await SharedPreferences.getInstance();
+        final List loopAlarms =
+            jsonDecode(prefs.getString('loopAlarms') ?? '[]');
+        loopAlarms.removeWhere((la) => la['id'] == alarmSettings['id']);
+        await prefs.setString('loopAlarms', jsonEncode(loopAlarms.toList()));
+      }
+      ;
     });
   }
 
@@ -216,6 +320,7 @@ class _ExampleAlarmEditScreenState extends State<ExampleAlarmEditScreen> {
               ),
             ),
           ),
+          buildDaySelector(),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -250,28 +355,27 @@ class _ExampleAlarmEditScreenState extends State<ExampleAlarmEditScreen> {
                 style: Theme.of(context).textTheme.titleMedium,
               ),
               Switch(
-                value: volume != null,
-                onChanged: (value) =>
-                    setState(() => volume = value ? 0.5 : null),
+                value: volume != 1.0,
+                onChanged: (value) => setState(() => volume = value ? 1.0 : 0),
               ),
             ],
           ),
           SizedBox(
             height: 30,
-            child: volume != null
+            child: volume != 1.0
                 ? Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Icon(
-                        volume! > 0.7
+                        volume > 0.7
                             ? Icons.volume_up_rounded
-                            : volume! > 0.1
+                            : volume > 0.1
                                 ? Icons.volume_down_rounded
                                 : Icons.volume_mute_rounded,
                       ),
                       Expanded(
                         child: Slider(
-                          value: volume!,
+                          value: volume,
                           onChanged: (value) {
                             setState(() => volume = value);
                           },
