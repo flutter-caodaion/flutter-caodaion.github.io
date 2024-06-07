@@ -48,7 +48,7 @@ class _ExampleAlarmEditScreenState extends State<ExampleAlarmEditScreen> {
       selectedDateTime = selectedDateTime.copyWith(second: 0, millisecond: 0);
       loopAudio = true;
       vibrate = true;
-      volume = 0.0;
+      volume = 1.0;
       assetAudio = 'assets/audio/tune.mp3';
     } else {
       if (widget.alarmSettings.runtimeType.toString() == 'AlarmSettings') {
@@ -163,55 +163,74 @@ class _ExampleAlarmEditScreenState extends State<ExampleAlarmEditScreen> {
         assetAudioPath: assetAudio,
         notificationTitle: notificationTitle.isNotEmpty
             ? notificationTitle
-            : "Hẹn giờ ${selectedDateTime.hour}:${selectedDateTime.minute}",
+            : "Hẹn giờ ${TimeOfDay(hour: selectedDateTime.hour, minute: selectedDateTime.minute).format(context)}",
         notificationBody: notificationBody.isNotEmpty
             ? notificationBody
-            : "Hẹn giờ ${selectedDateTime.hour}:${selectedDateTime.minute} Ngày ${selectedDateTime.day} tháng ${selectedDateTime.month} năm ${selectedDateTime.year}",
+            : "Hẹn giờ ${TimeOfDay(hour: selectedDateTime.hour, minute: selectedDateTime.minute).format(context)} Ngày ${selectedDateTime.day} tháng ${selectedDateTime.month} năm ${selectedDateTime.year}",
         enableNotificationOnKill: Platform.isIOS,
         fadeDuration: 5);
     return alarmSettings;
   }
 
-  void saveAlarm() {
+  Future<void> saveAlarm() async {
     if (loading) return;
     setState(() => loading = true);
+    if (selectedDays.where((sd) => sd == true).isNotEmpty) {
+      var elementWeekday = selectedDateTime.weekday;
+      var operatorWeekday = selectedDateTime.weekday;
+      if (selectedDateTime.day > DateTime.now().day) {
+        while (selectedDays[elementWeekday - 1] != true ||
+            operatorWeekday - selectedDateTime.weekday <= 0) {
+          if (elementWeekday == 7) {
+            elementWeekday = 1;
+          } else {
+            elementWeekday++;
+          }
+          operatorWeekday++;
+        }
+        if (operatorWeekday - selectedDateTime.weekday > 0 &&
+            selectedDateTime.second < DateTime.now().second) {
+          selectedDateTime = selectedDateTime
+              .add(Duration(days: operatorWeekday - selectedDateTime.weekday));
+        }
+      }
+    }
     final buildedAlarmSettings = buildAlarmSettings();
-    Alarm.set(alarmSettings: buildAlarmSettings()).then((res) async {
+    if (selectedDays.where((sd) => sd == true).isNotEmpty) {
+      Map<dynamic, dynamic> alarmSettings = {
+        'id': buildedAlarmSettings.id,
+        'dateTime': buildedAlarmSettings.dateTime.toString(),
+        'loopAudio': buildedAlarmSettings.loopAudio,
+        'vibrate': buildedAlarmSettings.vibrate,
+        'volume': buildedAlarmSettings.volume,
+        'assetAudioPath': buildedAlarmSettings.assetAudioPath,
+        'notificationTitle': buildedAlarmSettings.notificationTitle,
+        'notificationBody': buildedAlarmSettings.notificationBody,
+        'enableNotificationOnKill':
+            buildedAlarmSettings.enableNotificationOnKill,
+        'fadeDuration': buildedAlarmSettings.fadeDuration,
+        'selectedDays': selectedDays,
+        'active': true,
+      };
+      final prefs = await SharedPreferences.getInstance();
+      final List loopAlarms = jsonDecode(prefs.getString('loopAlarms') ?? '[]');
+      var foundLoopAlarms = loopAlarms.firstWhere(
+        (la) => la['id'] == alarmSettings['id'],
+        orElse: () => {},
+      );
+      if (foundLoopAlarms.isEmpty) {
+        loopAlarms.add(alarmSettings);
+      } else {
+        foundLoopAlarms = alarmSettings;
+        var indexLa =
+            loopAlarms.indexWhere((la) => la['id'] == alarmSettings['id']);
+        loopAlarms[indexLa] = foundLoopAlarms;
+      }
+      await prefs.setString('loopAlarms', jsonEncode(loopAlarms.toList()));
+    }
+    Alarm.set(alarmSettings: buildAlarmSettings()).then((res) {
       if (res) {
         Navigator.pop(context, true);
-        if (selectedDays.where((sd) => sd == true).isNotEmpty) {
-          Map<dynamic, dynamic> alarmSettings = {
-            'id': buildedAlarmSettings.id,
-            'dateTime': buildedAlarmSettings.dateTime.toString(),
-            'loopAudio': buildedAlarmSettings.loopAudio,
-            'vibrate': buildedAlarmSettings.vibrate,
-            'volume': buildedAlarmSettings.volume,
-            'assetAudioPath': buildedAlarmSettings.assetAudioPath,
-            'notificationTitle': buildedAlarmSettings.notificationTitle,
-            'notificationBody': buildedAlarmSettings.notificationBody,
-            'enableNotificationOnKill':
-                buildedAlarmSettings.enableNotificationOnKill,
-            'fadeDuration': buildedAlarmSettings.fadeDuration,
-            'selectedDays': selectedDays,
-            'active': true,
-          };
-          final prefs = await SharedPreferences.getInstance();
-          final List loopAlarms =
-              jsonDecode(prefs.getString('loopAlarms') ?? '[]');
-          var foundLoopAlarms = loopAlarms.firstWhere(
-            (la) => la['id'] == alarmSettings['id'],
-            orElse: () => {},
-          );
-          if (foundLoopAlarms.isEmpty) {
-            loopAlarms.add(alarmSettings);
-          } else {
-            foundLoopAlarms = alarmSettings;
-            var indexLa =
-                loopAlarms.indexWhere((la) => la['id'] == alarmSettings['id']);
-            loopAlarms[indexLa] = foundLoopAlarms;
-          }
-          await prefs.setString('loopAlarms', jsonEncode(loopAlarms.toList()));
-        }
       }
       setState(() => loading = false);
     });
