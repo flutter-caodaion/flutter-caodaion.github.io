@@ -3,6 +3,7 @@ import 'dart:convert';
 
 import 'package:alarm/alarm.dart';
 import 'package:alarm/model/alarm_settings.dart';
+import 'package:calendar_view/calendar_view.dart';
 import 'package:caodaion/pages/clock/screens/edit_alarm.dart';
 import 'package:caodaion/pages/clock/screens/shortcut_button.dart';
 import 'package:caodaion/pages/clock/widgets/tile.dart';
@@ -52,26 +53,26 @@ class _ExampleAlarmHomeScreenState extends State<ExampleAlarmHomeScreen> {
       loopAlarmList = loopAlarms;
       loopAlarmList.sort((a, b) {
         var aDateTime = DateTime.utc(
-            DateTime.now().year,
-            DateTime.now().month,
-            DateTime.now().day,
-            DateTime.parse(a['dateTime']).hour,
-            DateTime.parse(a['dateTime']).minute);
+          DateTime.now().year,
+          DateTime.now().month,
+          DateTime.now().day,
+          DateTime.parse(a['dateTime']).hour,
+          DateTime.parse(a['dateTime']).minute,
+        );
         var bDateTime = DateTime.utc(
-            DateTime.now().year,
-            DateTime.now().month,
-            DateTime.now().day,
-            DateTime.parse(b['dateTime']).hour,
-            DateTime.parse(b['dateTime']).minute);
+          DateTime.now().year,
+          DateTime.now().month,
+          DateTime.now().day,
+          DateTime.parse(b['dateTime']).hour,
+          DateTime.parse(b['dateTime']).minute,
+        );
         return aDateTime.compareTo(bDateTime);
       });
       for (var element in loopAlarmList) {
         if (element['active'] == true) {
           var parseDateTime = DateTime.parse(element['dateTime']);
           var foundAlarm = alarms.firstWhere(
-            (test) =>
-                test.dateTime.hour == parseDateTime.hour &&
-                test.dateTime.minute == parseDateTime.minute,
+            (test) => test.dateTime == parseDateTime,
             orElse: () => AlarmSettings(
               id: element['id'],
               dateTime: parseDateTime,
@@ -87,38 +88,44 @@ class _ExampleAlarmHomeScreenState extends State<ExampleAlarmHomeScreen> {
           );
           var elementWeekday = foundAlarm.dateTime.weekday;
           var operatorWeekday = foundAlarm.dateTime.weekday;
-          while (element['selectedDays'][elementWeekday - 1] != true) {
-            if (elementWeekday == 7) {
-              elementWeekday = 1;
-            } else {
-              elementWeekday++;
-            }
-            operatorWeekday++;
-          }
-          var addedDate = foundAlarm.dateTime.add(
-              Duration(days: operatorWeekday - foundAlarm.dateTime.weekday));
-          var newAlarmSettings = AlarmSettings(
-            id: foundAlarm.id,
-            dateTime: addedDate,
-            loopAudio: foundAlarm.loopAudio,
-            vibrate: foundAlarm.vibrate,
-            volume: foundAlarm.volume,
-            assetAudioPath: foundAlarm.assetAudioPath,
-            notificationTitle: foundAlarm.notificationTitle,
-            notificationBody: foundAlarm.notificationBody,
-            enableNotificationOnKill: foundAlarm.enableNotificationOnKill,
-            fadeDuration: foundAlarm.fadeDuration,
-          );
-          Alarm.set(alarmSettings: newAlarmSettings).then(
-            (res) async {
-              if (res) {
-                setState(() {
-                  alarms = Alarm.getAlarms();
-                  alarms.sort((a, b) => a.dateTime.compareTo(b.dateTime));
-                });
+          if (foundAlarm.dateTime.compareTo(DateTime.now()) == -1) {
+            while (element['selectedDays'][elementWeekday - 1] != true ||
+                operatorWeekday - foundAlarm.dateTime.weekday <= 0) {
+              if (elementWeekday == 7) {
+                elementWeekday = 1;
+              } else {
+                elementWeekday++;
               }
-            },
-          );
+              operatorWeekday++;
+            }
+          }
+          if (operatorWeekday - foundAlarm.dateTime.weekday > 0 &&
+              foundAlarm.dateTime.second < DateTime.now().second) {
+            var addedDate = foundAlarm.dateTime.add(
+                Duration(days: operatorWeekday - foundAlarm.dateTime.weekday));
+            var newAlarmSettings = AlarmSettings(
+              id: foundAlarm.id,
+              dateTime: addedDate,
+              loopAudio: foundAlarm.loopAudio,
+              vibrate: foundAlarm.vibrate,
+              volume: foundAlarm.volume,
+              assetAudioPath: foundAlarm.assetAudioPath,
+              notificationTitle: foundAlarm.notificationTitle,
+              notificationBody: foundAlarm.notificationBody,
+              enableNotificationOnKill: foundAlarm.enableNotificationOnKill,
+              fadeDuration: foundAlarm.fadeDuration,
+            );
+            Alarm.set(alarmSettings: newAlarmSettings).then(
+              (res) async {
+                if (res) {
+                  setState(() {
+                    alarms = Alarm.getAlarms();
+                    alarms.sort((a, b) => a.dateTime.compareTo(b.dateTime));
+                  });
+                }
+              },
+            );
+          }
         }
       }
     });
