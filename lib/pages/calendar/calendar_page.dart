@@ -558,10 +558,10 @@ class _CalendarPageState extends State<CalendarPage> {
                       itemBuilder: (BuildContext context) {
                         return [
                           // if (thanhSoList.isNotEmpty)
-                            const PopupMenuItem(
-                              value: 'subscribe',
-                              child: Text('Hiện sự kiện từ Thánh Sở'),
-                            ),
+                          const PopupMenuItem(
+                            value: 'subscribe',
+                            child: Text('Hiện sự kiện từ Thánh Sở'),
+                          ),
                           // const PopupMenuItem(
                           //   value: 'subscribe',
                           //   child: Text('Đăng ký hiển thị lịch lên CaoDaiON'),

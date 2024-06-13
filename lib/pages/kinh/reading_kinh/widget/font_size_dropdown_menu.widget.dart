@@ -61,7 +61,6 @@ class _FontSizeDropdownMenuState extends State<FontSizeDropdownMenu> {
   @override
   Widget build(BuildContext context) {
     return DropdownMenu(
-      label: const Text('Cỡ chữ'),
       initialSelection: selectedFontSize,
       dropdownMenuEntries: fontSizeRange,
       onSelected: (value) {

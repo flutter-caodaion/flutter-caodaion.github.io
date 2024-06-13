@@ -87,6 +87,12 @@ class CalendarEventsConstants {
       "tuThoi": true
     },
     {
+      "key": "le-ky-niem-duc-giao-tong-nguyen-ngoc-tuong-tich-diet",
+      "title": "LỄ KỶ NIỆM ĐỨC GIÁO TÔNG NGUYỄN NGỌC TƯƠNG TỊCH DIỆT",
+      "lunar": "yearly-05-15",
+      "tuThoi": true
+    },
+    {
       "key": "dai-le-ky-niem-sinh-nhut-duc-giao-tong-nguyen-ngoc-tuong",
       "title": "ĐẠI LỄ KỶ NIỆM SINH NHỰT ĐỨC GIÁO TÔNG NGUYỄN NGỌC TƯƠNG",
       "lunar": "yearly-05-26",

@@ -332,7 +332,10 @@ class _MapsPageState extends State<MapsPage> {
                         markers: [
                           Marker(
                             point: _currentPosition,
-                            child: const Icon(Icons.arrow_downward_rounded),
+                            child: Icon(
+                              Icons.arrow_downward_rounded,
+                              color: ColorConstants.mapsColor,
+                            ),
                             alignment: Alignment.topCenter,
                           ),
                           ..._displayMarkers
