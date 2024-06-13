@@ -88,7 +88,11 @@ class _ExampleAlarmHomeScreenState extends State<ExampleAlarmHomeScreen> {
           );
           var elementWeekday = foundAlarm.dateTime.weekday;
           var operatorWeekday = foundAlarm.dateTime.weekday;
-          if (foundAlarm.dateTime.compareTo(DateTime.now()) == -1) {
+          final nowDate = DateTime.now();
+          if (foundAlarm.dateTime.compareTo(DateTime.now()) == -1 ||
+              (nowDate.year != foundAlarm.dateTime.year &&
+                  nowDate.month != foundAlarm.dateTime.month &&
+                  nowDate.day != foundAlarm.dateTime.day)) {
             while (element['selectedDays'][elementWeekday - 1] != true ||
                 operatorWeekday - foundAlarm.dateTime.weekday <= 0) {
               if (elementWeekday == 7) {
@@ -97,21 +101,6 @@ class _ExampleAlarmHomeScreenState extends State<ExampleAlarmHomeScreen> {
                 elementWeekday++;
               }
               operatorWeekday++;
-            }
-          } else {
-            final nowDate = DateTime.now();
-            if (nowDate.year != foundAlarm.dateTime.year &&
-                nowDate.month != foundAlarm.dateTime.month &&
-                nowDate.day != foundAlarm.dateTime.day) {
-              while (element['selectedDays'][elementWeekday - 1] != true ||
-                  operatorWeekday - foundAlarm.dateTime.weekday <= 0) {
-                if (elementWeekday == 7) {
-                  elementWeekday = 1;
-                } else {
-                  elementWeekday++;
-                }
-                operatorWeekday++;
-              }
             }
           }
           if (foundAlarm.dateTime.second != DateTime.now().second) {
@@ -287,47 +276,6 @@ class _ExampleAlarmHomeScreenState extends State<ExampleAlarmHomeScreen> {
                       : Center(
                           child: Text(
                             'Chưa có hẹn giờ nào được lưu',
-                            style: Theme.of(context).textTheme.titleMedium,
-                          ),
-                        ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Text(
-                          "Hẹn giờ sắp tới",
-                          style: Theme.of(context).textTheme.titleLarge,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const Divider(),
-                  alarms.isNotEmpty
-                      ? ListView.separated(
-                          physics: const NeverScrollableScrollPhysics(),
-                          itemCount: alarms.length,
-                          separatorBuilder: (context, index) => const Padding(
-                            padding: EdgeInsets.symmetric(horizontal: 8.0),
-                            child: Divider(height: 1),
-                          ),
-                          itemBuilder: (context, index) {
-                            return ExampleAlarmTile(
-                              key: Key(alarms[index].id.toString()),
-                              loopData: {},
-                              dateTime: alarms[index].dateTime,
-                              onPressed: () =>
-                                  navigateToAlarmScreen(alarms[index]),
-                              onDismissed: () {
-                                stopAlarm(alarms[index].id);
-                              },
-                            );
-                          },
-                          shrinkWrap: true,
-                        )
-                      : Center(
-                          child: Text(
-                            'Hẹn giờ sắp tới chưa có',
                             style: Theme.of(context).textTheme.titleMedium,
                           ),
                         ),

@@ -1,3 +1,5 @@
+import 'package:alarm/alarm.dart';
+import 'package:alarm/model/alarm_settings.dart';
 import 'package:flutter/material.dart';
 
 class ExampleAlarmTile extends StatefulWidget {
@@ -21,6 +23,45 @@ class ExampleAlarmTile extends StatefulWidget {
 }
 
 class _ExampleAlarmTileState extends State<ExampleAlarmTile> {
+  late List<AlarmSettings> alarms;
+  late DateTime nextAlarm = DateTime.now();
+
+  @override
+  void initState() {
+    loadAlarms(0);
+    super.initState();
+  }
+
+  @override
+  void didUpdateWidget(covariant ExampleAlarmTile oldWidget) {
+    loadAlarms(0);
+    super.didUpdateWidget(oldWidget);
+  }
+
+  void loadAlarms(int? id) {
+    var elementWeekday = widget.dateTime.weekday;
+    var operatorWeekday = widget.dateTime.weekday;
+    setState(() {
+      final nowDate = DateTime.now();
+      if (widget.dateTime.compareTo(DateTime.now()) == -1 ||
+          (nowDate.year != widget.dateTime.year &&
+              nowDate.month != widget.dateTime.month &&
+              nowDate.day != widget.dateTime.day)) {
+        while (widget.loopData['selectedDays'][elementWeekday - 1] != true ||
+            operatorWeekday - widget.dateTime.weekday <= 0) {
+          if (elementWeekday == 7) {
+            elementWeekday = 1;
+          } else {
+            elementWeekday++;
+          }
+          operatorWeekday++;
+        }
+      }
+      nextAlarm = widget.dateTime
+          .add(Duration(days: operatorWeekday - widget.dateTime.weekday));
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Dismissible(
@@ -54,7 +95,21 @@ class _ExampleAlarmTileState extends State<ExampleAlarmTile> {
                         ? Builder(
                             builder: (context) {
                               var data = widget.loopData['data'];
-                              return Text(data!['notificationTitle']);
+                              return Wrap(
+                                alignment: WrapAlignment.spaceBetween,
+                                children: [
+                                  Text(data!['notificationTitle']),
+                                  Wrap(
+                                    children: [
+                                      const Icon(Icons.navigate_next_rounded),
+                                      Text("${TimeOfDay(
+                                        hour: nextAlarm.hour,
+                                        minute: nextAlarm.minute,
+                                      ).format(context)} ${nextAlarm.day}/${nextAlarm.month}/${nextAlarm.year}"),
+                                    ],
+                                  ),
+                                ],
+                              );
                             },
                           )
                         : const SizedBox(),
