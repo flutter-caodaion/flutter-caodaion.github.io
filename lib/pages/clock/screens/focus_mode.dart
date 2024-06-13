@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
@@ -19,10 +20,13 @@ class _FocusModeState extends State<FocusMode> {
   TextEditingController breakDurationController = TextEditingController();
   int focusMins = 1; // default 30
   int breakMins = 1; // default 5
-  double volume = 0.3; // default 1.0
-  bool isRunning = false; // default 1.0
+  int remainingTime = 0;
+  double volume = 1; // default 1.0
+  bool isRunning = false;
+  bool isFocusMode = true;
   late List<AlarmSettings> alarms;
   late dynamic focusNext = null;
+  Timer? timer;
 
   @override
   void initState() {
@@ -57,8 +61,6 @@ class _FocusModeState extends State<FocusMode> {
     }
   }
 
-  onUpdateSettingValue() {}
-
   loadInitValue() {
     focusDurationController.text = focusMins.toString();
     breakDurationController.text = breakMins.toString();
@@ -76,7 +78,7 @@ class _FocusModeState extends State<FocusMode> {
       assetAudioPath: 'assets/audio/tune.mp3',
       notificationTitle: AlarmConstants.breakModeAlarmMessage,
       notificationBody:
-          "Chế độ tập trung đã kết thúc, bắt đầu xả nghỉ trong vòng $breakMins",
+          "Chế độ tập trung đã kết thúc, bắt đầu xả nghỉ trong vòng $breakMins phút",
       enableNotificationOnKill: Platform.isIOS,
       fadeDuration: 5,
     );
@@ -87,15 +89,33 @@ class _FocusModeState extends State<FocusMode> {
         if (res) {
           await prefs.setString('focusNext', jsonEncode(alarmSettings));
           setState(() {
+            remainingTime = 0;
+            if (focusNext != null) {
+              remainingTime =
+                  DateTime.fromMicrosecondsSinceEpoch(focusNext['dateTime'])
+                      .difference(DateTime.now())
+                      .inSeconds;
+            }
+            _startTimer();
             isRunning = true;
+            isFocusMode = false;
           });
         }
+      });
+    } else {
+      setState(() {
+        remainingTime =
+            DateTime.fromMicrosecondsSinceEpoch(focusNext['dateTime'])
+                .difference(DateTime.now())
+                .inSeconds;
+        _startTimer();
+        isRunning = true;
+        isFocusMode = false;
       });
     }
   }
 
   _onStartBreak() async {
-    print("START BREAK");
     final prefs = await SharedPreferences.getInstance();
     final alarmDateTime = DateTime.now().add(Duration(minutes: breakMins));
     final alarmSettings = AlarmSettings(
@@ -106,7 +126,7 @@ class _FocusModeState extends State<FocusMode> {
       volume: volume,
       assetAudioPath: 'assets/audio/tune.mp3',
       notificationTitle: AlarmConstants.focusModeAlarmMessage,
-      notificationBody: "Bắt đầu tập trung trong vòng $focusMins",
+      notificationBody: "Bắt đầu tập trung trong vòng $focusMins phút",
       enableNotificationOnKill: Platform.isIOS,
       fadeDuration: 5,
     );
@@ -117,9 +137,28 @@ class _FocusModeState extends State<FocusMode> {
         if (res) {
           await prefs.setString('focusNext', jsonEncode(alarmSettings));
           setState(() {
+            remainingTime = 0;
+            if (focusNext != null) {
+              remainingTime =
+                  DateTime.fromMicrosecondsSinceEpoch(focusNext['dateTime'])
+                      .difference(DateTime.now())
+                      .inSeconds;
+            }
+            _startTimer();
             isRunning = true;
+            isFocusMode = true;
           });
         }
+      });
+    } else {
+      setState(() {
+        remainingTime =
+            DateTime.fromMicrosecondsSinceEpoch(focusNext['dateTime'])
+                .difference(DateTime.now())
+                .inSeconds;
+        _startTimer();
+        isRunning = true;
+        isFocusMode = true;
       });
     }
   }
@@ -131,10 +170,41 @@ class _FocusModeState extends State<FocusMode> {
       Alarm.stop(focusNext['id']).then((res) async {
         await prefs.remove('focusNext');
         setState(() {
+          remainingTime = 0;
+          timer?.cancel();
           isRunning = false;
+          isFocusMode = false;
         });
       });
     }
+  }
+
+  void _startTimer() {
+    setState(() {
+      isRunning = true;
+      if (remainingTime <= 0) {
+        remainingTime = (!isFocusMode ? focusMins : breakMins) * 60;
+      }
+    });
+
+    timer?.cancel();
+    timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      setState(() {
+        if (remainingTime > 0) {
+          remainingTime--;
+        } else {
+          timer.cancel();
+          isRunning = false;
+          remainingTime = (!isFocusMode ? focusMins : breakMins) * 60;
+        }
+      });
+    });
+  }
+
+  @override
+  void dispose() {
+    timer?.cancel();
+    super.dispose();
   }
 
   @override
@@ -146,52 +216,56 @@ class _FocusModeState extends State<FocusMode> {
             SliverList(
               delegate: SliverChildListDelegate(
                 [
-                  Card(
-                    color: ColorConstants.primaryBackground,
-                    child: ListTile(
-                      title: TextFormField(
-                        controller: focusDurationController,
-                        textAlign: TextAlign.center,
-                        keyboardType: TextInputType.number,
-                        decoration: const InputDecoration(
-                          hintText: "Tập trung trong (phút)",
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Card(
+                      color: ColorConstants.primaryBackground,
+                      child: ListTile(
+                        title: TextFormField(
+                          controller: focusDurationController,
+                          textAlign: TextAlign.center,
+                          keyboardType: TextInputType.number,
+                          decoration: const InputDecoration(
+                            hintText: "Tập trung trong (phút)",
+                          ),
+                          onChanged: (value) {
+                            setState(() {
+                              if (value.isNotEmpty) {
+                                focusMins = int.parse(value);
+                              }
+                            });
+                          },
                         ),
-                        onChanged: (value) {
-                          setState(() {
-                            if (value.isNotEmpty) {
-                              focusMins = int.parse(value);
-                            }
-                            onUpdateSettingValue();
-                          });
-                        },
+                        leading: const Icon(Icons.adjust_rounded),
+                        trailing: const Text("phút"),
                       ),
-                      leading: const Icon(Icons.adjust_rounded),
-                      trailing: const Text("phút"),
                     ),
                   ),
-                  Card(
-                    color: ColorConstants.primaryBackground,
-                    child: ListTile(
-                      title: TextFormField(
-                        controller: breakDurationController,
-                        textAlign: TextAlign.center,
-                        keyboardType: TextInputType.number,
-                        decoration: const InputDecoration(
-                          hintText: "Giải lao trong (phút)",
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Card(
+                      color: ColorConstants.primaryBackground,
+                      child: ListTile(
+                        title: TextFormField(
+                          controller: breakDurationController,
+                          textAlign: TextAlign.center,
+                          keyboardType: TextInputType.number,
+                          decoration: const InputDecoration(
+                            hintText: "Giải lao trong (phút)",
+                          ),
+                          onChanged: (value) {
+                            setState(() {
+                              if (value.isNotEmpty) {
+                                breakMins = int.parse(value);
+                              } else {
+                                breakMins = 0;
+                              }
+                            });
+                          },
                         ),
-                        onChanged: (value) {
-                          setState(() {
-                            if (value.isNotEmpty) {
-                              breakMins = int.parse(value);
-                            } else {
-                              breakMins = 0;
-                            }
-                            onUpdateSettingValue();
-                          });
-                        },
+                        leading: const Icon(Icons.coffee_rounded),
+                        trailing: const Text("phút"),
                       ),
-                      leading: const Icon(Icons.coffee_rounded),
-                      trailing: const Text("phút"),
                     ),
                   ),
                   Wrap(
@@ -233,6 +307,45 @@ class _FocusModeState extends State<FocusMode> {
                         ),
                       ),
                     ],
+                  ),
+                ],
+              ),
+            ),
+            SliverList(
+              delegate: SliverChildListDelegate(
+                [
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Text(
+                      !isFocusMode ? 'Chế độ tập trung' : 'Xả nghỉ',
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: TweenAnimationBuilder<double>(
+                      tween: Tween<double>(
+                        begin: 0,
+                        end: remainingTime > 0
+                            ? (remainingTime /
+                                (!isFocusMode
+                                    ? focusMins * 60
+                                    : breakMins * 60))
+                            : 0,
+                      ),
+                      duration: const Duration(seconds: 1),
+                      builder: (context, value, child) {
+                        return LinearProgressIndicator(
+                          value: value,
+                          minHeight: 32,
+                          valueColor: AlwaysStoppedAnimation<Color>(
+                            ColorConstants.clockColor,
+                          ),
+                          backgroundColor: ColorConstants.primaryBackground,
+                          borderRadius: BorderRadius.circular(20),
+                        );
+                      },
+                    ),
                   ),
                 ],
               ),
