@@ -19,10 +19,10 @@ class FocusMode extends StatefulWidget {
 class _FocusModeState extends State<FocusMode> {
   TextEditingController focusDurationController = TextEditingController();
   TextEditingController breakDurationController = TextEditingController();
-  int focusMins = 1; // default 30
-  int breakMins = 1; // default 5
+  int focusMins = AlarmConstants.defaultFocusMins; // default 30
+  int breakMins = AlarmConstants.defaultBreakMins; // default 5
   int remainingTime = 0;
-  double volume = 1; // default 1.0
+  double volume = 1.0; // default 1.0
   bool isRunning = false;
   bool isFocusMode = true;
   late List<AlarmSettings> alarms;
@@ -41,6 +41,14 @@ class _FocusModeState extends State<FocusMode> {
     super.didUpdateWidget(oldWidget);
     loadInitValue();
     loadNextFocus();
+  }
+
+  updateFocusSetting() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setInt('focusMins', focusMins);
+    await prefs.setInt('breakMins', breakMins);
+    focusDurationController.text = focusMins.toString();
+    breakDurationController.text = breakMins.toString();
   }
 
   loadNextFocus() async {
@@ -62,24 +70,43 @@ class _FocusModeState extends State<FocusMode> {
     }
   }
 
-  loadInitValue() {
-    focusDurationController.text = focusMins.toString();
-    breakDurationController.text = breakMins.toString();
+  loadInitValue() async {
+    final prefs = await SharedPreferences.getInstance();
+    var sharedfocusMins = prefs.getInt('focusMins');
+    var sharedbreakMins = prefs.getInt('breakMins');
+    if (sharedfocusMins != null) {
+      setState(() {
+        focusMins = sharedfocusMins;
+        focusDurationController.text = focusMins.toString();
+      });
+    } else {
+      focusDurationController.text = focusMins.toString();
+    }
+    if (sharedbreakMins != null) {
+      setState(() {
+        breakMins = sharedbreakMins;
+        breakDurationController.text = breakMins.toString();
+      });
+    } else {
+      breakDurationController.text = breakMins.toString();
+    }
   }
 
   void _onStartFocus() async {
     final prefs = await SharedPreferences.getInstance();
-    final alarmDateTime = DateTime.now().add(Duration(minutes: focusMins));
+    final alarmDateTime = DateTime.now().add(Duration(
+        minutes: focusMins != 0 ? focusMins : AlarmConstants.defaultFocusMins));
     final alarmSettings = AlarmSettings(
       id: DateTime.now().millisecondsSinceEpoch % 10000 + 1,
       dateTime: alarmDateTime,
       loopAudio: true,
       vibrate: true,
       volume: volume,
-      assetAudioPath: 'assets/audio/bell-sound-193696.mp3',
+      assetAudioPath:
+          'assets/audio/mixkit-uplifting-bells-notification-938.wav',
       notificationTitle: AlarmConstants.breakModeAlarmMessage,
       notificationBody:
-          "Chế độ tập trung đã kết thúc, bắt đầu xả nghỉ trong vòng $breakMins phút",
+          "Chế độ tập trung đã kết thúc, bắt đầu xả nghỉ trong vòng ${breakMins != 0 ? breakMins : AlarmConstants.defaultBreakMins} phút",
       enableNotificationOnKill: Platform.isIOS,
       fadeDuration: 5,
     );
@@ -118,16 +145,18 @@ class _FocusModeState extends State<FocusMode> {
 
   _onStartBreak() async {
     final prefs = await SharedPreferences.getInstance();
-    final alarmDateTime = DateTime.now().add(Duration(minutes: breakMins));
+    final alarmDateTime = DateTime.now().add(Duration(
+        minutes: breakMins != 0 ? breakMins : AlarmConstants.defaultBreakMins));
     final alarmSettings = AlarmSettings(
       id: DateTime.now().millisecondsSinceEpoch % 10000 + 1,
       dateTime: alarmDateTime,
       loopAudio: true,
       vibrate: true,
       volume: volume,
-      assetAudioPath: 'assets/audio/bell-chord1-83260.mp3',
+      assetAudioPath: 'assets/audio/mixkit-happy-bells-notification-937.wav',
       notificationTitle: AlarmConstants.focusModeAlarmMessage,
-      notificationBody: "Bắt đầu tập trung trong vòng $focusMins phút",
+      notificationBody:
+          "Bắt đầu tập trung trong vòng ${focusMins != 0 ? focusMins : AlarmConstants.defaultFocusMins} phút",
       enableNotificationOnKill: Platform.isIOS,
       fadeDuration: 5,
     );
@@ -196,10 +225,20 @@ class _FocusModeState extends State<FocusMode> {
         } else {
           timer.cancel();
           isRunning = false;
-          remainingTime = (!isFocusMode ? focusMins : breakMins) * 60;
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (mounted) {
+              GoRouter.of(context).go('/');
+            }
+          });
         }
       });
     });
+  }
+
+  String formatTime(int seconds) {
+    int minutes = seconds ~/ 60;
+    int secs = seconds % 60;
+    return '$minutes:${secs.toString().padLeft(2, '0')}';
   }
 
   @override
@@ -223,6 +262,7 @@ class _FocusModeState extends State<FocusMode> {
                       color: ColorConstants.primaryBackground,
                       child: ListTile(
                         title: TextFormField(
+                          enabled: !isRunning,
                           controller: focusDurationController,
                           textAlign: TextAlign.center,
                           keyboardType: TextInputType.number,
@@ -233,11 +273,21 @@ class _FocusModeState extends State<FocusMode> {
                             setState(() {
                               if (value.isNotEmpty) {
                                 focusMins = int.parse(value);
+                              } else {
+                                focusMins = 0;
                               }
+                              updateFocusSetting();
                             });
                           },
                         ),
-                        leading: const Icon(Icons.adjust_rounded),
+                        leading: IconButton(
+                            onPressed: () => {
+                                  setState(() {
+                                    focusMins = AlarmConstants.defaultFocusMins;
+                                    updateFocusSetting();
+                                  })
+                                },
+                            icon: const Icon(Icons.adjust_rounded)),
                         trailing: const Text("phút"),
                       ),
                     ),
@@ -248,6 +298,7 @@ class _FocusModeState extends State<FocusMode> {
                       color: ColorConstants.primaryBackground,
                       child: ListTile(
                         title: TextFormField(
+                          enabled: !isRunning,
                           controller: breakDurationController,
                           textAlign: TextAlign.center,
                           keyboardType: TextInputType.number,
@@ -261,10 +312,18 @@ class _FocusModeState extends State<FocusMode> {
                               } else {
                                 breakMins = 0;
                               }
+                              updateFocusSetting();
                             });
                           },
                         ),
-                        leading: const Icon(Icons.coffee_rounded),
+                        leading: IconButton(
+                            onPressed: () => {
+                                  setState(() {
+                                    breakMins = AlarmConstants.defaultBreakMins;
+                                    updateFocusSetting();
+                                  })
+                                },
+                            icon: const Icon(Icons.coffee_rounded)),
                         trailing: const Text("phút"),
                       ),
                     ),
@@ -315,11 +374,19 @@ class _FocusModeState extends State<FocusMode> {
             SliverList(
               delegate: SliverChildListDelegate(
                 [
+                  Icon(
+                    !isFocusMode ? Icons.adjust_rounded : Icons.coffee,
+                    size: 50,
+                    color: !isFocusMode
+                        ? ColorConstants.clockColor
+                        : ColorConstants.primaryIndicatorBackground,
+                  ),
                   Padding(
                     padding: const EdgeInsets.all(8.0),
                     child: Text(
                       !isFocusMode ? 'Chế độ tập trung' : 'Xả nghỉ',
                       textAlign: TextAlign.center,
+                      style: const TextStyle(fontSize: 30),
                     ),
                   ),
                   Padding(
@@ -347,6 +414,11 @@ class _FocusModeState extends State<FocusMode> {
                         );
                       },
                     ),
+                  ),
+                  Text(
+                    'Còn lại: ${formatTime(remainingTime)}',
+                    style: const TextStyle(fontSize: 24),
+                    textAlign: TextAlign.center,
                   ),
                 ],
               ),

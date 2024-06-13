@@ -49,7 +49,7 @@ class _ExampleAlarmEditScreenState extends State<ExampleAlarmEditScreen> {
       loopAudio = true;
       vibrate = true;
       volume = 0.3; // TODO:
-      assetAudio = 'assets/audio/bell-sound-193696.mp3';
+      assetAudio = 'assets/audio/mixkit-uplifting-bells-notification-938.wav';
     } else {
       if (widget.alarmSettings.runtimeType.toString() == 'AlarmSettings') {
         Map<dynamic, dynamic> widgetAlarmSettings = {

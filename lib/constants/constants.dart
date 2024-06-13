@@ -89,4 +89,23 @@ class TimeConstants {
 class AlarmConstants {
   static String focusModeAlarmMessage = "Bắt đầu tập trung";
   static String breakModeAlarmMessage = "Xả nghỉ";
+  static int defaultFocusMins = 30;
+  static int defaultBreakMins = 5;
+  static List defaultLoopAlarms = [
+    {
+      "id": 9691,
+      "dateTime": "2024-06-13 21:00:00.000",
+      "loopAudio": true,
+      "vibrate": true,
+      "volume": 1.0,
+      "assetAudioPath":
+          "assets/audio/mixkit-uplifting-bells-notification-938.wav",
+      "notificationTitle": "Đi ngủ",
+      "notificationBody": "Đến giờ ngủ rồi",
+      "enableNotificationOnKill": false,
+      "fadeDuration": 5.0,
+      "selectedDays": [true, true, true, true, true, true, true],
+      "active": true
+    }
+  ];
 }

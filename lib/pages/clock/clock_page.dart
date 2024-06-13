@@ -14,10 +14,14 @@ class ClockPage extends StatefulWidget {
   State<ClockPage> createState() => _ClockPageState();
 }
 
-class _ClockPageState extends State<ClockPage> {
+class _ClockPageState extends State<ClockPage> with SingleTickerProviderStateMixin {
+  late TabController _tabController = TabController(length: 2, vsync: this);
+
   @override
   void initState() {
     super.initState();
+    // Initialize the TabController with the number of tabs
+    _tabController = TabController(length: 2, vsync: this);
     loadNextFocus();
   }
 
@@ -26,47 +30,52 @@ class _ClockPageState extends State<ClockPage> {
     var sharedFocusNext = jsonDecode(prefs.getString('focusNext') ?? "null");
 
     if (sharedFocusNext != null) {
-      
+      _tabController.animateTo(1);
     }
   }
 
   @override
+  void dispose() {
+    _tabController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return DefaultTabController(
-      length: 2,
-      child: Scaffold(
-        appBar: AppBar(
-          leading: IconButton(
-            icon: const Icon(Icons.arrow_back_ios),
-            onPressed: () {
-              context.go('/');
+    return Scaffold(
+      appBar: AppBar(
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_ios),
+          onPressed: () {
+            context.go('/');
+          },
+        ),
+        bottom: TabBar(
+          controller: _tabController, // Use the TabController here
+          tabs: const [
+            Tab(
+              text: 'Hẹn giờ',
+            ),
+            Tab(
+              text: 'Chế độ tập trung',
+            ),
+          ],
+          overlayColor: WidgetStateProperty.resolveWith<Color?>(
+            (Set<WidgetState> states) {
+              if (states.contains(WidgetState.pressed)) {
+                return ColorConstants.primaryBackground;
+              }
+              return null;
             },
           ),
-          bottom: TabBar(
-            tabs: const [
-              Tab(
-                text: 'Hẹn giờ',
-              ),
-              Tab(
-                text: 'Chế độ tập trung',
-              ),
-            ],
-            overlayColor: WidgetStateProperty.resolveWith<Color?>(
-              (Set<WidgetState> states) {
-                if (states.contains(WidgetState.pressed)) {
-                  return ColorConstants.primaryBackground;
-                }
-                return null;
-              },
-            ),
-          ),
         ),
-        body: const TabBarView(
-          children: [
-            ExampleAlarmHomeScreen(),
-            FocusMode(),
-          ],
-        ),
+      ),
+      body: TabBarView(
+        controller: _tabController, // Use the TabController here
+        children: const [
+          ExampleAlarmHomeScreen(),
+          FocusMode(),
+        ],
       ),
     );
   }
