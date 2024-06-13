@@ -58,8 +58,9 @@ class _ResponsiveScaffoldState extends State<ResponsiveScaffold> {
     final prefs = await SharedPreferences.getInstance();
     final focusNext = jsonDecode(prefs.getString('focusNext') ?? 'null');
     final now = DateTime.now();
-    final itemDate = DateTime.fromMicrosecondsSinceEpoch(focusNext['dateTime']);
     if (focusNext != null) {
+      final itemDate =
+          DateTime.fromMicrosecondsSinceEpoch(focusNext['dateTime']);
       final foundActiveAlarm = now.year == itemDate.year &&
           now.month == itemDate.month &&
           now.day == itemDate.day &&

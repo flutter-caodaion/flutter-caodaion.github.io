@@ -85,3 +85,8 @@ class TimeConstants {
     },
   ];
 }
+
+class AlarmConstants {
+  static String focusModeAlarmMessage = "Bắt đầu tập trung";
+  static String breakModeAlarmMessage = "Xả nghỉ";
+}

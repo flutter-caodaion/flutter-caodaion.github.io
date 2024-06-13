@@ -3,12 +3,9 @@ import 'dart:convert';
 
 import 'package:alarm/alarm.dart';
 import 'package:alarm/model/alarm_settings.dart';
-import 'package:calendar_view/calendar_view.dart';
 import 'package:caodaion/pages/clock/screens/edit_alarm.dart';
-import 'package:caodaion/pages/clock/screens/shortcut_button.dart';
 import 'package:caodaion/pages/clock/widgets/tile.dart';
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -201,14 +198,14 @@ class _ExampleAlarmHomeScreenState extends State<ExampleAlarmHomeScreen> {
   Future<void> checkAndroidNotificationPermission() async {
     final status = await Permission.notification.status;
     if (status.isDenied) {
-      final res = await Permission.notification.request();
+      await Permission.notification.request();
     }
   }
 
   Future<void> checkAndroidScheduleExactAlarmPermission() async {
     final status = await Permission.scheduleExactAlarm.status;
     if (status.isDenied) {
-      final res = await Permission.scheduleExactAlarm.request();
+      await Permission.scheduleExactAlarm.request();
     }
   }
 

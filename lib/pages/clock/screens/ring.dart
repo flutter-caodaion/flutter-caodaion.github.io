@@ -69,8 +69,9 @@ class _AlarmRingScreenState extends State<AlarmRingScreen> {
     final prefs = await SharedPreferences.getInstance();
     final focusNext = jsonDecode(prefs.getString('focusNext') ?? 'null');
     final now = DateTime.now();
-    final itemDate = DateTime.fromMicrosecondsSinceEpoch(focusNext['dateTime']);
     if (focusNext != null) {
+      final itemDate =
+          DateTime.fromMicrosecondsSinceEpoch(focusNext['dateTime']);
       final dateTime =
           DateTime.fromMicrosecondsSinceEpoch(focusNext['dateTime']);
       final foundActiveAlarm = now.year == itemDate.year &&
