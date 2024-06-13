@@ -159,7 +159,7 @@ class _ExampleAlarmEditScreenState extends State<ExampleAlarmEditScreen> {
         dateTime: selectedDateTime,
         loopAudio: loopAudio,
         vibrate: vibrate,
-        volume: volume ?? 1.0,
+        volume: volume,
         assetAudioPath: assetAudio,
         notificationTitle: notificationTitle.isNotEmpty
             ? notificationTitle
@@ -246,7 +246,6 @@ class _ExampleAlarmEditScreenState extends State<ExampleAlarmEditScreen> {
         loopAlarms.removeWhere((la) => la['id'] == alarmSettings['id']);
         await prefs.setString('loopAlarms', jsonEncode(loopAlarms.toList()));
       }
-      ;
     });
   }
 

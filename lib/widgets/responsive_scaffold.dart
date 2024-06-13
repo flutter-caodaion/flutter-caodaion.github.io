@@ -51,6 +51,28 @@ class _ResponsiveScaffoldState extends State<ResponsiveScaffold> {
         });
       }
     }
+    loadNextFocus();
+  }
+
+  loadNextFocus() async {
+    final prefs = await SharedPreferences.getInstance();
+    final focusNext = jsonDecode(prefs.getString('focusNext') ?? 'null');
+    final now = DateTime.now();
+    final itemDate = DateTime.fromMicrosecondsSinceEpoch(focusNext['dateTime']);
+    if (focusNext != null) {
+      final foundActiveAlarm = now.year == itemDate.year &&
+          now.month == itemDate.month &&
+          now.day == itemDate.day &&
+          now.hour == itemDate.hour &&
+          now.minute >= itemDate.minute;
+      if (foundActiveAlarm == true) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted) {
+            GoRouter.of(context).go('/dong-ho/${focusNext['id']}');
+          }
+        });
+      }
+    }
   }
 
   @override

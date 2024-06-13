@@ -59,7 +59,43 @@ class _AlarmRingScreenState extends State<AlarmRingScreen> {
             enableNotificationOnKill: Platform.isIOS,
             fadeDuration: 5,
           );
-          print(alarmSettings);
+        });
+      }
+    }
+    loadNextFocus();
+  }
+
+  loadNextFocus() async {
+    final prefs = await SharedPreferences.getInstance();
+    final focusNext = jsonDecode(prefs.getString('focusNext') ?? 'null');
+    final now = DateTime.now();
+    final itemDate = DateTime.fromMicrosecondsSinceEpoch(focusNext['dateTime']);
+    if (focusNext != null) {
+      final dateTime =
+          DateTime.fromMicrosecondsSinceEpoch(focusNext['dateTime']);
+      final foundActiveAlarm = now.year == itemDate.year &&
+          now.month == itemDate.month &&
+          now.day == itemDate.day &&
+          now.hour == itemDate.hour &&
+          now.minute >= itemDate.minute;
+      if (foundActiveAlarm == true) {
+        setState(() {
+          alarmSettings = AlarmSettings(
+            id: int.parse(widget.id),
+            dateTime: dateTime,
+            loopAudio: focusNext['loopAudio'],
+            vibrate: focusNext['vibrate'],
+            volume: focusNext['volume'],
+            assetAudioPath: focusNext['assetAudioPath'],
+            notificationTitle: focusNext['notificationTitle'].isNotEmpty
+                ? focusNext['notificationTitle']
+                : "Hẹn giờ ${dateTime.hour}:${dateTime.minute}",
+            notificationBody: focusNext['notificationBody'].isNotEmpty
+                ? focusNext['notificationBody']
+                : "Hẹn giờ ${dateTime.hour}:${dateTime.minute} Ngày ${dateTime.day} tháng ${dateTime.month} năm ${dateTime.year}",
+            enableNotificationOnKill: Platform.isIOS,
+            fadeDuration: 5,
+          );
         });
       }
     }
@@ -72,16 +108,20 @@ class _AlarmRingScreenState extends State<AlarmRingScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
-            Text(
-              alarmSettings.notificationTitle,
-              style: const TextStyle(
-                fontSize: 30
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Text(
+                alarmSettings.notificationTitle,
+                textAlign: TextAlign.center,
+                style: const TextStyle(fontSize: 30),
               ),
             ),
-            Text(
-              alarmSettings.notificationBody,
-              style: const TextStyle(
-                fontSize: 16
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Text(
+                alarmSettings.notificationBody,
+                textAlign: TextAlign.center,
+                style: const TextStyle(fontSize: 16),
               ),
             ),
             const Text('🔔', style: TextStyle(fontSize: 50)),

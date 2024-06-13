@@ -1,4 +1,5 @@
 import 'package:caodaion/constants/constants.dart';
+import 'package:caodaion/pages/clock/screens/focus_mode.dart';
 import 'package:caodaion/pages/clock/screens/home.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -47,10 +48,10 @@ class _ClockPageState extends State<ClockPage> {
             ),
           ),
         ),
-        body: TabBarView(
+        body: const TabBarView(
           children: [
             ExampleAlarmHomeScreen(),
-            ExampleAlarmHomeScreen(),
+            FocusMode(),
           ],
         ),
       ),
