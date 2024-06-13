@@ -1,6 +1,7 @@
 import 'package:alarm/alarm.dart';
 import 'package:alarm/model/alarm_settings.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 class ExampleAlarmTile extends StatefulWidget {
   const ExampleAlarmTile({
@@ -105,7 +106,7 @@ class _ExampleAlarmTileState extends State<ExampleAlarmTile> {
                                       Text("${TimeOfDay(
                                         hour: nextAlarm.hour,
                                         minute: nextAlarm.minute,
-                                      ).format(context)} ${nextAlarm.day}/${nextAlarm.month}/${nextAlarm.year}"),
+                                      ).format(context)} ${DateFormat.d().format(nextAlarm)}/${DateFormat.M().format(nextAlarm)}/${DateFormat.y().format(nextAlarm)}"),
                                     ],
                                   ),
                                 ],
