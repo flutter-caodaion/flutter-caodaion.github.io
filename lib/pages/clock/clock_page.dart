@@ -1,8 +1,11 @@
+import 'dart:convert';
+
 import 'package:caodaion/constants/constants.dart';
 import 'package:caodaion/pages/clock/screens/focus_mode.dart';
 import 'package:caodaion/pages/clock/screens/home.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class ClockPage extends StatefulWidget {
   const ClockPage({super.key});
@@ -15,6 +18,16 @@ class _ClockPageState extends State<ClockPage> {
   @override
   void initState() {
     super.initState();
+    loadNextFocus();
+  }
+
+  loadNextFocus() async {
+    final prefs = await SharedPreferences.getInstance();
+    var sharedFocusNext = jsonDecode(prefs.getString('focusNext') ?? "null");
+
+    if (sharedFocusNext != null) {
+      
+    }
   }
 
   @override

@@ -6,6 +6,7 @@ import 'package:alarm/alarm.dart';
 import 'package:alarm/model/alarm_settings.dart';
 import 'package:caodaion/constants/constants.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class FocusMode extends StatefulWidget {
@@ -75,7 +76,7 @@ class _FocusModeState extends State<FocusMode> {
       loopAudio: true,
       vibrate: true,
       volume: volume,
-      assetAudioPath: 'assets/audio/tune.mp3',
+      assetAudioPath: 'assets/audio/bell-sound-193696.mp3',
       notificationTitle: AlarmConstants.breakModeAlarmMessage,
       notificationBody:
           "Chế độ tập trung đã kết thúc, bắt đầu xả nghỉ trong vòng $breakMins phút",
@@ -124,7 +125,7 @@ class _FocusModeState extends State<FocusMode> {
       loopAudio: true,
       vibrate: true,
       volume: volume,
-      assetAudioPath: 'assets/audio/tune.mp3',
+      assetAudioPath: 'assets/audio/bell-chord1-83260.mp3',
       notificationTitle: AlarmConstants.focusModeAlarmMessage,
       notificationBody: "Bắt đầu tập trung trong vòng $focusMins phút",
       enableNotificationOnKill: Platform.isIOS,
