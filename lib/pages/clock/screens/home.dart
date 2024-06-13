@@ -98,9 +98,23 @@ class _ExampleAlarmHomeScreenState extends State<ExampleAlarmHomeScreen> {
               }
               operatorWeekday++;
             }
+          } else {
+            final nowDate = DateTime.now();
+            if (nowDate.year != foundAlarm.dateTime.year &&
+                nowDate.month != foundAlarm.dateTime.month &&
+                nowDate.day != foundAlarm.dateTime.day) {
+              while (element['selectedDays'][elementWeekday - 1] != true ||
+                  operatorWeekday - foundAlarm.dateTime.weekday <= 0) {
+                if (elementWeekday == 7) {
+                  elementWeekday = 1;
+                } else {
+                  elementWeekday++;
+                }
+                operatorWeekday++;
+              }
+            }
           }
-          if (operatorWeekday - foundAlarm.dateTime.weekday > 0 &&
-              foundAlarm.dateTime.second < DateTime.now().second) {
+          if (foundAlarm.dateTime.second != DateTime.now().second) {
             var addedDate = foundAlarm.dateTime.add(
                 Duration(days: operatorWeekday - foundAlarm.dateTime.weekday));
             var newAlarmSettings = AlarmSettings(
