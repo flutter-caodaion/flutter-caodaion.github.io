@@ -62,9 +62,9 @@ class _FocusModeState extends State<FocusMode> {
         focusNext = sharedFocusNext;
         if (focusNext['notificationTitle'] ==
             AlarmConstants.breakModeAlarmMessage) {
-          _onStartBreak();
-        } else {
           _onStartFocus();
+        } else {
+          _onStartBreak();
         }
       });
     }

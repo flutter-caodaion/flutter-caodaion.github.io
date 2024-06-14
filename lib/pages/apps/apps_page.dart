@@ -28,16 +28,17 @@ class _AppsPageState extends State<AppsPage> {
             size: 32,
           ),
         },
-      {
-        'name': '/dong-ho',
-        'label': 'Đồng hồ',
-        'icon': SvgPicture.asset(
-          'assets/icons/clock.svg',
-          height: 32,
-          width: 32,
-          color: ColorConstants.clockColor,
-        ),
-      },
+      if (isPhone())
+        {
+          'name': '/dong-ho',
+          'label': 'Đồng hồ',
+          'icon': SvgPicture.asset(
+            'assets/icons/clock.svg',
+            height: 32,
+            width: 32,
+            color: ColorConstants.clockColor,
+          ),
+        },
       {
         'name': '/lich',
         'label': 'Lịch',
