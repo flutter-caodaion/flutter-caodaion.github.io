@@ -4,6 +4,7 @@ import 'package:caodaion/constants/constants.dart';
 import 'package:caodaion/pages/clock/screens/focus_mode.dart';
 import 'package:caodaion/pages/clock/screens/home.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -14,7 +15,8 @@ class ClockPage extends StatefulWidget {
   State<ClockPage> createState() => _ClockPageState();
 }
 
-class _ClockPageState extends State<ClockPage> with SingleTickerProviderStateMixin {
+class _ClockPageState extends State<ClockPage>
+    with SingleTickerProviderStateMixin {
   late TabController _tabController = TabController(length: 2, vsync: this);
 
   @override
@@ -49,6 +51,18 @@ class _ClockPageState extends State<ClockPage> with SingleTickerProviderStateMix
           onPressed: () {
             context.go('/');
           },
+        ),
+        title: Row(
+          children: [
+            SvgPicture.asset(
+              'assets/icons/clock.svg',
+              color: ColorConstants.clockColor,
+            ),
+            const SizedBox(
+              width: 8,
+            ),
+            const Text("Đồng hồ"),
+          ],
         ),
         bottom: TabBar(
           controller: _tabController, // Use the TabController here

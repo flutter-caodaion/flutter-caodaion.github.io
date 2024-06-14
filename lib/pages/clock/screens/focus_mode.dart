@@ -379,7 +379,7 @@ class _FocusModeState extends State<FocusMode> {
                     size: 50,
                     color: !isFocusMode
                         ? ColorConstants.clockColor
-                        : ColorConstants.primaryIndicatorBackground,
+                        : const Color(0xfffbbc05),
                   ),
                   Padding(
                     padding: const EdgeInsets.all(8.0),

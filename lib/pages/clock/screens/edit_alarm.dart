@@ -49,7 +49,7 @@ class _ExampleAlarmEditScreenState extends State<ExampleAlarmEditScreen> {
       selectedDateTime = selectedDateTime.copyWith(second: 0, millisecond: 0);
       loopAudio = true;
       vibrate = true;
-      volume = 0.3; // TODO:
+      volume = 1.0; // TODO:
       assetAudio = 'assets/audio/mixkit-uplifting-bells-notification-938.wav';
     } else {
       if (widget.alarmSettings.runtimeType.toString() == 'AlarmSettings') {

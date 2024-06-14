@@ -178,6 +178,23 @@ class AlarmConstants {
       "active": true
     },
     {
+      "id": 292,
+      "dateTime":
+          DateTime.now().copyWith(hour: 19, minute: 30, second: 0).toString(),
+      "loopAudio": true,
+      "vibrate": true,
+      "volume": 1.0,
+      "assetAudioPath":
+          "assets/audio/mixkit-uplifting-bells-notification-938.wav",
+      "notificationTitle": "Học Đạo 📑",
+      "notificationBody":
+          "Đến giờ Học Đạo rồi 📑! Chúc bạn có một buổi học tập hiệu quả 😊!",
+      "enableNotificationOnKill": false,
+      "fadeDuration": 5.0,
+      "selectedDays": [true, true, true, true, true, true, true],
+      "active": true
+    },
+    {
       "id": 9691,
       "dateTime":
           DateTime.now().copyWith(hour: 21, minute: 0, second: 0).toString(),
