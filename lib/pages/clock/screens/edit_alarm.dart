@@ -175,6 +175,7 @@ class _ExampleAlarmEditScreenState extends State<ExampleAlarmEditScreen> {
   Future<void> saveAlarm() async {
     if (loading) return;
     setState(() => loading = true);
+    final buildedAlarmSettings = buildAlarmSettings();
     if (selectedDays.where((sd) => sd == true).isNotEmpty) {
       var elementWeekday = selectedDateTime.weekday;
       var operatorWeekday = selectedDateTime.weekday;
@@ -194,9 +195,6 @@ class _ExampleAlarmEditScreenState extends State<ExampleAlarmEditScreen> {
               .add(Duration(days: operatorWeekday - selectedDateTime.weekday));
         }
       }
-    }
-    final buildedAlarmSettings = buildAlarmSettings();
-    if (selectedDays.where((sd) => sd == true).isNotEmpty) {
       Map<dynamic, dynamic> alarmSettings = {
         'id': buildedAlarmSettings.id,
         'dateTime': buildedAlarmSettings.dateTime.toString(),
@@ -227,13 +225,15 @@ class _ExampleAlarmEditScreenState extends State<ExampleAlarmEditScreen> {
         loopAlarms[indexLa] = foundLoopAlarms;
       }
       await prefs.setString('loopAlarms', jsonEncode(loopAlarms.toList()));
+      Navigator.pop(context, true);
+    } else {
+      Alarm.set(alarmSettings: buildAlarmSettings()).then((res) {
+        if (res) {
+          Navigator.pop(context, true);
+        }
+        setState(() => loading = false);
+      });
     }
-    Alarm.set(alarmSettings: buildAlarmSettings()).then((res) {
-      if (res) {
-        Navigator.pop(context, true);
-      }
-      setState(() => loading = false);
-    });
   }
 
   void deleteAlarm() {

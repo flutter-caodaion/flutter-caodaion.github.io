@@ -73,7 +73,7 @@ class _ClockPageState extends State<ClockPage> with SingleTickerProviderStateMix
       body: TabBarView(
         controller: _tabController, // Use the TabController here
         children: const [
-          ExampleAlarmHomeScreen(),
+          AlarmHome(),
           FocusMode(),
         ],
       ),

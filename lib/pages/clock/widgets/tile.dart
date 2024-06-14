@@ -43,18 +43,31 @@ class _ExampleAlarmTileState extends State<ExampleAlarmTile> {
     var operatorWeekday = widget.dateTime.weekday;
     setState(() {
       final nowDate = DateTime.now();
-      if (widget.dateTime.compareTo(DateTime.now()) == -1 ||
-          (nowDate.year != widget.dateTime.year &&
-              nowDate.month != widget.dateTime.month &&
-              nowDate.day != widget.dateTime.day)) {
-        while (widget.loopData['selectedDays'][elementWeekday - 1] != true ||
-            operatorWeekday - widget.dateTime.weekday <= 0) {
-          if (elementWeekday == 7) {
-            elementWeekday = 1;
-          } else {
-            elementWeekday++;
+      if (widget.dateTime.compareTo(DateTime.now()) == -1) {
+        if (nowDate.year != widget.dateTime.year &&
+            nowDate.month != widget.dateTime.month &&
+            nowDate.day != widget.dateTime.day) {
+          while (widget.loopData['selectedDays'][elementWeekday - 1] != true ||
+              operatorWeekday - widget.dateTime.weekday <= 0) {
+            if (elementWeekday == 7) {
+              elementWeekday = 1;
+            } else {
+              elementWeekday++;
+            }
+            operatorWeekday++;
           }
-          operatorWeekday++;
+        }
+      } else {
+        if (widget.loopData['selectedDays'] != null) {
+          while (widget.loopData['selectedDays'][elementWeekday - 1] != true ||
+              operatorWeekday - widget.dateTime.weekday < 0) {
+            if (elementWeekday == 7) {
+              elementWeekday = 1;
+            } else {
+              elementWeekday++;
+            }
+            operatorWeekday++;
+          }
         }
       }
       nextAlarm = widget.dateTime

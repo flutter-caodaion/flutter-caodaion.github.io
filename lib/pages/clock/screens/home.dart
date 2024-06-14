@@ -9,14 +9,14 @@ import 'package:flutter/material.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-class ExampleAlarmHomeScreen extends StatefulWidget {
-  const ExampleAlarmHomeScreen({super.key});
+class AlarmHome extends StatefulWidget {
+  const AlarmHome({super.key});
 
   @override
-  State<ExampleAlarmHomeScreen> createState() => _ExampleAlarmHomeScreenState();
+  State<AlarmHome> createState() => _AlarmHomeState();
 }
 
-class _ExampleAlarmHomeScreenState extends State<ExampleAlarmHomeScreen> {
+class _AlarmHomeState extends State<AlarmHome> {
   late List<AlarmSettings> alarms;
   late List loopAlarmList = [];
   static StreamSubscription<AlarmSettings>? subscription;
@@ -86,12 +86,23 @@ class _ExampleAlarmHomeScreenState extends State<ExampleAlarmHomeScreen> {
           var elementWeekday = foundAlarm.dateTime.weekday;
           var operatorWeekday = foundAlarm.dateTime.weekday;
           final nowDate = DateTime.now();
-          if (foundAlarm.dateTime.compareTo(DateTime.now()) == -1 ||
-              (nowDate.year != foundAlarm.dateTime.year &&
-                  nowDate.month != foundAlarm.dateTime.month &&
-                  nowDate.day != foundAlarm.dateTime.day)) {
+          if (foundAlarm.dateTime.compareTo(DateTime.now()) == -1) {
+            if (nowDate.year != foundAlarm.dateTime.year &&
+                nowDate.month != foundAlarm.dateTime.month &&
+                nowDate.day != foundAlarm.dateTime.day) {
+              while (element['selectedDays'][elementWeekday - 1] != true ||
+                  operatorWeekday - foundAlarm.dateTime.weekday <= 0) {
+                if (elementWeekday == 7) {
+                  elementWeekday = 1;
+                } else {
+                  elementWeekday++;
+                }
+                operatorWeekday++;
+              }
+            }
+          } else {
             while (element['selectedDays'][elementWeekday - 1] != true ||
-                operatorWeekday - foundAlarm.dateTime.weekday <= 0) {
+                operatorWeekday - foundAlarm.dateTime.weekday < 0) {
               if (elementWeekday == 7) {
                 elementWeekday = 1;
               } else {
@@ -273,6 +284,35 @@ class _ExampleAlarmHomeScreenState extends State<ExampleAlarmHomeScreen> {
                       : Center(
                           child: Text(
                             'Chưa có hẹn giờ nào được lưu',
+                            style: Theme.of(context).textTheme.titleMedium,
+                          ),
+                        ),
+                  const Divider(),
+                  alarms.isNotEmpty
+                      ? ListView.separated(
+                          physics: const NeverScrollableScrollPhysics(),
+                          itemCount: alarms.length,
+                          separatorBuilder: (context, index) => const Padding(
+                            padding: EdgeInsets.symmetric(horizontal: 8.0),
+                            child: Divider(height: 1),
+                          ),
+                          itemBuilder: (context, index) {
+                            return ExampleAlarmTile(
+                              key: Key(alarms[index].id.toString()),
+                              loopData: {},
+                              dateTime: alarms[index].dateTime,
+                              onPressed: () =>
+                                  navigateToAlarmScreen(alarms[index]),
+                              onDismissed: () {
+                                stopAlarm(alarms[index].id);
+                              },
+                            );
+                          },
+                          shrinkWrap: true,
+                        )
+                      : Center(
+                          child: Text(
+                            'Hẹn giờ sắp tới chưa có',
                             style: Theme.of(context).textTheme.titleMedium,
                           ),
                         ),
