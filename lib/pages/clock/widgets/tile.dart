@@ -41,25 +41,27 @@ class _ExampleAlarmTileState extends State<ExampleAlarmTile> {
   }
 
   void loadAlarms(int? id) {
-    var elementWeekday = widget.dateTime.weekday;
-    var operatorWeekday = widget.dateTime.weekday;
     setState(() {
+      var elementWeekday = widget.dateTime.weekday;
+      var operatorWeekday = widget.dateTime.weekday;
       final nowDate = DateTime.now();
       if (widget.dateTime.compareTo(DateTime.now()) == -1) {
-        if (nowDate.year != widget.dateTime.year &&
-            nowDate.month != widget.dateTime.month &&
-            nowDate.day != widget.dateTime.day) {
+        if (nowDate.year == widget.dateTime.year &&
+            nowDate.month == widget.dateTime.month &&
+            nowDate.day == widget.dateTime.day) {
           elementWeekday += 1;
           operatorWeekday += 1;
         }
-        while (widget.loopData['selectedDays'][elementWeekday - 1] != true ||
-            operatorWeekday - widget.dateTime.weekday < 0) {
-          if (elementWeekday == 7) {
-            elementWeekday = 1;
-          } else {
-            elementWeekday++;
+        if (widget.loopData['selectedDays'] != null) {
+          while (widget.loopData['selectedDays'][elementWeekday - 1] != true ||
+              operatorWeekday - widget.dateTime.weekday < 0) {
+            if (elementWeekday == 7) {
+              elementWeekday = 1;
+            } else {
+              elementWeekday++;
+            }
+            operatorWeekday++;
           }
-          operatorWeekday++;
         }
       } else {
         if (widget.loopData['selectedDays'] != null) {
@@ -74,7 +76,10 @@ class _ExampleAlarmTileState extends State<ExampleAlarmTile> {
           }
         }
       }
-
+      if (widget.dateTime.second != DateTime.now().second) {
+        nextAlarm = widget.dateTime
+            .add(Duration(days: operatorWeekday - widget.dateTime.weekday));
+      }
       var data = widget.loopData['data'];
       if (data != null) {
         confirmDismiss = AlarmConstants.defaultLoopAlarms.firstWhere(
