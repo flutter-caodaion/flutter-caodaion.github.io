@@ -3,6 +3,7 @@ import 'dart:convert';
 
 import 'package:alarm/alarm.dart';
 import 'package:alarm/model/alarm_settings.dart';
+import 'package:caodaion/constants/constants.dart';
 import 'package:caodaion/pages/clock/screens/edit_alarm.dart';
 import 'package:caodaion/pages/clock/widgets/tile.dart';
 import 'package:flutter/material.dart';
@@ -45,7 +46,8 @@ class _AlarmHomeState extends State<AlarmHome> {
 
   storeLoopAlarm() async {
     final prefs = await SharedPreferences.getInstance();
-    final List loopAlarms = jsonDecode(prefs.getString('loopAlarms') ?? '[]');
+    var loopAlarms = jsonDecode(prefs.getString('loopAlarms') ?? '[]');
+    loopAlarms = [...loopAlarms, ...AlarmConstants.defaultLoopAlarms];
     setState(() {
       loopAlarmList = loopAlarms;
       loopAlarmList.sort((a, b) {
@@ -87,18 +89,20 @@ class _AlarmHomeState extends State<AlarmHome> {
           var operatorWeekday = foundAlarm.dateTime.weekday;
           final nowDate = DateTime.now();
           if (foundAlarm.dateTime.compareTo(DateTime.now()) == -1) {
-            if (nowDate.year != foundAlarm.dateTime.year &&
-                nowDate.month != foundAlarm.dateTime.month &&
-                nowDate.day != foundAlarm.dateTime.day) {
-              while (element['selectedDays'][elementWeekday - 1] != true ||
-                  operatorWeekday - foundAlarm.dateTime.weekday <= 0) {
-                if (elementWeekday == 7) {
-                  elementWeekday = 1;
-                } else {
-                  elementWeekday++;
-                }
-                operatorWeekday++;
+            if (nowDate.year == foundAlarm.dateTime.year &&
+                nowDate.month == foundAlarm.dateTime.month &&
+                nowDate.day == foundAlarm.dateTime.day) {
+              elementWeekday += 1;
+              operatorWeekday += 1;
+            }
+            while (element['selectedDays'][elementWeekday - 1] != true ||
+                operatorWeekday - foundAlarm.dateTime.weekday < 0) {
+              if (elementWeekday == 7) {
+                elementWeekday = 1;
+              } else {
+                elementWeekday++;
               }
+              operatorWeekday++;
             }
           } else {
             while (element['selectedDays'][elementWeekday - 1] != true ||
@@ -147,7 +151,15 @@ class _AlarmHomeState extends State<AlarmHome> {
     var indexLa =
         loopAlarmList.indexWhere((la) => la['id'] == value['data']['id']);
     loopAlarmList[indexLa]['active'] = !loopAlarmList[indexLa]['active'];
-    await prefs.setString('loopAlarms', jsonEncode(loopAlarmList.toList()));
+    var foundSystemAlarm = AlarmConstants.defaultLoopAlarms.where((item) =>
+        item['id'] == value['data']['id'] &&
+        DateTime.parse(item['dateTime']).hour ==
+            DateTime.parse(value['data']['dateTime']).hour &&
+        DateTime.parse(item['dateTime']).minute ==
+            DateTime.parse(value['data']['dateTime']).minute);
+    if (foundSystemAlarm.isEmpty) {
+      await prefs.setString('loopAlarms', jsonEncode(loopAlarmList.toList()));
+    }
     var foundList = alarms.where((item) =>
         item.dateTime.hour == DateTime.parse(value['data']['dateTime']).hour &&
         item.dateTime.minute ==
@@ -287,6 +299,18 @@ class _AlarmHomeState extends State<AlarmHome> {
                             style: Theme.of(context).textTheme.titleMedium,
                           ),
                         ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Text(
+                          "Hẹn giờ sắp tới",
+                          style: Theme.of(context).textTheme.titleLarge,
+                        ),
+                      ),
+                    ],
+                  ),
                   const Divider(),
                   alarms.isNotEmpty
                       ? ListView.separated(

@@ -24,6 +24,7 @@ class _ExampleAlarmEditScreenState extends State<ExampleAlarmEditScreen> {
   late DateTime selectedDateTime = DateTime.now();
   late bool loopAudio = true;
   late bool vibrate = true;
+  late bool isCustomVolume = false;
   late double volume = 1;
   late String assetAudio;
   late String notificationTitle = '';
@@ -84,6 +85,16 @@ class _ExampleAlarmEditScreenState extends State<ExampleAlarmEditScreen> {
         selectedDays[i] = loopData['selectedDays'][i].toString() == 'true';
       }
       active = loopData['active'];
+      setState(() {
+        if (loopData['notificationTitle'] != null) {
+          notificationTitle = loopData['notificationTitle'];
+          notificationTitleController.text = notificationTitle;
+        }
+        if (loopData['notificationBody'] != null) {
+          notificationBody = loopData['notificationBody'];
+          notificationBodyController.text = notificationBody;
+        }
+      });
     }
   }
 
@@ -303,6 +314,7 @@ class _ExampleAlarmEditScreenState extends State<ExampleAlarmEditScreen> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               TextField(
+                minLines: 2,
                 maxLines: null,
                 keyboardType: TextInputType.multiline,
                 controller: notificationBodyController,
@@ -373,14 +385,19 @@ class _ExampleAlarmEditScreenState extends State<ExampleAlarmEditScreen> {
                 style: Theme.of(context).textTheme.titleMedium,
               ),
               Switch(
-                value: volume != 1.0,
-                onChanged: (value) => setState(() => volume = value ? 1.0 : 0),
+                value: isCustomVolume,
+                onChanged: (value) => {
+                  setState(() {
+                    isCustomVolume = value;
+                    volume = value ? 1.0 : 0;
+                  })
+                },
               ),
             ],
           ),
           SizedBox(
             height: 30,
-            child: volume != 1.0
+            child: isCustomVolume
                 ? Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [

@@ -48,7 +48,7 @@ class _ExampleAlarmTileState extends State<ExampleAlarmTile> {
             nowDate.month != widget.dateTime.month &&
             nowDate.day != widget.dateTime.day) {
           while (widget.loopData['selectedDays'][elementWeekday - 1] != true ||
-              operatorWeekday - widget.dateTime.weekday <= 0) {
+              operatorWeekday - widget.dateTime.weekday < 0) {
             if (elementWeekday == 7) {
               elementWeekday = 1;
             } else {

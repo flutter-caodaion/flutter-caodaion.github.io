@@ -94,18 +94,36 @@ class AlarmConstants {
   static List defaultLoopAlarms = [
     {
       "id": 9691,
-      "dateTime": "2024-06-13 21:00:00.000",
+      "dateTime":
+          DateTime.now().copyWith(hour: 21, minute: 0, second: 0).toString(),
       "loopAudio": true,
       "vibrate": true,
       "volume": 1.0,
       "assetAudioPath":
           "assets/audio/mixkit-uplifting-bells-notification-938.wav",
       "notificationTitle": "Đi ngủ",
-      "notificationBody": "Đến giờ ngủ rồi",
+      "notificationBody": "Đến giờ ngủ rồi 🕘🥱! Chúc bạn ngủ ngon 😴!",
       "enableNotificationOnKill": false,
       "fadeDuration": 5.0,
       "selectedDays": [true, true, true, true, true, true, true],
       "active": true
-    }
+    },
+    {
+      "id": 4884,
+      "dateTime":
+          DateTime.now().copyWith(hour: 5, minute: 0, second: 0).toString(),
+      "loopAudio": true,
+      "vibrate": true,
+      "volume": 1.0,
+      "assetAudioPath":
+          "assets/audio/mixkit-uplifting-bells-notification-938.wav",
+      "notificationTitle": "Cúng thời MẸO",
+      "notificationBody":
+          "Đến giờ Cúng thời MẸO rồi 🕔🐱! Chúc bạn có một đàn cúng hiệu quả 😊!",
+      "enableNotificationOnKill": false,
+      "fadeDuration": 5.0,
+      "selectedDays": [true, true, true, true, true, true, true],
+      "active": true
+    },
   ];
 }
