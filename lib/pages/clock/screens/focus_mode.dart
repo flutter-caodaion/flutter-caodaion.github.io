@@ -24,7 +24,7 @@ class _FocusModeState extends State<FocusMode> {
   int remainingTime = 0;
   double volume = 1.0; // default 1.0
   bool isRunning = false;
-  bool isFocusMode = true;
+  bool isFocusMode = false;
   late List<AlarmSettings> alarms;
   late dynamic focusNext = null;
   Timer? timer;
