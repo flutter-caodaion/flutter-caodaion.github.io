@@ -93,16 +93,34 @@ class AlarmConstants {
   static int defaultBreakMins = 5;
   static List defaultLoopAlarms = [
     {
-      "id": 9691,
+      "id": 5199,
       "dateTime":
-          DateTime.now().copyWith(hour: 21, minute: 0, second: 0).toString(),
+          DateTime.now().copyWith(hour: 4, minute: 0, second: 0).toString(),
       "loopAudio": true,
       "vibrate": true,
       "volume": 1.0,
       "assetAudioPath":
           "assets/audio/mixkit-uplifting-bells-notification-938.wav",
-      "notificationTitle": "Đi ngủ",
-      "notificationBody": "Đến giờ ngủ rồi 🕘🥱! Chúc bạn ngủ ngon 😴!",
+      "notificationTitle": "Thức dậy ⏰",
+      "notificationBody":
+          "Đến giờ thức dậy rồi 🕓⏰! Chúc bạn có một ngày mới vui vẻ hạnh phúc 😊!",
+      "enableNotificationOnKill": false,
+      "fadeDuration": 5.0,
+      "selectedDays": [true, true, true, true, true, true, true],
+      "active": true
+    },
+    {
+      "id": 9931,
+      "dateTime":
+          DateTime.now().copyWith(hour: 23, minute: 0, second: 0).toString(),
+      "loopAudio": true,
+      "vibrate": true,
+      "volume": 1.0,
+      "assetAudioPath":
+          "assets/audio/mixkit-uplifting-bells-notification-938.wav",
+      "notificationTitle": "Cúng thời TÝ 🐭",
+      "notificationBody":
+          "Đến giờ Cúng thời TÝ rồi 🕚🐭! Chúc bạn có một đàn cúng hiệu quả 😊!",
       "enableNotificationOnKill": false,
       "fadeDuration": 5.0,
       "selectedDays": [true, true, true, true, true, true, true],
@@ -117,9 +135,59 @@ class AlarmConstants {
       "volume": 1.0,
       "assetAudioPath":
           "assets/audio/mixkit-uplifting-bells-notification-938.wav",
-      "notificationTitle": "Cúng thời MẸO",
+      "notificationTitle": "Cúng thời MẸO 🐱",
       "notificationBody":
           "Đến giờ Cúng thời MẸO rồi 🕔🐱! Chúc bạn có một đàn cúng hiệu quả 😊!",
+      "enableNotificationOnKill": false,
+      "fadeDuration": 5.0,
+      "selectedDays": [true, true, true, true, true, true, true],
+      "active": true
+    },
+    {
+      "id": 834,
+      "dateTime":
+          DateTime.now().copyWith(hour: 11, minute: 0, second: 0).toString(),
+      "loopAudio": true,
+      "vibrate": true,
+      "volume": 1.0,
+      "assetAudioPath":
+          "assets/audio/mixkit-uplifting-bells-notification-938.wav",
+      "notificationTitle": "Cúng thời NGỌ 🐴",
+      "notificationBody":
+          "Đến giờ Cúng thời NGỌ rồi 🕚🐴! Chúc bạn có một đàn cúng hiệu quả 😊!",
+      "enableNotificationOnKill": false,
+      "fadeDuration": 5.0,
+      "selectedDays": [true, true, true, true, true, true, true],
+      "active": true
+    },
+    {
+      "id": 292,
+      "dateTime":
+          DateTime.now().copyWith(hour: 17, minute: 0, second: 0).toString(),
+      "loopAudio": true,
+      "vibrate": true,
+      "volume": 1.0,
+      "assetAudioPath":
+          "assets/audio/mixkit-uplifting-bells-notification-938.wav",
+      "notificationTitle": "Cúng thời DẬU 🐔",
+      "notificationBody":
+          "Đến giờ Cúng thời DẬU rồi 🕔🐔! Chúc bạn có một đàn cúng hiệu quả 😊!",
+      "enableNotificationOnKill": false,
+      "fadeDuration": 5.0,
+      "selectedDays": [true, true, true, true, true, true, true],
+      "active": true
+    },
+    {
+      "id": 9691,
+      "dateTime":
+          DateTime.now().copyWith(hour: 21, minute: 0, second: 0).toString(),
+      "loopAudio": true,
+      "vibrate": true,
+      "volume": 1.0,
+      "assetAudioPath":
+          "assets/audio/mixkit-uplifting-bells-notification-938.wav",
+      "notificationTitle": "Đi ngủ 🥱",
+      "notificationBody": "Đến giờ ngủ rồi 🕘🥱! Chúc bạn ngủ ngon 😴!",
       "enableNotificationOnKill": false,
       "fadeDuration": 5.0,
       "selectedDays": [true, true, true, true, true, true, true],

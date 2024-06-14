@@ -1,4 +1,5 @@
 import 'package:alarm/model/alarm_settings.dart';
+import 'package:caodaion/constants/constants.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
@@ -25,6 +26,7 @@ class ExampleAlarmTile extends StatefulWidget {
 class _ExampleAlarmTileState extends State<ExampleAlarmTile> {
   late List<AlarmSettings> alarms;
   late DateTime nextAlarm = DateTime.now();
+  late dynamic confirmDismiss = true;
 
   @override
   void initState() {
@@ -47,15 +49,17 @@ class _ExampleAlarmTileState extends State<ExampleAlarmTile> {
         if (nowDate.year != widget.dateTime.year &&
             nowDate.month != widget.dateTime.month &&
             nowDate.day != widget.dateTime.day) {
-          while (widget.loopData['selectedDays'][elementWeekday - 1] != true ||
-              operatorWeekday - widget.dateTime.weekday < 0) {
-            if (elementWeekday == 7) {
-              elementWeekday = 1;
-            } else {
-              elementWeekday++;
-            }
-            operatorWeekday++;
+          elementWeekday += 1;
+          operatorWeekday += 1;
+        }
+        while (widget.loopData['selectedDays'][elementWeekday - 1] != true ||
+            operatorWeekday - widget.dateTime.weekday < 0) {
+          if (elementWeekday == 7) {
+            elementWeekday = 1;
+          } else {
+            elementWeekday++;
           }
+          operatorWeekday++;
         }
       } else {
         if (widget.loopData['selectedDays'] != null) {
@@ -70,14 +74,24 @@ class _ExampleAlarmTileState extends State<ExampleAlarmTile> {
           }
         }
       }
-      nextAlarm = widget.dateTime
-          .add(Duration(days: operatorWeekday - widget.dateTime.weekday));
+
+      var data = widget.loopData['data'];
+      if (data != null) {
+        confirmDismiss = AlarmConstants.defaultLoopAlarms.firstWhere(
+                (item) => item['id'].toString() == data['id'].toString(),
+                orElse: () => null) ==
+            null;
+      }
     });
   }
 
   @override
   Widget build(BuildContext context) {
+    var data = widget.loopData['data'];
     return Dismissible(
+      confirmDismiss: (direction) async {
+        return confirmDismiss;
+      },
       key: widget.key!,
       direction: widget.onDismissed != null
           ? DismissDirection.endToStart
@@ -107,7 +121,6 @@ class _ExampleAlarmTileState extends State<ExampleAlarmTile> {
                     widget.loopData.isNotEmpty
                         ? Builder(
                             builder: (context) {
-                              var data = widget.loopData['data'];
                               return Wrap(
                                 alignment: WrapAlignment.spaceBetween,
                                 children: [
