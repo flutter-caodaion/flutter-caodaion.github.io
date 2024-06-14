@@ -136,9 +136,9 @@ class _FocusModeState extends State<FocusMode> {
                       .difference(DateTime.now())
                       .inSeconds;
             }
-            _startTimer();
             isRunning = true;
             isFocusMode = false;
+            _startTimer();
           });
         }
       });
@@ -148,17 +148,20 @@ class _FocusModeState extends State<FocusMode> {
             DateTime.fromMicrosecondsSinceEpoch(focusNext['dateTime'])
                 .difference(DateTime.now())
                 .inSeconds;
-        _startTimer();
         isRunning = true;
         isFocusMode = false;
+        _startTimer();
       });
     }
   }
 
   _onStartBreak() async {
     final prefs = await SharedPreferences.getInstance();
-    final alarmDateTime = DateTime.now().add(Duration(
-        minutes: breakMins != 0 ? breakMins : AlarmConstants.defaultBreakMins));
+    final alarmDateTime = DateTime.now().add(
+      Duration(
+        minutes: breakMins != 0 ? breakMins : AlarmConstants.defaultBreakMins,
+      ),
+    );
     final alarmSettings = AlarmSettings(
       id: DateTime.now().millisecondsSinceEpoch % 10000 + 1,
       dateTime: alarmDateTime,
@@ -186,9 +189,9 @@ class _FocusModeState extends State<FocusMode> {
                       .difference(DateTime.now())
                       .inSeconds;
             }
-            _startTimer();
             isRunning = true;
             isFocusMode = true;
+            _startTimer();
           });
         }
       });
@@ -198,9 +201,9 @@ class _FocusModeState extends State<FocusMode> {
             DateTime.fromMicrosecondsSinceEpoch(focusNext['dateTime'])
                 .difference(DateTime.now())
                 .inSeconds;
-        _startTimer();
         isRunning = true;
         isFocusMode = true;
+        _startTimer();
       });
     }
   }
@@ -212,10 +215,10 @@ class _FocusModeState extends State<FocusMode> {
       Alarm.stop(focusNext['id']).then((res) async {
         await prefs.remove('focusNext');
         setState(() {
-          remainingTime = 0;
-          timer?.cancel();
+          remainingTime = focusMins * 60;
           isRunning = false;
           isFocusMode = false;
+          timer?.cancel();
         });
       });
     }
@@ -237,7 +240,6 @@ class _FocusModeState extends State<FocusMode> {
         } else {
           timer.cancel();
           isRunning = false;
-          GoRouter.of(context).go('/');
         }
       });
     });
@@ -289,12 +291,15 @@ class _FocusModeState extends State<FocusMode> {
                           },
                         ),
                         leading: IconButton(
-                            onPressed: () => {
-                                  setState(() {
-                                    focusMins = AlarmConstants.defaultFocusMins;
-                                    updateFocusSetting();
-                                  })
-                                },
+                            onPressed: isRunning
+                                ? null
+                                : () => {
+                                      setState(() {
+                                        focusMins =
+                                            AlarmConstants.defaultFocusMins;
+                                        updateFocusSetting();
+                                      })
+                                    },
                             icon: const Icon(Icons.adjust_rounded)),
                         trailing: const Text("phút"),
                       ),
@@ -325,12 +330,15 @@ class _FocusModeState extends State<FocusMode> {
                           },
                         ),
                         leading: IconButton(
-                            onPressed: () => {
-                                  setState(() {
-                                    breakMins = AlarmConstants.defaultBreakMins;
-                                    updateFocusSetting();
-                                  })
-                                },
+                            onPressed: isRunning
+                                ? null
+                                : () => {
+                                      setState(() {
+                                        breakMins =
+                                            AlarmConstants.defaultBreakMins;
+                                        updateFocusSetting();
+                                      })
+                                    },
                             icon: const Icon(Icons.coffee_rounded)),
                         trailing: const Text("phút"),
                       ),
@@ -412,10 +420,17 @@ class _FocusModeState extends State<FocusMode> {
                       duration: const Duration(seconds: 1),
                       builder: (context, value, child) {
                         return LinearProgressIndicator(
-                          value: value,
+                          value: remainingTime > 0
+                              ? (remainingTime /
+                                  (!isFocusMode
+                                      ? focusMins * 60
+                                      : breakMins * 60))
+                              : 0,
                           minHeight: 32,
                           valueColor: AlwaysStoppedAnimation<Color>(
-                            ColorConstants.clockColor,
+                            !isFocusMode
+                                ? ColorConstants.clockColor
+                                : const Color(0xfffbbc05),
                           ),
                           backgroundColor: ColorConstants.primaryBackground,
                           borderRadius: BorderRadius.circular(20),
