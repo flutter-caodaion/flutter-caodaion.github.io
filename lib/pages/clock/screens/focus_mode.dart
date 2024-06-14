@@ -60,11 +60,23 @@ class _FocusModeState extends State<FocusMode> {
     if (sharedFocusNext != null) {
       setState(() {
         focusNext = sharedFocusNext;
+
+        remainingTime = (!isFocusMode ? focusMins : breakMins) * 60;
         if (focusNext['notificationTitle'] ==
             AlarmConstants.breakModeAlarmMessage) {
-          _onStartFocus();
+          if (DateTime.fromMicrosecondsSinceEpoch(sharedFocusNext['dateTime'])
+              .isAfter(DateTime.now())) {
+            _onStartFocus();
+          } else {
+            _onStartBreak();
+          }
         } else {
-          _onStartBreak();
+          if (DateTime.fromMicrosecondsSinceEpoch(sharedFocusNext['dateTime'])
+              .isAfter(DateTime.now())) {
+            _onStartBreak();
+          } else {
+            _onStartFocus();
+          }
         }
       });
     }
@@ -225,11 +237,7 @@ class _FocusModeState extends State<FocusMode> {
         } else {
           timer.cancel();
           isRunning = false;
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            if (mounted) {
-              GoRouter.of(context).go('/');
-            }
-          });
+          GoRouter.of(context).go('/');
         }
       });
     });
