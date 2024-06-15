@@ -46,6 +46,7 @@ class _AlarmHomeState extends State<AlarmHome> {
 
   storeLoopAlarm() async {
     final prefs = await SharedPreferences.getInstance();
+    // prefs.remove('loopAlarms');
     var loopAlarms = jsonDecode(prefs.getString('loopAlarms') ?? '[]');
     loopAlarms = [...loopAlarms, ...AlarmConstants.defaultLoopAlarms];
     setState(() {
@@ -151,15 +152,19 @@ class _AlarmHomeState extends State<AlarmHome> {
     var indexLa =
         loopAlarmList.indexWhere((la) => la['id'] == value['data']['id']);
     loopAlarmList[indexLa]['active'] = !loopAlarmList[indexLa]['active'];
-    var foundSystemAlarm = AlarmConstants.defaultLoopAlarms.where((item) =>
-        item['id'] == value['data']['id'] &&
-        DateTime.parse(item['dateTime']).hour ==
-            DateTime.parse(value['data']['dateTime']).hour &&
-        DateTime.parse(item['dateTime']).minute ==
-            DateTime.parse(value['data']['dateTime']).minute);
-    if (foundSystemAlarm.isEmpty) {
-      await prefs.setString('loopAlarms', jsonEncode(loopAlarmList.toList()));
+    var storedLoopAlarm = [];
+    for (var element in loopAlarmList) {
+      var foundSystemAlarm = AlarmConstants.defaultLoopAlarms.where((item) =>
+          item['id'] == element['id'] &&
+          DateTime.parse(item['dateTime']).hour ==
+              DateTime.parse(element['dateTime']).hour &&
+          DateTime.parse(item['dateTime']).minute ==
+              DateTime.parse(element['dateTime']).minute);
+      if (foundSystemAlarm.isEmpty) {
+        storedLoopAlarm.add(element);
+      }
     }
+    await prefs.setString('loopAlarms', jsonEncode(storedLoopAlarm.toList()));
     var foundList = alarms.where((item) =>
         item.dateTime.hour == DateTime.parse(value['data']['dateTime']).hour &&
         item.dateTime.minute ==
@@ -302,47 +307,47 @@ class _AlarmHomeState extends State<AlarmHome> {
                   const SizedBox(
                     height: 64,
                   ),
-                  // Row(
-                  //   mainAxisAlignment: MainAxisAlignment.start,
-                  //   children: [
-                  //     Padding(
-                  //       padding: const EdgeInsets.all(8.0),
-                  //       child: Text(
-                  //         "Hẹn giờ sắp tới",
-                  //         style: Theme.of(context).textTheme.titleLarge,
-                  //       ),
-                  //     ),
-                  //   ],
-                  // ),
-                  // const Divider(),
-                  // alarms.isNotEmpty
-                  //     ? ListView.separated(
-                  //         physics: const NeverScrollableScrollPhysics(),
-                  //         itemCount: alarms.length,
-                  //         separatorBuilder: (context, index) => const Padding(
-                  //           padding: EdgeInsets.symmetric(horizontal: 8.0),
-                  //           child: Divider(height: 1),
-                  //         ),
-                  //         itemBuilder: (context, index) {
-                  //           return ExampleAlarmTile(
-                  //             key: Key(alarms[index].id.toString()),
-                  //             loopData: {},
-                  //             dateTime: alarms[index].dateTime,
-                  //             onPressed: () =>
-                  //                 navigateToAlarmScreen(alarms[index]),
-                  //             onDismissed: () {
-                  //               stopAlarm(alarms[index].id);
-                  //             },
-                  //           );
-                  //         },
-                  //         shrinkWrap: true,
-                  //       )
-                  //     : Center(
-                  //         child: Text(
-                  //           'Hẹn giờ sắp tới chưa có',
-                  //           style: Theme.of(context).textTheme.titleMedium,
-                  //         ),
-                  //       ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Text(
+                          "Hẹn giờ sắp tới",
+                          style: Theme.of(context).textTheme.titleLarge,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const Divider(),
+                  alarms.isNotEmpty
+                      ? ListView.separated(
+                          physics: const NeverScrollableScrollPhysics(),
+                          itemCount: alarms.length,
+                          separatorBuilder: (context, index) => const Padding(
+                            padding: EdgeInsets.symmetric(horizontal: 8.0),
+                            child: Divider(height: 1),
+                          ),
+                          itemBuilder: (context, index) {
+                            return ExampleAlarmTile(
+                              key: Key(alarms[index].id.toString()),
+                              loopData: {},
+                              dateTime: alarms[index].dateTime,
+                              onPressed: () =>
+                                  navigateToAlarmScreen(alarms[index]),
+                              onDismissed: () {
+                                stopAlarm(alarms[index].id);
+                              },
+                            );
+                          },
+                          shrinkWrap: true,
+                        )
+                      : Center(
+                          child: Text(
+                            'Hẹn giờ sắp tới chưa có',
+                            style: Theme.of(context).textTheme.titleMedium,
+                          ),
+                        ),
                 ],
               ),
             ),
