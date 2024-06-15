@@ -1,4 +1,6 @@
 // library_page.dart
+import 'dart:convert';
+
 import 'package:caodaion/constants/constants.dart';
 import 'package:caodaion/pages/library/service/library_service.dart';
 import 'package:flutter/material.dart';
@@ -37,6 +39,7 @@ class _LibraryPageState extends State<LibraryPage> {
     }
     setState(() {
       _displayBooks = List.from(books);
+      libraryService.bookResponse = bookResponse;
     });
   }
 
@@ -66,10 +69,16 @@ class _LibraryPageState extends State<LibraryPage> {
       ),
       body: CustomScrollView(
         slivers: [
+          const SliverToBoxAdapter(
+            child: SizedBox(
+              height: 16,
+            ),
+          ),
           SliverToBoxAdapter(
             child: Padding(
               padding: const EdgeInsets.all(8.0),
               child: Wrap(
+                alignment: WrapAlignment.center,
                 spacing: 8.0,
                 children: _displayBooks.map((book) {
                   double screenWidth = MediaQuery.of(context).size.width;
@@ -83,6 +92,7 @@ class _LibraryPageState extends State<LibraryPage> {
                                       : 1)) -
                       8 -
                       2;
+                  List labels = jsonDecode(book['labels'] ?? '[]');
                   return SizedBox(
                     width: cardWidth,
                     child: Card(
@@ -127,6 +137,26 @@ class _LibraryPageState extends State<LibraryPage> {
                           ),
                           Padding(
                             padding: const EdgeInsets.all(8.0),
+                            child: Wrap(
+                              spacing: 8.0,
+                              children: labels.map((label) {
+                                return ElevatedButton(
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: const Color(0xffe0e0e0),
+                                  ),
+                                  onPressed: () {},
+                                  child: Text(
+                                    label,
+                                    style: const TextStyle(
+                                      color: Colors.black,
+                                    ),
+                                  ),
+                                );
+                              }).toList(),
+                            ),
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.all(8.0),
                             child: TextButton(
                               onPressed: () {
                                 context.go("/sach/${book['key']}");
@@ -138,6 +168,9 @@ class _LibraryPageState extends State<LibraryPage> {
                                   Icon(
                                     Icons.visibility,
                                     color: Colors.black,
+                                  ),
+                                  SizedBox(
+                                    width: 8,
                                   ),
                                   SizedBox(
                                     width: 8,
@@ -158,6 +191,11 @@ class _LibraryPageState extends State<LibraryPage> {
                   );
                 }).toList(),
               ),
+            ),
+          ),
+          const SliverToBoxAdapter(
+            child: SizedBox(
+              height: 36,
             ),
           ),
         ],

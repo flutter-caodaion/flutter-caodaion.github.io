@@ -5,6 +5,7 @@ class LibraryService {
   final String spreadSheetId =
       '2PACX-1vTsCA5rwuatpvDRWVRURaUJX74WoYG22AWBFsDN1J55IEZYTlYC4xsNdgHR6NDvdTzbMmWIRNKdxE23';
   XlsxService xlsxService = XlsxService();
+  var bookResponse;
 
   Future<Map<String, dynamic>?> fetchBooks() async {
     XlsxService xlsxService = XlsxService();
