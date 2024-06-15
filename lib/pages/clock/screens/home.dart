@@ -48,7 +48,6 @@ class _AlarmHomeState extends State<AlarmHome> {
     final prefs = await SharedPreferences.getInstance();
     // prefs.remove('loopAlarms');
     var loopAlarms = jsonDecode(prefs.getString('loopAlarms') ?? '[]');
-    loopAlarms = [...loopAlarms, ...AlarmConstants.defaultLoopAlarms];
     setState(() {
       loopAlarmList = loopAlarms;
       loopAlarmList.sort((a, b) {
@@ -152,19 +151,7 @@ class _AlarmHomeState extends State<AlarmHome> {
     var indexLa =
         loopAlarmList.indexWhere((la) => la['id'] == value['data']['id']);
     loopAlarmList[indexLa]['active'] = !loopAlarmList[indexLa]['active'];
-    var storedLoopAlarm = [];
-    for (var element in loopAlarmList) {
-      var foundSystemAlarm = AlarmConstants.defaultLoopAlarms.where((item) =>
-          item['id'] == element['id'] &&
-          DateTime.parse(item['dateTime']).hour ==
-              DateTime.parse(element['dateTime']).hour &&
-          DateTime.parse(item['dateTime']).minute ==
-              DateTime.parse(element['dateTime']).minute);
-      if (foundSystemAlarm.isEmpty) {
-        storedLoopAlarm.add(element);
-      }
-    }
-    await prefs.setString('loopAlarms', jsonEncode(storedLoopAlarm.toList()));
+    await prefs.setString('loopAlarms', jsonEncode(loopAlarmList.toList()));
     var foundList = alarms.where((item) =>
         item.dateTime.hour == DateTime.parse(value['data']['dateTime']).hour &&
         item.dateTime.minute ==
@@ -237,6 +224,19 @@ class _AlarmHomeState extends State<AlarmHome> {
     }
   }
 
+  onSelectAlarmList(value) async {
+    if (value == 'useDefaultLoopAlarms') {
+      final prefs = await SharedPreferences.getInstance();
+      var storedLoopAlarm = jsonDecode(prefs.getString('loopAlarms') ?? '[]');
+      storedLoopAlarm = [
+        ...storedLoopAlarm,
+        ...AlarmConstants.defaultLoopAlarms
+      ];
+      await prefs.setString('loopAlarms', jsonEncode(storedLoopAlarm.toList()));
+      storeLoopAlarm();
+    }
+  }
+
   @override
   void dispose() {
     subscription?.cancel();
@@ -253,7 +253,7 @@ class _AlarmHomeState extends State<AlarmHome> {
               delegate: SliverChildListDelegate(
                 [
                   Row(
-                    mainAxisAlignment: MainAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Padding(
                         padding: const EdgeInsets.all(8.0),
@@ -261,6 +261,21 @@ class _AlarmHomeState extends State<AlarmHome> {
                           "Danh sách hẹn giờ",
                           style: Theme.of(context).textTheme.titleLarge,
                         ),
+                      ),
+                      PopupMenuButton(
+                        color: Colors.white,
+                        icon: const Icon(Icons.more_vert_rounded),
+                        itemBuilder: (BuildContext context) {
+                          return [
+                            const PopupMenuItem(
+                              value: 'useDefaultLoopAlarms',
+                              child: Text('Dùng hẹn giờ từ ứng dụng'),
+                            ),
+                          ];
+                        },
+                        onSelected: (value) {
+                          onSelectAlarmList(value);
+                        },
                       ),
                     ],
                   ),

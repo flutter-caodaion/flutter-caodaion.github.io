@@ -26,7 +26,6 @@ class ExampleAlarmTile extends StatefulWidget {
 class _ExampleAlarmTileState extends State<ExampleAlarmTile> {
   late List<AlarmSettings> alarms;
   late DateTime nextAlarm = DateTime.now();
-  late dynamic confirmDismiss = true;
 
   @override
   void initState() {
@@ -80,13 +79,6 @@ class _ExampleAlarmTileState extends State<ExampleAlarmTile> {
         nextAlarm = widget.dateTime
             .add(Duration(days: operatorWeekday - widget.dateTime.weekday));
       }
-      var data = widget.loopData['data'];
-      if (data != null) {
-        confirmDismiss = AlarmConstants.defaultLoopAlarms.firstWhere(
-                (item) => item['id'].toString() == data['id'].toString(),
-                orElse: () => null) ==
-            null;
-      }
     });
   }
 
@@ -94,9 +86,6 @@ class _ExampleAlarmTileState extends State<ExampleAlarmTile> {
   Widget build(BuildContext context) {
     var data = widget.loopData['data'];
     return Dismissible(
-      confirmDismiss: (direction) async {
-        return confirmDismiss;
-      },
       key: widget.key!,
       direction: widget.onDismissed != null
           ? DismissDirection.endToStart
