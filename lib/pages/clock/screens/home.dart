@@ -136,6 +136,7 @@ class _AlarmHomeState extends State<AlarmHome> {
                   setState(() {
                     alarms = Alarm.getAlarms();
                     alarms.sort((a, b) => a.dateTime.compareTo(b.dateTime));
+                    storeAlarms();
                   });
                 }
               },
