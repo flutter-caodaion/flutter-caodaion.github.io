@@ -70,6 +70,15 @@ class _AppsPageState extends State<AppsPage> {
         ),
       },
       {
+        'name': '/sach',
+        'label': 'Sách',
+        'icon': Icon(
+          Icons.library_books_rounded,
+          color: ColorConstants.libraryColor,
+          size: 32,
+        ),
+      },
+      {
         'name': '/tu-tinh',
         'label': 'Tự tỉnh',
         'icon': SvgPicture.asset(

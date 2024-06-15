@@ -1,12 +1,13 @@
 import 'package:caodaion/pages/apps/apps_page.dart';
 import 'package:caodaion/pages/calendar/calendar_page.dart';
 import 'package:caodaion/pages/clock/clock_page.dart';
-import 'package:caodaion/pages/clock/screens/home.dart';
 import 'package:caodaion/pages/clock/screens/ring.dart';
 import 'package:caodaion/pages/gemini_ai/genimi_ai_page.dart';
 import 'package:caodaion/pages/home/home_page.dart';
 import 'package:caodaion/pages/kinh/kinh_page.dart';
 import 'package:caodaion/pages/kinh/reading_kinh/reading_kinh.dart';
+import 'package:caodaion/pages/library/book_page.dart';
+import 'package:caodaion/pages/library/library_page.dart';
 import 'package:caodaion/pages/maps/maps_page.dart';
 import 'package:caodaion/pages/profile/profile_page.dart';
 import 'package:caodaion/pages/qr/qr_page.dart';
@@ -164,6 +165,20 @@ final GoRouter router = GoRouter(
       path: '/ai',
       pageBuilder: (context, state) =>
           NoTransitionPage(child: const GenimiAIPage(), name: '/ai'),
+    ),
+    GoRoute(
+      path: '/sach',
+      pageBuilder: (context, state) =>
+          NoTransitionPage(child: const LibraryPage(), name: '/sach'),
+    ),
+    GoRoute(
+      path: '/sach/:slug',
+      pageBuilder: (context, state) {
+        final slug = state.pathParameters['slug'] as String;
+        return NoTransitionPage(
+          child: BookPage(slug: slug),
+        );
+      },
     ),
   ],
 );

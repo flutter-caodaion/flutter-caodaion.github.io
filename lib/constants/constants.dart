@@ -9,6 +9,7 @@ class ColorConstants {
   static Color whiteBackdround = const Color(0xffffffff);
   static Color qrColor = const Color(0xffb53c34);
   static Color mapsColor = const Color(0xff8eea88);
+  static Color libraryColor = const Color(0xffdf4b39);
   static Color calendarColor = const Color(0xff34A853);
   static Color tnhtColor = const Color(0xffFBBC05);
   static Color kinhColor = const Color(0xff000000);
