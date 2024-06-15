@@ -37,10 +37,10 @@ class _ResponsiveScaffoldState extends State<ResponsiveScaffold> {
       final foundActiveAlarm = storageAlarms.firstWhere((item) {
         final now = DateTime.now();
         final itemDate = DateTime.fromMicrosecondsSinceEpoch(item['dateTime']);
-        return now.year == itemDate.year &&
-            now.month == itemDate.month &&
-            now.day == itemDate.day &&
-            now.hour == itemDate.hour &&
+        return now.year >= itemDate.year &&
+            now.month >= itemDate.month &&
+            now.day >= itemDate.day &&
+            now.hour >= itemDate.hour &&
             now.minute >= itemDate.minute;
       }, orElse: () => -1);
       if (foundActiveAlarm != -1) {
