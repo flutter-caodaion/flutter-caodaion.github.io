@@ -22,7 +22,7 @@ class _FocusModeState extends State<FocusMode> {
   int focusMins = AlarmConstants.defaultFocusMins; // default 30
   int breakMins = AlarmConstants.defaultBreakMins; // default 5
   int remainingTime = 0;
-  double volume = 1.0; // default 1.0
+  double volume = AlarmConstants.defaultVolume; // default 1.0
   bool isRunning = false;
   bool isFocusMode = false;
   late List<AlarmSettings> alarms;

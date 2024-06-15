@@ -91,6 +91,9 @@ class AlarmConstants {
   static String breakModeAlarmMessage = "Xả nghỉ";
   static int defaultFocusMins = 30;
   static int defaultBreakMins = 5;
+  static double defaultVolume = 1.0;
+  static String defaultAudio =
+      "assets/audio/mixkit-uplifting-bells-notification-938.wav";
   static List defaultLoopAlarms = [
     {
       "id": 5199,
@@ -98,9 +101,8 @@ class AlarmConstants {
           DateTime.now().copyWith(hour: 4, minute: 0, second: 0).toString(),
       "loopAudio": true,
       "vibrate": true,
-      "volume": 1.0,
-      "assetAudioPath":
-          "assets/audio/mixkit-uplifting-bells-notification-938.wav",
+      "volume": defaultVolume,
+      "assetAudioPath": defaultAudio,
       "notificationTitle": "Thức dậy ⏰",
       "notificationBody":
           "Đến giờ thức dậy rồi 🕓⏰! Chúc bạn có một ngày mới vui vẻ hạnh phúc 😊!",
@@ -115,9 +117,8 @@ class AlarmConstants {
           DateTime.now().copyWith(hour: 23, minute: 0, second: 0).toString(),
       "loopAudio": true,
       "vibrate": true,
-      "volume": 1.0,
-      "assetAudioPath":
-          "assets/audio/mixkit-uplifting-bells-notification-938.wav",
+      "volume": defaultVolume,
+      "assetAudioPath": defaultAudio,
       "notificationTitle": "Cúng thời TÝ 🐭",
       "notificationBody":
           "Đến giờ Cúng thời TÝ rồi 🕚🐭! Chúc bạn có một đàn cúng hiệu quả 😊!",
@@ -132,9 +133,8 @@ class AlarmConstants {
           DateTime.now().copyWith(hour: 5, minute: 0, second: 0).toString(),
       "loopAudio": true,
       "vibrate": true,
-      "volume": 1.0,
-      "assetAudioPath":
-          "assets/audio/mixkit-uplifting-bells-notification-938.wav",
+      "volume": defaultVolume,
+      "assetAudioPath": defaultAudio,
       "notificationTitle": "Cúng thời MẸO 🐱",
       "notificationBody":
           "Đến giờ Cúng thời MẸO rồi 🕔🐱! Chúc bạn có một đàn cúng hiệu quả 😊!",
@@ -149,9 +149,8 @@ class AlarmConstants {
           DateTime.now().copyWith(hour: 11, minute: 0, second: 0).toString(),
       "loopAudio": true,
       "vibrate": true,
-      "volume": 1.0,
-      "assetAudioPath":
-          "assets/audio/mixkit-uplifting-bells-notification-938.wav",
+      "volume": defaultVolume,
+      "assetAudioPath": defaultAudio,
       "notificationTitle": "Cúng thời NGỌ 🐴",
       "notificationBody":
           "Đến giờ Cúng thời NGỌ rồi 🕚🐴! Chúc bạn có một đàn cúng hiệu quả 😊!",
@@ -166,9 +165,8 @@ class AlarmConstants {
           DateTime.now().copyWith(hour: 17, minute: 0, second: 0).toString(),
       "loopAudio": true,
       "vibrate": true,
-      "volume": 1.0,
-      "assetAudioPath":
-          "assets/audio/mixkit-uplifting-bells-notification-938.wav",
+      "volume": defaultVolume,
+      "assetAudioPath": defaultAudio,
       "notificationTitle": "Cúng thời DẬU 🐔",
       "notificationBody":
           "Đến giờ Cúng thời DẬU rồi 🕔🐔! Chúc bạn có một đàn cúng hiệu quả 😊!",
@@ -183,9 +181,8 @@ class AlarmConstants {
           DateTime.now().copyWith(hour: 19, minute: 30, second: 0).toString(),
       "loopAudio": true,
       "vibrate": true,
-      "volume": 1.0,
-      "assetAudioPath":
-          "assets/audio/mixkit-uplifting-bells-notification-938.wav",
+      "volume": defaultVolume,
+      "assetAudioPath": defaultAudio,
       "notificationTitle": "Học Đạo 📑",
       "notificationBody":
           "Đến giờ Học Đạo rồi 📑! Chúc bạn có một buổi học tập hiệu quả 😊!",
@@ -200,9 +197,8 @@ class AlarmConstants {
           DateTime.now().copyWith(hour: 21, minute: 0, second: 0).toString(),
       "loopAudio": true,
       "vibrate": true,
-      "volume": 1.0,
-      "assetAudioPath":
-          "assets/audio/mixkit-uplifting-bells-notification-938.wav",
+      "volume": defaultVolume,
+      "assetAudioPath": defaultAudio,
       "notificationTitle": "Đi ngủ 🥱",
       "notificationBody": "Đến giờ ngủ rồi 🕘🥱! Chúc bạn ngủ ngon 😴!",
       "enableNotificationOnKill": false,

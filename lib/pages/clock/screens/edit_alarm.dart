@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:alarm/alarm.dart';
 import 'package:alarm/model/alarm_settings.dart';
+import 'package:caodaion/constants/constants.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -25,7 +26,7 @@ class _ExampleAlarmEditScreenState extends State<ExampleAlarmEditScreen> {
   late bool loopAudio = true;
   late bool vibrate = true;
   late bool isCustomVolume = false;
-  late double volume = 1;
+  late double volume = AlarmConstants.defaultVolume;
   late String assetAudio;
   late String notificationTitle = '';
   TextEditingController notificationTitleController = TextEditingController();
@@ -49,8 +50,9 @@ class _ExampleAlarmEditScreenState extends State<ExampleAlarmEditScreen> {
       selectedDateTime = selectedDateTime.copyWith(second: 0, millisecond: 0);
       loopAudio = true;
       vibrate = true;
-      volume = 1.0; // TODO:
-      assetAudio = 'assets/audio/mixkit-uplifting-bells-notification-938.wav';
+      volume = AlarmConstants.defaultVolume;
+      assetAudio = AlarmConstants.defaultAudio;
+      selectedDays[DateTime.now().weekday - 1] = true;
     } else {
       if (widget.alarmSettings.runtimeType.toString() == 'AlarmSettings') {
         Map<dynamic, dynamic> widgetAlarmSettings = {
@@ -58,7 +60,7 @@ class _ExampleAlarmEditScreenState extends State<ExampleAlarmEditScreen> {
           'dateTime': widget.alarmSettings.dateTime.toString(),
           'loopAudio': widget.alarmSettings.loopAudio,
           'vibrate': widget.alarmSettings.vibrate,
-          'volume': widget.alarmSettings.volume ?? 1.0,
+          'volume': widget.alarmSettings.volume ?? AlarmConstants.defaultVolume,
           'assetAudioPath': widget.alarmSettings.assetAudioPath,
           'notificationTitle': widget.alarmSettings.notificationTitle,
           'notificationBody': widget.alarmSettings.notificationBody,
@@ -79,7 +81,7 @@ class _ExampleAlarmEditScreenState extends State<ExampleAlarmEditScreen> {
           : alarmSettings['dateTime'];
       loopAudio = alarmSettings['loopAudio'];
       vibrate = alarmSettings['vibrate'];
-      volume = alarmSettings['volume'] ?? 1.0;
+      volume = alarmSettings['volume'] ?? AlarmConstants.defaultVolume;
       assetAudio = alarmSettings['assetAudioPath'];
       for (var i = 0; i < loopData['selectedDays'].length; i++) {
         selectedDays[i] = loopData['selectedDays'][i].toString() == 'true';
@@ -389,7 +391,7 @@ class _ExampleAlarmEditScreenState extends State<ExampleAlarmEditScreen> {
                 onChanged: (value) => {
                   setState(() {
                     isCustomVolume = value;
-                    volume = value ? 1.0 : 0;
+                    volume = value ? AlarmConstants.defaultVolume : 0;
                   })
                 },
               ),

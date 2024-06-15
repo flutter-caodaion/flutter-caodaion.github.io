@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:alarm/alarm.dart';
 import 'package:alarm/model/alarm_settings.dart';
+import 'package:caodaion/constants/constants.dart';
 import 'package:flutter/material.dart';
 
 class ExampleAlarmHomeShortcutButton extends StatefulWidget {
@@ -27,7 +28,7 @@ class _ExampleAlarmHomeShortcutButtonState
 
     if (delayInHours != 0) {
       dateTime = dateTime.copyWith(second: 0, millisecond: 0);
-      volume = 1;
+      volume = AlarmConstants.defaultVolume;
     }
 
     setState(() => showMenu = false);
@@ -36,7 +37,7 @@ class _ExampleAlarmHomeShortcutButtonState
       id: id,
       dateTime: dateTime,
       assetAudioPath: 'assets/audio/mixkit-uplifting-bells-notification-938.wav',
-      volume: 1,
+      volume: AlarmConstants.defaultVolume,
       notificationTitle: 'Alarm example',
       notificationBody:
           'Shortcut $id button alarm with delay of $delayInHours hours',
