@@ -4,6 +4,7 @@ import 'package:caodaion/pages/library/service/library_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:go_router/go_router.dart';
+import 'package:webview_flutter/webview_flutter.dart';
 
 class BookPage extends StatefulWidget {
   final String slug;
@@ -19,6 +20,7 @@ class _BookPageState extends State<BookPage> {
   List books = [];
   var book;
   InAppWebViewController? webViewController;
+  late WebViewController webController; // Use nullable type if null is possible
 
   @override
   void initState() {
@@ -41,6 +43,28 @@ class _BookPageState extends State<BookPage> {
       });
       if (foundBook.isNotEmpty) {
         book = foundBook;
+        if (book['googleDocId'].isNotEmpty) {
+          book['path'] =
+              "https://docs.google.com/document/d/e/${book['googleDocId']}/pub?embedded=true";
+          webController = WebViewController()
+            ..setJavaScriptMode(JavaScriptMode.unrestricted)
+            ..setBackgroundColor(const Color(0x00000000))
+            ..setNavigationDelegate(
+              NavigationDelegate(
+                onProgress: (int progress) {
+                  // Update loading bar.
+                },
+                onPageStarted: (String url) {
+                  print(url);
+                },
+                onPageFinished: (String url) {
+                  print(url);
+                },
+                onHttpError: (HttpResponseError error) {},
+              ),
+            )
+            ..loadRequest(Uri.parse(book['path']));
+        }
       }
     });
   }
@@ -55,34 +79,30 @@ class _BookPageState extends State<BookPage> {
             context.go('/sach');
           },
         ),
-        title: Row(
+        title: Wrap(
           children: [
             Icon(
-              Icons.map,
+              Icons.library_books_rounded,
               color: ColorConstants.libraryColor,
             ),
             const SizedBox(
               width: 8,
             ),
-            Text(book != null ? book['name'] : 'Đọc Sách'),
+            Text(
+              book != null ? book['name'] : 'Đọc Sách',
+              overflow: TextOverflow.ellipsis,
+            ),
           ],
         ),
         backgroundColor: ColorConstants.whiteBackdround,
       ),
-      body: InAppWebView(
-        initialUrlRequest: URLRequest(
-          url: WebUri("https://flutter.dev"),
-        ),
-        onWebViewCreated: (controller) {
-          webViewController = controller;
-        },
-        onLoadStart: (controller, url) {
-          print("Started loading: $url");
-        },
-        onLoadStop: (controller, url) {
-          print("Finished loading: $url");
-        },
-      ),
+      body: Builder(builder: (context) {
+        if (book != null) {
+          return WebViewWidget(controller: webController);
+        } else {
+          return SizedBox();
+        }
+      }),
     );
   }
 }
