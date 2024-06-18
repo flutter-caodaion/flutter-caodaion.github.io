@@ -28,6 +28,7 @@ class _BookPageState extends State<BookPage> {
   String statusMessage = "Đang tải nội dung sách ...";
   String docContent = "";
   List<InlineSpan> styledTextSpans = [];
+  List<ArchiveFile> _archive = []; // Initialize _archive as an empty list
 
   @override
   void initState() {
@@ -102,6 +103,7 @@ class _BookPageState extends State<BookPage> {
 
     // Decode the bytes to a Zip archive
     final archive = ZipDecoder().decodeBytes(bytes);
+    _archive = List.of(archive);
 
     // Variables to hold extracted content
     String documentXml = '';
@@ -130,32 +132,7 @@ class _BookPageState extends State<BookPage> {
 
       // Extract text and apply styles
       styledTextSpans = _getTextSpansFromXml(document, styles);
-
-      // Extract and display images
-      await _extractAndDisplayImages(imagesMap);
     }
-  }
-
-  Future<void> _extractAndDisplayImages(
-      Map<String, List<int>> imagesMap) async {
-    final directory = await getTemporaryDirectory();
-
-    imagesMap.forEach((imageName, imageBytes) async {
-      final filePath = '${directory.path}/${imageName.split('/').lastOrNull}.png';
-      final file = File(filePath);
-      await file.writeAsBytes(imageBytes);
-
-      setState(() {
-        styledTextSpans.add(
-          WidgetSpan(
-            child: Image.file(
-              file,
-              fit: BoxFit.contain, // Adjust the fit as per your UI requirement
-            ),
-          ),
-        );
-      });
-    });
   }
 
   List<InlineSpan> _getTextSpansFromXml(
@@ -173,7 +150,8 @@ class _BookPageState extends State<BookPage> {
           final text = textElement.text;
 
           // Default style
-          TextStyle textStyle = TextStyle(color: Colors.black, fontSize: 14.0);
+          TextStyle textStyle =
+              const TextStyle(color: Colors.black, fontSize: 14.0);
 
           // Apply styles from the run properties
           final runProperties = run.findElements('w:rPr').firstOrNull;
@@ -185,12 +163,65 @@ class _BookPageState extends State<BookPage> {
           // Create a TextSpan with the text and style
           textSpans.add(TextSpan(text: text, style: textStyle));
         }
+        final drawingElements = run.findElements('w:drawing');
+        for (var drawing in drawingElements) {
+          final imageData = drawing.findElements('wp:inline').firstOrNull;
+          if (imageData != null) {
+            final imageDataElement =
+                imageData.findAllElements('a:blip').firstOrNull;
+            final imageId = imageDataElement?.getAttribute('r:embed');
+
+            if (imageId != null) {
+              final imageBytes = _getImageBytesFromId(imageId, document);
+              if (imageBytes != null) {
+                // Display the image using WidgetSpan
+                textSpans.add(
+                  WidgetSpan(
+                    child: Image.memory(
+                      Uint8List.fromList(imageBytes),
+                      fit: BoxFit.contain, // Adjust fit as per your UI design
+                    ),
+                  ),
+                );
+              }
+            }
+          }
+        }
       }
       // Add a new line after each paragraph
-      textSpans.add(TextSpan(text: '\n'));
+      textSpans.add(const TextSpan(text: '\n'));
     }
 
     return textSpans;
+  }
+
+  List<int>? _getImageBytesFromId(String imageId, XmlDocument document) {
+    // Find the image data from the document based on imageId
+    final imageDataElement =
+        document.findAllElements('pic:pic').firstWhere((element) {
+      final blipId = element
+          .findAllElements('a:blip')
+          .firstOrNull
+          ?.getAttribute('r:embed');
+      return blipId == imageId;
+    });
+
+    if (imageDataElement != null) {
+      // Extract and return image bytes
+      final imageData =
+          imageDataElement.findAllElements('pic:cNvPr').firstOrNull;
+      final imageRelId = imageData?.getAttribute('name');
+      if (imageRelId != null) {
+        final zipEntryName = 'word/media/$imageRelId';
+        final archiveFile =
+            _archive.firstWhere((file) => file.name == zipEntryName);
+        if (archiveFile != null) {
+          return archiveFile.content;
+        }
+      }
+    }
+
+    return null;
   }
 
   TextStyle _applyStylesFromProperties(
