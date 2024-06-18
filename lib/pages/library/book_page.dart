@@ -224,6 +224,11 @@ class _BookPageState extends State<BookPage> {
   }
 
   @override
+  void dispose() {
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
@@ -255,7 +260,7 @@ class _BookPageState extends State<BookPage> {
           return styledTextSpans.isNotEmpty
               ? SingleChildScrollView(
                   child: Padding(
-                    padding: const EdgeInsets.all(8.0),
+                    padding: const EdgeInsets.all(16.0),
                     child: RichText(
                       text: TextSpan(children: styledTextSpans),
                     ),

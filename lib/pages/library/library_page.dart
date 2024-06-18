@@ -75,7 +75,7 @@ class _LibraryPageState extends State<LibraryPage> {
             ),
           ),
           SliverToBoxAdapter(
-            child: Padding(
+            child: _displayBooks.isNotEmpty ? Padding(
               padding: const EdgeInsets.all(8.0),
               child: Wrap(
                 alignment: WrapAlignment.center,
@@ -191,7 +191,7 @@ class _LibraryPageState extends State<LibraryPage> {
                   );
                 }).toList(),
               ),
-            ),
+            ) : LinearProgressIndicator(),
           ),
           const SliverToBoxAdapter(
             child: SizedBox(
