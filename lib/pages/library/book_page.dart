@@ -6,11 +6,11 @@ import 'package:archive/archive.dart';
 import 'package:caodaion/constants/constants.dart';
 import 'package:caodaion/pages/library/service/library_service.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:http/http.dart' as http;
 import 'package:path_provider/path_provider.dart';
 import 'package:xml/xml.dart';
-
 
 class BookPage extends StatefulWidget {
   final String slug;
@@ -106,13 +106,17 @@ class _BookPageState extends State<BookPage> {
     // Variables to hold extracted content
     String documentXml = '';
     String stylesXml = '';
+    Map<String, List<int>> imagesMap = {};
 
-    // Extract the required XML files
+    // Extract the required XML files and images
     for (var file in archive) {
       if (file.name == 'word/document.xml') {
         documentXml = utf8.decode(file.content);
       } else if (file.name == 'word/styles.xml') {
         stylesXml = utf8.decode(file.content);
+      } else if (file.name.startsWith('word/media/')) {
+        // Extract image bytes
+        imagesMap[file.name] = file.content;
       }
     }
 
@@ -126,7 +130,32 @@ class _BookPageState extends State<BookPage> {
 
       // Extract text and apply styles
       styledTextSpans = _getTextSpansFromXml(document, styles);
+
+      // Extract and display images
+      await _extractAndDisplayImages(imagesMap);
     }
+  }
+
+  Future<void> _extractAndDisplayImages(
+      Map<String, List<int>> imagesMap) async {
+    final directory = await getTemporaryDirectory();
+
+    imagesMap.forEach((imageName, imageBytes) async {
+      final filePath = '${directory.path}/word/media/$imageName';
+      final file = File(filePath);
+      await file.writeAsBytes(imageBytes);
+
+      setState(() {
+        styledTextSpans.add(
+          WidgetSpan(
+            child: Image.file(
+              file,
+              fit: BoxFit.contain, // Adjust the fit as per your UI requirement
+            ),
+          ),
+        );
+      });
+    });
   }
 
   List<InlineSpan> _getTextSpansFromXml(
@@ -261,7 +290,7 @@ class _BookPageState extends State<BookPage> {
                 )
               : Center(child: Text(statusMessage));
         } else {
-          return SizedBox();
+          return const SizedBox();
         }
       }),
     );
