@@ -141,7 +141,7 @@ class _BookPageState extends State<BookPage> {
     final directory = await getTemporaryDirectory();
 
     imagesMap.forEach((imageName, imageBytes) async {
-      final filePath = '${directory.path}/word/media/$imageName';
+      final filePath = '${directory.path}/${imageName.split('/').lastOrNull}.png';
       final file = File(filePath);
       await file.writeAsBytes(imageBytes);
 
