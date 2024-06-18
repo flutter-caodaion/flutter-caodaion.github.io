@@ -5,17 +5,12 @@ import 'dart:io';
 import 'package:archive/archive.dart';
 import 'package:caodaion/constants/constants.dart';
 import 'package:caodaion/pages/library/service/library_service.dart';
-import 'package:docx_template/docx_template.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:go_router/go_router.dart';
-import 'package:webview_flutter/webview_flutter.dart';
 import 'package:http/http.dart' as http;
-import 'package:path_provider/path_provider.dart'; // To get the local file path
-import 'package:open_file/open_file.dart'; // To open the file
-import 'dart:typed_data';
-
+import 'package:path_provider/path_provider.dart';
 import 'package:xml/xml.dart';
+
 
 class BookPage extends StatefulWidget {
   final String slug;
@@ -30,8 +25,6 @@ class _BookPageState extends State<BookPage> {
   LibraryService libraryService = LibraryService();
   List books = [];
   var book;
-  InAppWebViewController? webViewController;
-  late WebViewController webController; // Use nullable type if null is possible
   String statusMessage = "Đang tải nội dung sách ...";
   String docContent = "";
   List<InlineSpan> styledTextSpans = [];
