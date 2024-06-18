@@ -143,9 +143,22 @@ class _BookPageState extends State<BookPage> {
     final paragraphs = document.findAllElements('w:p');
 
     for (var paragraph in paragraphs) {
+      // Check for paragraph alignment
+      final pPr = paragraph.findAllElements('w:pPr').firstOrNull;
+      TextAlign textAlign = TextAlign.left; // Default alignment
+      if (pPr != null) {
+        final alignmentElement = pPr.findAllElements('w:jc').firstOrNull;
+        if (alignmentElement != null) {
+          final alignmentValue = alignmentElement.getAttribute('w:val');
+          textAlign = _getTextAlignFromString(alignmentValue);
+        }
+      }
+
       final runs = paragraph.findAllElements('w:r');
+      final paragraphSpans = <InlineSpan>[];
+
       for (var run in runs) {
-        final textElement = run.findElements('w:t').firstOrNull;
+        final textElement = run.findAllElements('w:t').firstOrNull;
         if (textElement != null) {
           final text = textElement.text;
 
@@ -154,18 +167,19 @@ class _BookPageState extends State<BookPage> {
               const TextStyle(color: Colors.black, fontSize: 14.0);
 
           // Apply styles from the run properties
-          final runProperties = run.findElements('w:rPr').firstOrNull;
+          final runProperties = run.findAllElements('w:rPr').firstOrNull;
           if (runProperties != null) {
             textStyle =
                 _applyStylesFromProperties(runProperties, textStyle, styles);
           }
 
           // Create a TextSpan with the text and style
-          textSpans.add(TextSpan(text: text, style: textStyle));
+          paragraphSpans.add(TextSpan(text: text, style: textStyle));
         }
-        final drawingElements = run.findElements('w:drawing');
+
+        final drawingElements = run.findAllElements('w:drawing');
         for (var drawing in drawingElements) {
-          final imageData = drawing.findElements('wp:inline').firstOrNull;
+          final imageData = drawing.findAllElements('wp:inline').firstOrNull;
           if (imageData != null) {
             final imageDataElement =
                 imageData.findAllElements('a:blip').firstOrNull;
@@ -175,7 +189,7 @@ class _BookPageState extends State<BookPage> {
               final imageBytes = _getImageBytesFromId(imageId, document);
               if (imageBytes != null) {
                 // Display the image using WidgetSpan
-                textSpans.add(
+                paragraphSpans.add(
                   WidgetSpan(
                     child: Image.memory(
                       Uint8List.fromList(imageBytes),
@@ -188,6 +202,20 @@ class _BookPageState extends State<BookPage> {
           }
         }
       }
+
+      // Wrap the paragraphSpans in a WidgetSpan with alignment
+      textSpans.add(
+        WidgetSpan(
+          child: Align(
+            alignment: _getAlignmentFromTextAlign(textAlign),
+            child: RichText(
+              text: TextSpan(children: paragraphSpans),
+              textAlign: textAlign,
+            ),
+          ),
+        ),
+      );
+
       // Add a new line after each paragraph
       textSpans.add(const TextSpan(text: '\n'));
     }
@@ -229,22 +257,22 @@ class _BookPageState extends State<BookPage> {
     TextStyle textStyle = baseStyle;
 
     // Check for bold
-    if (runProperties.findElements('w:b').isNotEmpty) {
+    if (runProperties.findAllElements('w:b').isNotEmpty) {
       textStyle = textStyle.copyWith(fontWeight: FontWeight.bold);
     }
 
     // Check for italic
-    if (runProperties.findElements('w:i').isNotEmpty) {
+    if (runProperties.findAllElements('w:i').isNotEmpty) {
       textStyle = textStyle.copyWith(fontStyle: FontStyle.italic);
     }
 
     // Check for underline
-    if (runProperties.findElements('w:u').isNotEmpty) {
+    if (runProperties.findAllElements('w:u').isNotEmpty) {
       textStyle = textStyle.copyWith(decoration: TextDecoration.underline);
     }
 
     // Apply font size if specified
-    final fontSizeElement = runProperties.findElements('w:sz').firstOrNull;
+    final fontSizeElement = runProperties.findAllElements('w:sz').firstOrNull;
     if (fontSizeElement != null) {
       final sizeValue = fontSizeElement.getAttribute('w:val');
       if (sizeValue != null) {
@@ -255,7 +283,7 @@ class _BookPageState extends State<BookPage> {
     }
 
     // Apply color if specified
-    final colorElement = runProperties.findElements('w:color').firstOrNull;
+    final colorElement = runProperties.findAllElements('w:color').firstOrNull;
     if (colorElement != null) {
       final colorValue = colorElement.getAttribute('w:val');
       if (colorValue != null) {
@@ -266,6 +294,35 @@ class _BookPageState extends State<BookPage> {
     // Handle other properties like fonts, etc. here
 
     return textStyle;
+  }
+
+  // Function to map alignment string to TextAlign
+  TextAlign _getTextAlignFromString(String? alignmentValue) {
+    switch (alignmentValue) {
+      case 'center':
+        return TextAlign.center;
+      case 'right':
+        return TextAlign.right;
+      case 'both':
+        return TextAlign.justify;
+      default:
+        return TextAlign.left;
+    }
+  }
+
+// Function to map TextAlign to Alignment
+  Alignment _getAlignmentFromTextAlign(TextAlign textAlign) {
+    switch (textAlign) {
+      case TextAlign.center:
+        return Alignment.center;
+      case TextAlign.right:
+        return Alignment.centerRight;
+      case TextAlign.justify:
+        return Alignment
+            .centerLeft; // No direct equivalent for justify in Alignment
+      default:
+        return Alignment.centerLeft;
+    }
   }
 
   // Convert hexadecimal color string to Color
