@@ -209,6 +209,9 @@ class _AlarmHomeState extends State<AlarmHome> {
     loopAlarms.removeWhere((la) => la['id'] == id);
     await prefs.setString('loopAlarms', jsonEncode(loopAlarms.toList()));
     storeLoopAlarm();
+    Alarm.stop(id).then((_) {
+      loadAlarms(0);
+    });
   }
 
   Future<void> checkAndroidNotificationPermission() async {
