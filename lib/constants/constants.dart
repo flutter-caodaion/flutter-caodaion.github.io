@@ -209,3 +209,9 @@ class AlarmConstants {
     },
   ];
 }
+
+class ContentContants {
+  static double defaultFontSizeDesktop = 16.0;
+  static double defaultFontSizeTablet = 14.0;
+  static double defaultFontSizeMobile = 13.0;
+}

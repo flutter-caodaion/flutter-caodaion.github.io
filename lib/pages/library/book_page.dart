@@ -5,10 +5,11 @@ import 'package:caodaion/constants/constants.dart';
 import 'package:caodaion/pages/library/service/library_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_html/flutter_html.dart';
 import 'package:go_router/go_router.dart';
 import 'package:http/http.dart' as http;
+import 'package:responsive_framework/responsive_framework.dart';
 import 'package:xml/xml.dart';
-
 
 class BookPage extends StatefulWidget {
   final String slug;
@@ -71,7 +72,6 @@ class _BookPageState extends State<BookPage> {
       final response = await http.get(Uri.parse(url));
 
       if (response.statusCode == 200) {
-
         // Extract the text from the .docx file along with styles
         await _extractTextAndStylesFromDocx(response.bodyBytes);
         setState(() {
@@ -91,7 +91,6 @@ class _BookPageState extends State<BookPage> {
   }
 
   Future<void> _extractTextAndStylesFromDocx(bytes) async {
-
     // Decode the bytes to a Zip archive
     final archive = ZipDecoder().decodeBytes(bytes);
     _archive = List.of(archive);
@@ -129,7 +128,6 @@ class _BookPageState extends State<BookPage> {
   List<InlineSpan> _getTextSpansFromXml(
       XmlDocument document, XmlDocument styles) {
     final textSpans = <InlineSpan>[];
-
     // Find all the paragraphs
     final paragraphs = document.findAllElements('w:p');
 
@@ -137,11 +135,27 @@ class _BookPageState extends State<BookPage> {
       // Check for paragraph alignment
       final pPr = paragraph.findAllElements('w:pPr').firstOrNull;
       TextAlign textAlign = TextAlign.left; // Default alignment
+      double fontSize = ResponsiveBreakpoints.of(context).isMobile
+          ? ContentContants.defaultFontSizeMobile
+          : ResponsiveBreakpoints.of(context).isTablet
+              ? ContentContants.defaultFontSizeTablet
+              : ResponsiveBreakpoints.of(context).isDesktop
+                  ? ContentContants.defaultFontSizeDesktop
+                  : ContentContants.defaultFontSizeTablet;
+      FontWeight fontWeight = FontWeight.normal;
       if (pPr != null) {
         final alignmentElement = pPr.findAllElements('w:jc').firstOrNull;
         if (alignmentElement != null) {
           final alignmentValue = alignmentElement.getAttribute('w:val');
           textAlign = _getTextAlignFromString(alignmentValue);
+        }
+        final paragraphStyleElement =
+            pPr.findAllElements('w:pStyle').firstOrNull;
+        if (paragraphStyleElement != null) {
+          final paragraphStyleValue =
+              paragraphStyleElement.getAttribute('w:val');
+          fontSize = _getFontSizeFromParagraphStyle(paragraphStyleValue);
+          fontWeight = _getFontWeightFromParagraphStyle(paragraphStyleValue);
         }
       }
 
@@ -152,10 +166,12 @@ class _BookPageState extends State<BookPage> {
         final textElement = run.findAllElements('w:t').firstOrNull;
         if (textElement != null) {
           final text = textElement.text;
-
           // Default style
-          TextStyle textStyle =
-              const TextStyle(color: Colors.black, fontSize: 14.0);
+          TextStyle textStyle = TextStyle(
+            color: Colors.black,
+            fontSize: fontSize,
+            fontWeight: fontWeight,
+          );
 
           // Apply styles from the run properties
           final runProperties = run.findAllElements('w:rPr').firstOrNull;
@@ -225,19 +241,14 @@ class _BookPageState extends State<BookPage> {
       return blipId == imageId;
     });
 
-    if (imageDataElement != null) {
-      // Extract and return image bytes
-      final imageData =
-          imageDataElement.findAllElements('pic:cNvPr').firstOrNull;
-      final imageRelId = imageData?.getAttribute('name');
-      if (imageRelId != null) {
-        final zipEntryName = 'word/media/$imageRelId';
-        final archiveFile =
-            _archive.firstWhere((file) => file.name == zipEntryName);
-        if (archiveFile != null) {
-          return archiveFile.content;
-        }
-      }
+    // Extract and return image bytes
+    final imageData = imageDataElement.findAllElements('pic:cNvPr').firstOrNull;
+    final imageRelId = imageData?.getAttribute('name');
+    if (imageRelId != null) {
+      final zipEntryName = 'word/media/$imageRelId';
+      final archiveFile =
+          _archive.firstWhere((file) => file.name == zipEntryName);
+      return archiveFile.content;
     }
 
     return null;
@@ -298,6 +309,65 @@ class _BookPageState extends State<BookPage> {
         return TextAlign.justify;
       default:
         return TextAlign.left;
+    }
+  }
+
+  double _getFontSizeFromFontSize(double fontSize) {
+    return ResponsiveBreakpoints.of(context).isMobile
+        ? fontSize /
+            (fontSize / (fontSize + ContentContants.defaultFontSizeMobile))
+        : ResponsiveBreakpoints.of(context).isTablet
+            ? fontSize /
+                (fontSize / (fontSize + ContentContants.defaultFontSizeTablet))
+            : ResponsiveBreakpoints.of(context).isDesktop
+                ? fontSize /
+                    (fontSize /
+                        (fontSize + ContentContants.defaultFontSizeDesktop))
+                : fontSize /
+                    (fontSize /
+                        (fontSize + ContentContants.defaultFontSizeTablet));
+  }
+
+  // Function to map alignment string to TextAlign
+  double _getFontSizeFromParagraphStyle(String? paragraphStyleValue) {
+    switch (paragraphStyleValue) {
+      case 'Title':
+        return _getFontSizeFromFontSize(26.0);
+      case 'Heading1':
+        return _getFontSizeFromFontSize(20.0);
+      case 'Subtitle':
+        return _getFontSizeFromFontSize(15.0);
+      case 'Heading2':
+        return _getFontSizeFromFontSize(16.0);
+      case 'Heading3':
+        return _getFontSizeFromFontSize(14.0);
+      case 'Heading4':
+        return _getFontSizeFromFontSize(12.0);
+      case 'Heading5':
+        return _getFontSizeFromFontSize(11.0);
+      default:
+        return _getFontSizeFromFontSize(16.0);
+    }
+  }
+
+  FontWeight _getFontWeightFromParagraphStyle(String? paragraphStyleValue) {
+    switch (paragraphStyleValue) {
+      case 'Title':
+        return FontWeight.bold;
+      case 'Heading1':
+        return FontWeight.bold;
+      case 'Subtitle':
+        return FontWeight.normal;
+      case 'Heading2':
+        return FontWeight.bold;
+      case 'Heading3':
+        return FontWeight.normal;
+      case 'Heading4':
+        return FontWeight.normal;
+      case 'Heading5':
+        return FontWeight.normal;
+      default:
+        return FontWeight.normal;
     }
   }
 
@@ -362,8 +432,10 @@ class _BookPageState extends State<BookPage> {
               ? SingleChildScrollView(
                   child: Padding(
                     padding: const EdgeInsets.all(16.0),
-                    child: RichText(
-                      text: TextSpan(children: styledTextSpans),
+                    child: SelectableText.rich(
+                      TextSpan(
+                        children: styledTextSpans,
+                      ),
                     ),
                   ),
                 )
