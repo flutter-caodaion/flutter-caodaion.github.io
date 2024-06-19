@@ -1,5 +1,6 @@
 // library_page.dart
 import 'dart:convert';
+import 'dart:math';
 import 'package:archive/archive.dart';
 import 'package:caodaion/constants/constants.dart';
 import 'package:caodaion/pages/library/service/library_service.dart';
@@ -9,6 +10,7 @@ import 'package:flutter_html/flutter_html.dart';
 import 'package:go_router/go_router.dart';
 import 'package:http/http.dart' as http;
 import 'package:responsive_framework/responsive_framework.dart';
+import 'package:shimmer/shimmer.dart';
 import 'package:xml/xml.dart';
 
 class BookPage extends StatefulWidget {
@@ -439,7 +441,35 @@ class _BookPageState extends State<BookPage> {
                     ),
                   ),
                 )
-              : Center(child: Text(statusMessage));
+              : SingleChildScrollView(
+                  child: Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: List.generate(100, (i) {
+                        return Builder(builder: (BuildContext context) {
+                          double screenWidth =
+                              MediaQuery.of(context).size.width;
+                          return SizedBox(
+                            width: double.parse(Random()
+                                .nextInt(int.parse(screenWidth.toString()))
+                                .toString()),
+                            height:
+                                double.parse(Random().nextInt(100).toString()),
+                            child: Shimmer.fromColors(
+                              baseColor: const Color(0xffe9e8e8),
+                              highlightColor: Colors.white,
+                              child: Card(
+                                color: ColorConstants.whiteBackdround,
+                                child: const SizedBox(),
+                              ),
+                            ),
+                          );
+                        });
+                      }),
+                    ),
+                  ),
+                );
         } else {
           return const SizedBox();
         }

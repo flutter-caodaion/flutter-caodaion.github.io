@@ -222,7 +222,7 @@ class _LibraryPageState extends State<LibraryPage> {
                             width: cardWidth,
                             height: 300,
                             child: Shimmer.fromColors(
-                              baseColor: const Color(0xffeaf1fb),
+                              baseColor: const Color(0xffe9e8e8),
                               highlightColor: Colors.white,
                               child: Card(
                                 color: ColorConstants.whiteBackdround,
