@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:caodaion/constants/constants.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:responsive_framework/responsive_framework.dart';
@@ -78,160 +79,165 @@ class _ResponsiveScaffoldState extends State<ResponsiveScaffold> {
 
   @override
   Widget build(BuildContext context) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        if (constraints.maxWidth >= 600) {
-          return SafeArea(
-            child: Scaffold(
-              body: Row(
-                children: [
-                  NavigationRail(
-                    selectedIndex: _selectedIndex(context),
+    SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
+      statusBarColor: Colors.transparent, // Set status bar color to transparent
+    ));
+    return Scaffold(
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          if (constraints.maxWidth >= 600) {
+            return SafeArea(
+              child: Scaffold(
+                body: Row(
+                  children: [
+                    NavigationRail(
+                      selectedIndex: _selectedIndex(context),
+                      backgroundColor: ColorConstants.primaryBackground,
+                      indicatorColor: ColorConstants.primaryIndicatorBackground,
+                      onDestinationSelected: (index) =>
+                          _onItemTapped(context, index),
+                      labelType: NavigationRailLabelType.all,
+                      destinations: <NavigationRailDestination>[
+                        NavigationRailDestination(
+                          icon: Tooltip(
+                            message: "Trang chủ",
+                            child: SvgPicture.asset(
+                              'assets/icons/caodaion-logo.svg',
+                              height: 32,
+                              width: 32,
+                            ),
+                          ),
+                          label: const Text('CaoDaiON'),
+                          padding: const EdgeInsets.only(top: 4, bottom: 4),
+                        ),
+                        NavigationRailDestination(
+                          icon: Tooltip(
+                            message: "Kinh Cúng Tứ Thời & Quan Hôn Tang Tế",
+                            child: SvgPicture.asset(
+                              'assets/icons/book.svg',
+                            ),
+                          ),
+                          label: const Text('Kinh'),
+                          padding: const EdgeInsets.only(top: 4, bottom: 4),
+                        ),
+                        NavigationRailDestination(
+                          icon: Tooltip(
+                            message: "Thánh Ngôn Hiệp Tuyển",
+                            child: SvgPicture.asset(
+                              'assets/icons/close_book.svg',
+                            ),
+                          ),
+                          label: const Text('TNHT'),
+                          padding: const EdgeInsets.only(top: 4, bottom: 4),
+                        ),
+                        NavigationRailDestination(
+                          icon: Tooltip(
+                            message: "Lịch âm dương",
+                            child: SvgPicture.asset(
+                              'assets/icons/calendar.svg',
+                            ),
+                          ),
+                          label: const Text('Lịch'),
+                          padding: const EdgeInsets.only(top: 4, bottom: 4),
+                        ),
+                        NavigationRailDestination(
+                          icon: Tooltip(
+                            message: "Các ứng dụng",
+                            child: SvgPicture.asset(
+                              'assets/icons/apps.svg',
+                            ),
+                          ),
+                          label: const Text('Ứng dụng'),
+                          padding: const EdgeInsets.only(top: 4, bottom: 4),
+                        ),
+                      ],
+                    ),
+                    Expanded(child: widget.child),
+                  ],
+                ),
+              ),
+            );
+          } else {
+            return SafeArea(
+              child: Scaffold(
+                body: widget.child,
+                bottomNavigationBar: Theme(
+                  data: Theme.of(context).copyWith(
+                    canvasColor: ColorConstants.primaryBackground,
+                  ),
+                  child: BottomNavigationBar(
+                    currentIndex: _selectedIndex(context),
+                    onTap: (index) => _onItemTapped(context, index),
+                    selectedItemColor: ColorConstants.primaryColor,
                     backgroundColor: ColorConstants.primaryBackground,
-                    indicatorColor: ColorConstants.primaryIndicatorBackground,
-                    onDestinationSelected: (index) =>
-                        _onItemTapped(context, index),
-                    labelType: NavigationRailLabelType.all,
-                    destinations: <NavigationRailDestination>[
-                      NavigationRailDestination(
+                    items: <BottomNavigationBarItem>[
+                      BottomNavigationBarItem(
                         icon: Tooltip(
-                          message: "Trang chủ",
+                          message: "Kinh Cúng Tứ Thời & Quan Hôn Tang Tế",
+                          child: SvgPicture.asset(
+                            'assets/icons/book.svg',
+                            color: _selectedIndex(context) == 0
+                                ? ColorConstants.primaryColor
+                                : Colors.black,
+                          ),
+                        ),
+                        label: 'Kinh',
+                      ),
+                      BottomNavigationBarItem(
+                        icon: Tooltip(
+                          message: "Thánh Ngôn Hiệp Tuyển",
+                          child: SvgPicture.asset(
+                            'assets/icons/close_book.svg',
+                            color: _selectedIndex(context) == 1
+                                ? ColorConstants.primaryColor
+                                : Colors.black,
+                          ),
+                        ),
+                        label: 'TNHT',
+                      ),
+                      BottomNavigationBarItem(
+                        icon: Tooltip(
+                          message: "Trang chủ CaoDaiON",
                           child: SvgPicture.asset(
                             'assets/icons/caodaion-logo.svg',
                             height: 32,
                             width: 32,
                           ),
                         ),
-                        label: const Text('CaoDaiON'),
-                        padding: const EdgeInsets.only(top: 4, bottom: 4),
+                        label: 'CaoDaiON',
                       ),
-                      NavigationRailDestination(
-                        icon: Tooltip(
-                          message: "Kinh Cúng Tứ Thời & Quan Hôn Tang Tế",
-                          child: SvgPicture.asset(
-                            'assets/icons/book.svg',
-                          ),
-                        ),
-                        label: const Text('Kinh'),
-                        padding: const EdgeInsets.only(top: 4, bottom: 4),
-                      ),
-                      NavigationRailDestination(
-                        icon: Tooltip(
-                          message: "Thánh Ngôn Hiệp Tuyển",
-                          child: SvgPicture.asset(
-                            'assets/icons/close_book.svg',
-                          ),
-                        ),
-                        label: const Text('TNHT'),
-                        padding: const EdgeInsets.only(top: 4, bottom: 4),
-                      ),
-                      NavigationRailDestination(
+                      BottomNavigationBarItem(
                         icon: Tooltip(
                           message: "Lịch âm dương",
                           child: SvgPicture.asset(
                             'assets/icons/calendar.svg',
+                            color: _selectedIndex(context) == 3
+                                ? ColorConstants.primaryColor
+                                : Colors.black,
                           ),
                         ),
-                        label: const Text('Lịch'),
-                        padding: const EdgeInsets.only(top: 4, bottom: 4),
+                        label: 'Lịch',
                       ),
-                      NavigationRailDestination(
+                      BottomNavigationBarItem(
                         icon: Tooltip(
                           message: "Các ứng dụng",
                           child: SvgPicture.asset(
                             'assets/icons/apps.svg',
+                            color: _selectedIndex(context) == 4
+                                ? ColorConstants.primaryColor
+                                : Colors.black,
                           ),
                         ),
-                        label: const Text('Ứng dụng'),
-                        padding: const EdgeInsets.only(top: 4, bottom: 4),
+                        label: 'Ứng dụng',
                       ),
                     ],
                   ),
-                  Expanded(child: widget.child),
-                ],
-              ),
-            ),
-          );
-        } else {
-          return SafeArea(
-            child: Scaffold(
-              body: widget.child,
-              bottomNavigationBar: Theme(
-                data: Theme.of(context).copyWith(
-                  canvasColor: ColorConstants.primaryBackground,
-                ),
-                child: BottomNavigationBar(
-                  currentIndex: _selectedIndex(context),
-                  onTap: (index) => _onItemTapped(context, index),
-                  selectedItemColor: ColorConstants.primaryColor,
-                  backgroundColor: ColorConstants.primaryBackground,
-                  items: <BottomNavigationBarItem>[
-                    BottomNavigationBarItem(
-                      icon: Tooltip(
-                        message: "Kinh Cúng Tứ Thời & Quan Hôn Tang Tế",
-                        child: SvgPicture.asset(
-                          'assets/icons/book.svg',
-                          color: _selectedIndex(context) == 0
-                              ? ColorConstants.primaryColor
-                              : Colors.black,
-                        ),
-                      ),
-                      label: 'Kinh',
-                    ),
-                    BottomNavigationBarItem(
-                      icon: Tooltip(
-                        message: "Thánh Ngôn Hiệp Tuyển",
-                        child: SvgPicture.asset(
-                          'assets/icons/close_book.svg',
-                          color: _selectedIndex(context) == 1
-                              ? ColorConstants.primaryColor
-                              : Colors.black,
-                        ),
-                      ),
-                      label: 'TNHT',
-                    ),
-                    BottomNavigationBarItem(
-                      icon: Tooltip(
-                        message: "Trang chủ CaoDaiON",
-                        child: SvgPicture.asset(
-                          'assets/icons/caodaion-logo.svg',
-                          height: 32,
-                          width: 32,
-                        ),
-                      ),
-                      label: 'CaoDaiON',
-                    ),
-                    BottomNavigationBarItem(
-                      icon: Tooltip(
-                        message: "Lịch âm dương",
-                        child: SvgPicture.asset(
-                          'assets/icons/calendar.svg',
-                          color: _selectedIndex(context) == 3
-                              ? ColorConstants.primaryColor
-                              : Colors.black,
-                        ),
-                      ),
-                      label: 'Lịch',
-                    ),
-                    BottomNavigationBarItem(
-                      icon: Tooltip(
-                        message: "Các ứng dụng",
-                        child: SvgPicture.asset(
-                          'assets/icons/apps.svg',
-                          color: _selectedIndex(context) == 4
-                              ? ColorConstants.primaryColor
-                              : Colors.black,
-                        ),
-                      ),
-                      label: 'Ứng dụng',
-                    ),
-                  ],
                 ),
               ),
-            ),
-          );
-        }
-      },
+            );
+          }
+        },
+      ),
     );
   }
 

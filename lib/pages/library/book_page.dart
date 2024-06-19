@@ -444,16 +444,12 @@ class _BookPageState extends State<BookPage> {
               : SingleChildScrollView(
                   child: Padding(
                     padding: const EdgeInsets.all(16.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                    child: Wrap(
+                      alignment: WrapAlignment.start,
                       children: List.generate(100, (i) {
                         return Builder(builder: (BuildContext context) {
-                          double screenWidth =
-                              MediaQuery.of(context).size.width;
                           return SizedBox(
-                            width: double.parse(Random()
-                                .nextInt(int.parse(screenWidth.toString()))
-                                .toString()),
+                            width: double.parse(Random().nextInt(1080).toString()),
                             height:
                                 double.parse(Random().nextInt(100).toString()),
                             child: Shimmer.fromColors(
