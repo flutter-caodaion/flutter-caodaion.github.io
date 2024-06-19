@@ -65,7 +65,7 @@ class _GenimiAIPageState extends State<GenimiAIPage> {
           leading: IconButton(
             icon: const Icon(Icons.arrow_back_ios),
             onPressed: () {
-              context.go('/');
+              context.go('/apps');
             },
           ),
           title: Row(

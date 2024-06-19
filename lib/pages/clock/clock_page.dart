@@ -49,7 +49,7 @@ class _ClockPageState extends State<ClockPage>
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios),
           onPressed: () {
-            context.go('/');
+            context.go('/apps');
           },
         ),
         title: Row(

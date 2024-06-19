@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:responsive_framework/responsive_framework.dart';
+import 'package:shimmer/shimmer.dart';
 
 class LibraryPage extends StatefulWidget {
   const LibraryPage({super.key});
@@ -50,7 +51,7 @@ class _LibraryPageState extends State<LibraryPage> {
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios),
           onPressed: () {
-            context.go('/');
+            context.go('/apps');
           },
         ),
         title: Row(
@@ -196,8 +197,42 @@ class _LibraryPageState extends State<LibraryPage> {
                       }).toList(),
                     ),
                   )
-                : const Center(
-                    child: LinearProgressIndicator(),
+                : Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Wrap(
+                      alignment: WrapAlignment.center,
+                      spacing: 8.0,
+                      children: List.generate(12, (i) {
+                        return Builder(builder: (BuildContext context) {
+                          double screenWidth =
+                              MediaQuery.of(context).size.width;
+                          double cardWidth = (screenWidth /
+                                  (ResponsiveBreakpoints.of(context).isMobile
+                                      ? 1
+                                      : ResponsiveBreakpoints.of(context)
+                                              .isTablet
+                                          ? 2
+                                          : ResponsiveBreakpoints.of(context)
+                                                  .isDesktop
+                                              ? 5
+                                              : 1)) -
+                              8 -
+                              2;
+                          return SizedBox(
+                            width: cardWidth,
+                            height: 300,
+                            child: Shimmer.fromColors(
+                              baseColor: const Color(0xffeaf1fb),
+                              highlightColor: Colors.white,
+                              child: Card(
+                                color: ColorConstants.whiteBackdround,
+                                child: const SizedBox(),
+                              ),
+                            ),
+                          );
+                        });
+                      }),
+                    ),
                   ),
           ),
           const SliverToBoxAdapter(
