@@ -1,7 +1,5 @@
 // library_page.dart
 import 'dart:convert';
-import 'dart:io';
-
 import 'package:archive/archive.dart';
 import 'package:caodaion/constants/constants.dart';
 import 'package:caodaion/pages/library/service/library_service.dart';
@@ -9,8 +7,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:http/http.dart' as http;
-import 'package:path_provider/path_provider.dart';
 import 'package:xml/xml.dart';
+
 
 class BookPage extends StatefulWidget {
   final String slug;
@@ -73,14 +71,9 @@ class _BookPageState extends State<BookPage> {
       final response = await http.get(Uri.parse(url));
 
       if (response.statusCode == 200) {
-        final directory = await getTemporaryDirectory();
-        final filePath = '${directory.path}/google_doc.docx';
-        final file = File(filePath);
-
-        await file.writeAsBytes(response.bodyBytes);
 
         // Extract the text from the .docx file along with styles
-        await _extractTextAndStylesFromDocx(file);
+        await _extractTextAndStylesFromDocx(response.bodyBytes);
         setState(() {
           statusMessage = "Document Loaded";
         });
@@ -97,9 +90,7 @@ class _BookPageState extends State<BookPage> {
     }
   }
 
-  Future<void> _extractTextAndStylesFromDocx(File file) async {
-    // Read the .docx file as bytes
-    final bytes = file.readAsBytesSync();
+  Future<void> _extractTextAndStylesFromDocx(bytes) async {
 
     // Decode the bytes to a Zip archive
     final archive = ZipDecoder().decodeBytes(bytes);
