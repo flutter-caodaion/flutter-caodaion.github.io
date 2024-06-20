@@ -10,6 +10,7 @@ import 'package:flutter_svg/svg.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:go_router/go_router.dart';
 import 'package:latlong2/latlong.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class MapsPage extends StatefulWidget {
   const MapsPage({super.key});
@@ -39,7 +40,7 @@ class _MapsPageState extends State<MapsPage> {
   MapsService mapsService = MapsService();
   double searchRadius = 999999999999999;
 
-  Future<List<LatLng>> fetchRoute(LatLng start, LatLng end) async {
+  Future fetchRoute(LatLng start, LatLng end) async {
     final url =
         'http://router.project-osrm.org/route/v1/driving/${start.longitude},${start.latitude};${end.longitude},${end.latitude}?geometries=geojson';
     final response = await http.get(Uri.parse(url));
@@ -47,26 +48,123 @@ class _MapsPageState extends State<MapsPage> {
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body);
       final coords = data['routes'][0]['geometry']['coordinates'] as List;
-      return coords.map((c) => LatLng(c[1], c[0])).toList();
+      return {
+        "coords": coords.map((c) => LatLng(c[1], c[0])).toList(),
+        "data": data,
+      };
     } else {
       throw Exception('Failed to load route');
     }
   }
 
   List<LatLng> routePoints = [];
+  var routeData = null;
+  String convertDistance(double meters) {
+    if (meters >= 1000) {
+      double kilometers = meters / 1000;
+      return '${kilometers.toStringAsFixed(1)} km';
+    } else {
+      return '${meters.toString()} m';
+    }
+  }
 
-  Future<void> _getRoute(LatLng start, LatLng end) async {
-    final points = await fetchRoute(start, end);
-    setState(() {
-      routePoints = points;
-    });
+  String convertDuration(double seconds) {
+    int hours = seconds ~/ 3600; // Number of whole hours
+    int minutes = (seconds % 3600) ~/ 60; // Number of whole minutes
+    String hoursText = (hours > 0) ? '$hours giờ ' : ''; // Hours text
+    String minutesText = '$minutes phút'; // Minutes text
+    return hoursText + minutesText;
+  }
 
-    if (points.isNotEmpty) {
-      final bounds = calculateBounds(points);
-      _mapController.fitBounds(
-        bounds,
-        options: FitBoundsOptions(padding: EdgeInsets.all(20)),
-      );
+  _openWithGoogleMaps(element) async {
+    const baseUrl = 'https://www.google.com/maps/dir/';
+    var coordinates =
+        "${_currentPosition.latitude},${_currentPosition.longitude}/${double.parse(element['latLng'].split(',')[0])},${double.parse(element['latLng'].split(',')[1])}";
+    final Uri url = Uri.parse(baseUrl + coordinates);
+    if (!await launchUrl(url)) {
+      throw Exception('Could not launch $url');
+    }
+  }
+
+  _showRoutePoints(element) {
+    final legs = routeData['routes'][0]['legs'][0];
+    showModalBottomSheet(
+      barrierColor: Colors.transparent,
+      context: context,
+      builder: (BuildContext context) {
+        return Container(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              if (legs != null)
+                Text(
+                  "${convertDuration(legs['duration'])} (${convertDistance(legs['distance'])})",
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 20.0,
+                  ),
+                ),
+              Text(
+                "Chỉ đường từ vị trí của bạn đến ${element['name']} (${element['address']})",
+              ),
+              const SizedBox(
+                height: 24,
+              ),
+              Wrap(
+                children: [
+                  ElevatedButton(
+                    onPressed: () {
+                      _openWithGoogleMaps(element);
+                    },
+                    child: Wrap(
+                      alignment: WrapAlignment.center,
+                      crossAxisAlignment: WrapCrossAlignment.center,
+                      children: [
+                        SvgPicture.asset(
+                          'assets/icons/Google_Maps_icon_(2020).svg',
+                          height: 24,
+                          width: 24,
+                        ),
+                        const SizedBox(
+                          width: 8,
+                        ),
+                        const Text(
+                          "Mở trên Google Maps",
+                          style: TextStyle(
+                            color: Colors.black,
+                          ),
+                        )
+                      ],
+                    ),
+                  ),
+                ],
+              )
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Future<void> _getRoute(LatLng start, LatLng end, element) async {
+    final fetchedRoute = await fetchRoute(start, end);
+    if (fetchedRoute.isNotEmpty) {
+      final points = fetchedRoute['coords'];
+      setState(() {
+        routePoints = points;
+        routeData = fetchedRoute['data'];
+        _showRoutePoints(element);
+      });
+
+      if (points.isNotEmpty) {
+        final bounds = calculateBounds(points);
+        _mapController.fitBounds(
+          bounds,
+          options: FitBoundsOptions(padding: EdgeInsets.all(20)),
+        );
+      }
     }
   }
 
@@ -116,7 +214,16 @@ class _MapsPageState extends State<MapsPage> {
   }
 
   _showMarkerDetails(element) {
+    _mapController.moveAndRotate(
+      LatLng(
+        double.parse(element['latLng'].split(',')[0]),
+        double.parse(element['latLng'].split(',')[1]),
+      ),
+      15,
+      0,
+    );
     showModalBottomSheet(
+      barrierColor: Colors.transparent,
       context: context,
       builder: (BuildContext context) {
         return Container(
@@ -170,12 +277,12 @@ class _MapsPageState extends State<MapsPage> {
                     ElevatedButton(
                       onPressed: () {
                         _getRoute(
-                          _currentPosition,
-                          LatLng(
-                            double.parse(element['latLng'].split(',')[0]),
-                            double.parse(element['latLng'].split(',')[1]),
-                          ),
-                        );
+                            _currentPosition,
+                            LatLng(
+                              double.parse(element['latLng'].split(',')[0]),
+                              double.parse(element['latLng'].split(',')[1]),
+                            ),
+                            element);
                         Navigator.of(context).pop();
                       },
                       child: const Row(
@@ -184,7 +291,7 @@ class _MapsPageState extends State<MapsPage> {
                           Text('Chỉ đường'),
                         ],
                       ),
-                    ),
+                    )
                 ],
               ),
             ],
@@ -348,9 +455,7 @@ class _MapsPageState extends State<MapsPage> {
                           alignment: Alignment.center,
                           padding: const EdgeInsets.all(50),
                           maxZoom: 15,
-                          markers: [
-                            ..._displayMarkers
-                          ],
+                          markers: [..._displayMarkers],
                           builder: (context, markers) {
                             return Container(
                               decoration: BoxDecoration(
