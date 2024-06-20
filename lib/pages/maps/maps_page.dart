@@ -330,7 +330,7 @@ class _MapsPageState extends State<MapsPage> {
   }
 
   List<Marker> _searchMarkers(LatLng location, double radius) {
-    final Distance distance = Distance();
+    const Distance distance = Distance();
     return _allMarkers.where((marker) {
       final double markerDistance = distance.as(
         LengthUnit.Meter,
