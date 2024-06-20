@@ -7,6 +7,7 @@ import 'package:caodaion/constants/constants.dart';
 import 'package:caodaion/pages/clock/screens/edit_alarm.dart';
 import 'package:caodaion/pages/clock/widgets/tile.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -69,6 +70,11 @@ class _AlarmHomeState extends State<AlarmHome> {
       });
       for (var element in loopAlarmList) {
         if (element['active'] == true) {
+          if (element['dateTime'].runtimeType is String) {
+            final nowDateTime = DateTime.now();
+            element['dateTime'] =
+                "${DateFormat.y().format(nowDateTime)}-${DateFormat.M().format(nowDateTime)}-${DateFormat.d().format(nowDateTime)} ${element['dateTime'].split(" ")[1]}";
+          }
           var parseDateTime = DateTime.parse(element['dateTime']);
           var foundAlarm = alarms.firstWhere(
             (test) => test.dateTime == parseDateTime,
@@ -115,7 +121,7 @@ class _AlarmHomeState extends State<AlarmHome> {
               operatorWeekday++;
             }
           }
-          if (foundAlarm.dateTime.second != DateTime.now().second) {
+          if (foundAlarm.dateTime.microsecond != DateTime.now().microsecond) {
             var addedDate = foundAlarm.dateTime.add(
                 Duration(days: operatorWeekday - foundAlarm.dateTime.weekday));
             var newAlarmSettings = AlarmSettings(
@@ -323,53 +329,59 @@ class _AlarmHomeState extends State<AlarmHome> {
                             style: Theme.of(context).textTheme.titleMedium,
                           ),
                         ),
-                  const SizedBox(
-                    height: 64,
-                  ),
-                  // Row(
-                  //   mainAxisAlignment: MainAxisAlignment.start,
-                  //   children: [
-                  //     Padding(
-                  //       padding: const EdgeInsets.all(8.0),
-                  //       child: Text(
-                  //         "Hẹn giờ sắp tới",
-                  //         style: Theme.of(context).textTheme.titleLarge,
-                  //       ),
-                  //     ),
-                  //   ],
-                  // ),
-                  // const Divider(),
-                  // alarms.isNotEmpty
-                  //     ? ListView.separated(
-                  //         physics: const NeverScrollableScrollPhysics(),
-                  //         itemCount: alarms.length,
-                  //         separatorBuilder: (context, index) => const Padding(
-                  //           padding: EdgeInsets.symmetric(horizontal: 8.0),
-                  //           child: Divider(height: 1),
-                  //         ),
-                  //         itemBuilder: (context, index) {
-                  //           return ExampleAlarmTile(
-                  //             key: Key(alarms[index].id.toString()),
-                  //             loopData: {},
-                  //             dateTime: alarms[index].dateTime,
-                  //             onPressed: () =>
-                  //                 navigateToAlarmScreen(alarms[index]),
-                  //             onDismissed: () {
-                  //               stopAlarm(alarms[index].id);
-                  //             },
-                  //           );
-                  //         },
-                  //         shrinkWrap: true,
-                  //       )
-                  //     : Center(
-                  //         child: Text(
-                  //           'Hẹn giờ sắp tới chưa có',
-                  //           style: Theme.of(context).textTheme.titleMedium,
-                  //         ),
-                  //       ),
                 ],
               ),
             ),
+            const SliverPadding(
+              padding: EdgeInsets.symmetric(vertical: 32),
+            ),
+            // SliverList(
+            //   delegate: SliverChildListDelegate(
+            //     [
+            //       Row(
+            //         mainAxisAlignment: MainAxisAlignment.start,
+            //         children: [
+            //           Padding(
+            //             padding: const EdgeInsets.all(8.0),
+            //             child: Text(
+            //               "Hẹn giờ sắp tới",
+            //               style: Theme.of(context).textTheme.titleLarge,
+            //             ),
+            //           ),
+            //         ],
+            //       ),
+            //       const Divider(),
+            //       alarms.isNotEmpty
+            //           ? ListView.separated(
+            //               physics: const NeverScrollableScrollPhysics(),
+            //               itemCount: alarms.length,
+            //               separatorBuilder: (context, index) => const Padding(
+            //                 padding: EdgeInsets.symmetric(horizontal: 8.0),
+            //                 child: Divider(height: 1),
+            //               ),
+            //               itemBuilder: (context, index) {
+            //                 return ExampleAlarmTile(
+            //                   key: Key(alarms[index].id.toString()),
+            //                   loopData: {},
+            //                   dateTime: alarms[index].dateTime,
+            //                   onPressed: () =>
+            //                       navigateToAlarmScreen(alarms[index]),
+            //                   onDismissed: () {
+            //                     stopAlarm(alarms[index].id);
+            //                   },
+            //                 );
+            //               },
+            //               shrinkWrap: true,
+            //             )
+            //           : Center(
+            //               child: Text(
+            //                 'Hẹn giờ sắp tới chưa có',
+            //                 style: Theme.of(context).textTheme.titleMedium,
+            //               ),
+            //             ),
+            //     ],
+            //   ),
+            // ),
           ],
         ),
       ),
