@@ -18,35 +18,14 @@ class _AppsPageState extends State<AppsPage> {
   @override
   Widget build(BuildContext context) {
     List<Map<String, dynamic>> appList = [
-      if (!isWindows())
-        {
-          'name': '/qr',
-          'label': 'Quét QR',
-          'icon': Icon(
-            Icons.qr_code_scanner_outlined,
-            color: ColorConstants.qrColor,
-            size: 32,
-          ),
-        },
-      if (isPhone())
-        {
-          'name': '/dong-ho',
-          'label': 'Đồng hồ',
-          'icon': SvgPicture.asset(
-            'assets/icons/clock.svg',
-            height: 32,
-            width: 32,
-            color: ColorConstants.clockColor,
-          ),
-        },
       {
-        'name': '/lich',
-        'label': 'Lịch',
+        'name': '/kinh',
+        'label': 'Kinh',
         'icon': SvgPicture.asset(
-          'assets/icons/calendar.svg',
+          'assets/icons/book.svg',
           height: 32,
           width: 32,
-          color: ColorConstants.calendarColor,
+          color: ColorConstants.kinhColor,
         ),
       },
       {
@@ -60,15 +39,26 @@ class _AppsPageState extends State<AppsPage> {
         ),
       },
       {
-        'name': '/kinh',
-        'label': 'Kinh',
+        'name': '/lich',
+        'label': 'Lịch',
         'icon': SvgPicture.asset(
-          'assets/icons/book.svg',
+          'assets/icons/calendar.svg',
           height: 32,
           width: 32,
-          color: ColorConstants.kinhColor,
+          color: ColorConstants.calendarColor,
         ),
       },
+      if (isPhone())
+        {
+          'name': '/dong-ho',
+          'label': 'Đồng hồ',
+          'icon': SvgPicture.asset(
+            'assets/icons/clock.svg',
+            height: 32,
+            width: 32,
+            color: ColorConstants.clockColor,
+          ),
+        },
       {
         'name': '/sach',
         'label': 'Sách',
@@ -78,6 +68,25 @@ class _AppsPageState extends State<AppsPage> {
           size: 32,
         ),
       },
+      {
+        'name': '/maps',
+        'label': 'Bản đồ',
+        'icon': Icon(
+          Icons.map,
+          color: ColorConstants.mapsColor,
+          size: 32,
+        ),
+      },
+      if (!isWindows())
+        {
+          'name': '/qr',
+          'label': 'Quét QR',
+          'icon': Icon(
+            Icons.qr_code_scanner_outlined,
+            color: ColorConstants.qrColor,
+            size: 32,
+          ),
+        },
       {
         'name': '/tu-tinh',
         'label': 'Tự tỉnh',
@@ -101,15 +110,6 @@ class _AppsPageState extends State<AppsPage> {
           'assets/icons/gemini_sparkle_v002_d4735304ff6292a690345.svg',
           height: 32,
           width: 32,
-        ),
-      },
-      {
-        'name': '/maps',
-        'label': 'Bản đồ',
-        'icon': Icon(
-          Icons.map,
-          color: ColorConstants.mapsColor,
-          size: 32,
         ),
       },
     ];

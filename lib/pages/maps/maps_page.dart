@@ -36,9 +36,17 @@ class _MapsPageState extends State<MapsPage> {
     MapsConstants.caodaionLatitute,
     MapsConstants.caodaionLongitute,
   );
+  Map<String, dynamic> aPoint = {
+    "value": "Vị trí hiện tại",
+    "latLgn": LatLng(
+      MapsConstants.caodaionLatitute,
+      MapsConstants.caodaionLongitute,
+    ),
+  };
   final MapController _mapController = MapController();
   MapsService mapsService = MapsService();
   double searchRadius = 999999999999999;
+  bool isShowFilter = false;
 
   Future fetchRoute(LatLng start, LatLng end) async {
     final url =
@@ -58,7 +66,8 @@ class _MapsPageState extends State<MapsPage> {
   }
 
   List<LatLng> routePoints = [];
-  var routeData = null;
+  var routeData;
+  var routeElement;
   String convertDistance(double meters) {
     if (meters >= 1000) {
       double kilometers = meters / 1000;
@@ -88,6 +97,9 @@ class _MapsPageState extends State<MapsPage> {
 
   _showRoutePoints(element) {
     final legs = routeData['routes'][0]['legs'][0];
+    setState(() {
+      routeElement = element;
+    });
     showModalBottomSheet(
       barrierColor: Colors.transparent,
       context: context,
@@ -131,7 +143,36 @@ class _MapsPageState extends State<MapsPage> {
                           width: 8,
                         ),
                         const Text(
-                          "Mở trên Google Maps",
+                          "Mở Google Maps",
+                          style: TextStyle(
+                            color: Colors.black,
+                          ),
+                        )
+                      ],
+                    ),
+                  ),
+                  ElevatedButton(
+                    onPressed: () {
+                      setState(() {
+                        routePoints = [];
+                        routeData = null;
+                        routeElement = null;
+                        Navigator.of(context).pop();
+                      });
+                    },
+                    child: const Wrap(
+                      alignment: WrapAlignment.center,
+                      crossAxisAlignment: WrapCrossAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.delete_rounded,
+                          color: Colors.black,
+                        ),
+                        SizedBox(
+                          width: 8,
+                        ),
+                        Text(
+                          "Xoá chỉ đường",
                           style: TextStyle(
                             color: Colors.black,
                           ),
@@ -209,6 +250,7 @@ class _MapsPageState extends State<MapsPage> {
 
     setState(() {
       _currentPosition = LatLng(position.latitude, position.longitude);
+      aPoint['latLng'] = _currentPosition;
       _mapController.move(_currentPosition, 15.0);
     });
   }
@@ -277,7 +319,7 @@ class _MapsPageState extends State<MapsPage> {
                     ElevatedButton(
                       onPressed: () {
                         _getRoute(
-                            _currentPosition,
+                            aPoint['latLng'],
                             LatLng(
                               double.parse(element['latLng'].split(',')[0]),
                               double.parse(element['latLng'].split(',')[1]),
@@ -287,8 +329,19 @@ class _MapsPageState extends State<MapsPage> {
                       },
                       child: const Row(
                         children: [
-                          Icon(Icons.directions),
-                          Text('Chỉ đường'),
+                          Icon(
+                            Icons.directions,
+                            color: Colors.black,
+                          ),
+                          SizedBox(
+                            width: 8,
+                          ),
+                          Text(
+                            'Chỉ đường',
+                            style: TextStyle(
+                              color: Colors.black,
+                            ),
+                          ),
                         ],
                       ),
                     )
@@ -343,16 +396,6 @@ class _MapsPageState extends State<MapsPage> {
     }).toList();
   }
 
-  void _performSearch() {
-    LatLng searchLocation = _currentPosition;
-
-    List<Marker> searchResults = _searchMarkers(searchLocation, searchRadius);
-
-    setState(() {
-      _displayMarkers = searchResults;
-    });
-  }
-
   LatLngBounds calculateBounds(List<LatLng> points) {
     double minLat = points.first.latitude;
     double maxLat = points.first.latitude;
@@ -367,6 +410,33 @@ class _MapsPageState extends State<MapsPage> {
     }
 
     return LatLngBounds(LatLng(minLat, minLng), LatLng(maxLat, maxLng));
+  }
+
+  Widget _buildFilterSection() {
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: Row(
+        children: [
+          Expanded(
+            child: TextField(
+              decoration: const InputDecoration(
+                labelText: 'Tìm theo phạm vi (mét)',
+              ),
+              keyboardType: TextInputType.number,
+              onChanged: (value) {
+                setState(() {
+                  searchRadius = double.tryParse(value) ?? 999999999999999.0;
+                });
+              },
+            ),
+          ),
+          ElevatedButton(
+            onPressed: () {},
+            child: const Text('Tìm kiếm'),
+          ),
+        ],
+      ),
+    );
   }
 
   @override
@@ -386,119 +456,95 @@ class _MapsPageState extends State<MapsPage> {
           },
         ),
         title: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Icon(
-              Icons.map,
-              color: ColorConstants.mapsColor,
+            Row(
+              children: [
+                Icon(
+                  Icons.map,
+                  color: ColorConstants.mapsColor,
+                ),
+                const SizedBox(
+                  width: 8,
+                ),
+                const Text("Bản đồ"),
+              ],
             ),
-            const SizedBox(
-              width: 8,
+            IconButton(
+              onPressed: () {
+                setState(() {
+                  isShowFilter = !isShowFilter;
+                });
+              },
+              icon: const Icon(Icons.search_rounded),
             ),
-            const Text("Bản đồ"),
           ],
         ),
         backgroundColor: ColorConstants.whiteBackdround,
       ),
       body: Column(
         children: [
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Row(
+          if (isShowFilter) _buildFilterSection(),
+          Expanded(
+            child: FlutterMap(
+              mapController: _mapController,
+              options: MapOptions(
+                initialCenter: _currentPosition,
+                initialZoom: 18,
+              ),
               children: [
-                Expanded(
-                  child: TextField(
-                    decoration: const InputDecoration(
-                      labelText: 'Tìm theo phạm vi (mét)',
-                    ),
-                    keyboardType: TextInputType.number,
-                    onChanged: (value) {
-                      setState(() {
-                        searchRadius =
-                            double.tryParse(value) ?? 999999999999999.0;
-                      });
+                TileLayer(
+                  urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                  userAgentPackageName: 'com.caodaion.app',
+                ),
+                // const RichAttributionWidget(
+                //   attributions: [],
+                // ),
+                MarkerClusterLayerWidget(
+                  options: MarkerClusterLayerOptions(
+                    maxClusterRadius: 45,
+                    size: const Size(40, 40),
+                    alignment: Alignment.center,
+                    padding: const EdgeInsets.all(50),
+                    maxZoom: 15,
+                    markers: [..._displayMarkers],
+                    builder: (context, markers) {
+                      return Container(
+                        decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(20),
+                            color: Colors.blue),
+                        child: Center(
+                          child: Text(
+                            markers.length.toString(),
+                            style: const TextStyle(color: Colors.white),
+                          ),
+                        ),
+                      );
                     },
                   ),
                 ),
-                ElevatedButton(
-                  onPressed: _performSearch,
-                  child: const Text('Tìm kiếm'),
+                PolylineLayer(
+                  polylines: [
+                    Polyline(
+                      points: routePoints,
+                      strokeWidth: 8,
+                      color: const Color(0xff0f53ff),
+                      borderColor: const Color(0xff0f28f5),
+                      borderStrokeWidth: 1,
+                    ),
+                  ],
                 ),
               ],
             ),
-          ),
-          Expanded(
-            child: _currentPosition == null
-                ? const Center(child: CircularProgressIndicator())
-                : FlutterMap(
-                    mapController: _mapController,
-                    options: MapOptions(
-                      initialCenter: _currentPosition,
-                      initialZoom: 18,
-                    ),
-                    children: [
-                      TileLayer(
-                        urlTemplate:
-                            'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-                        userAgentPackageName: 'com.caodaion.app',
-                      ),
-                      // const RichAttributionWidget(
-                      //   attributions: [],
-                      // ),
-                      MarkerLayer(
-                        markers: [
-                          Marker(
-                            point: _currentPosition,
-                            child: Icon(
-                              Icons.arrow_downward_rounded,
-                              color: ColorConstants.mapsColor,
-                            ),
-                            alignment: Alignment.topCenter,
-                          ),
-                        ],
-                      ),
-                      MarkerClusterLayerWidget(
-                        options: MarkerClusterLayerOptions(
-                          maxClusterRadius: 45,
-                          size: const Size(40, 40),
-                          alignment: Alignment.center,
-                          padding: const EdgeInsets.all(50),
-                          maxZoom: 15,
-                          markers: [..._displayMarkers],
-                          builder: (context, markers) {
-                            return Container(
-                              decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(20),
-                                  color: Colors.blue),
-                              child: Center(
-                                child: Text(
-                                  markers.length.toString(),
-                                  style: const TextStyle(color: Colors.white),
-                                ),
-                              ),
-                            );
-                          },
-                        ),
-                      ),
-                      PolylineLayer(
-                        polylines: [
-                          Polyline(
-                            points: routePoints,
-                            strokeWidth: 8,
-                            color: const Color(0xff0f53ff),
-                            borderColor: const Color(0xff0f28f5),
-                            borderStrokeWidth: 1,
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
           ),
         ],
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: _getCurrentLocation,
         tooltip: "Vị trí hiện tại",
-        child: const Icon(Icons.my_location),
+        child: const Icon(
+          Icons.my_location,
+        ),
       ),
     );
   }
