@@ -2,6 +2,7 @@
 import 'dart:convert';
 import 'package:caodaion/constants/constants.dart';
 import 'package:caodaion/pages/maps/service/maps_service.dart';
+import 'package:caodaion/util/text.dart';
 import 'package:flutter_map_marker_cluster/flutter_map_marker_cluster.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
@@ -20,8 +21,9 @@ class MapsPage extends StatefulWidget {
 }
 
 class _MapsPageState extends State<MapsPage> {
-  final List<Marker> _allMarkers = [
+  final List _allMarkers = [
     Marker(
+      key: const Key("CaoDaiON"),
       point: LatLng(
         MapsConstants.caodaionLatitute,
         MapsConstants.caodaionLongitute,
@@ -30,8 +32,8 @@ class _MapsPageState extends State<MapsPage> {
       alignment: Alignment.topCenter,
     )
   ];
-  List<Marker> _displayMarkers = [];
 
+  List _filteredItems = [];
   LatLng _currentPosition = LatLng(
     MapsConstants.caodaionLatitute,
     MapsConstants.caodaionLongitute,
@@ -47,6 +49,7 @@ class _MapsPageState extends State<MapsPage> {
   MapsService mapsService = MapsService();
   double searchRadius = 999999999999999;
   bool isShowFilter = false;
+  TextEditingController _searchController = TextEditingController();
 
   Future fetchRoute(LatLng start, LatLng end) async {
     final url =
@@ -358,6 +361,23 @@ class _MapsPageState extends State<MapsPage> {
     );
   }
 
+  List<Map<String, ValueKey<String>>> _searchThanhSo = [];
+
+  List<Map<String, ValueKey<String>>> removeDuplicateKeys(
+      List<Map<String, ValueKey<String>>> list) {
+    final Set<String> seenKeys = {}; // To track unique key values
+    final List<Map<String, ValueKey<String>>> uniqueKeyList = [];
+
+    for (var item in list) {
+      if (!seenKeys.contains(item['key']?.value)) {
+        seenKeys.add(item['key']!.value);
+        uniqueKeyList.add(item);
+      }
+    }
+
+    return uniqueKeyList;
+  }
+
   void _initializeMarkers() async {
     final mapResponse = await mapsService.fetchThanhSo();
     if (mapResponse!['data'].isNotEmpty) {
@@ -365,8 +385,23 @@ class _MapsPageState extends State<MapsPage> {
         if (element['key'].isNotEmpty &&
             element['latLng'].isNotEmpty &&
             !element['key'].contains('edit')) {
+          _searchThanhSo.add({
+            "key": ValueKey("Lọc theo ${element['organization']}"),
+          });
+        }
+      }
+      for (var element in mapResponse['data']) {
+        if (element['key'].isNotEmpty &&
+            element['latLng'].isNotEmpty &&
+            !element['key'].contains('edit')) {
+          _searchThanhSo.add({
+            "key": ValueKey(
+                "${element['name']} || ${element['address']} || ${element['organization']}")
+          });
           _allMarkers.add(
             Marker(
+              key: Key(
+                  "${element['name']} || ${element['address']} || ${element['organization']}"),
               point: LatLng(
                 double.parse(element['latLng'].split(',')[0]),
                 double.parse(element['latLng'].split(',')[1]),
@@ -383,21 +418,20 @@ class _MapsPageState extends State<MapsPage> {
     }
     if (mounted) {
       setState(() {
-        _displayMarkers = List.from(_allMarkers);
+        _searchThanhSo = removeDuplicateKeys(_searchThanhSo);
+        _filteredItems = _searchThanhSo; // Initially, show all items
+        _searchController.addListener(_filterList);
       });
     }
   }
 
-  List<Marker> _searchMarkers(LatLng location, double radius) {
-    const Distance distance = Distance();
-    return _allMarkers.where((marker) {
-      final double markerDistance = distance.as(
-        LengthUnit.Meter,
-        location,
-        marker.point,
-      );
-      return markerDistance <= radius;
-    }).toList();
+  void _filterList() {
+    setState(() {
+      _filteredItems = _searchThanhSo.where((marker) {
+        return createSlug((marker['key'] as ValueKey<String>).value)
+            .contains(createSlug(_searchController.text));
+      }).toList();
+    });
   }
 
   LatLngBounds calculateBounds(List<LatLng> points) {
@@ -419,28 +453,79 @@ class _MapsPageState extends State<MapsPage> {
   Widget _buildFilterSection() {
     return Padding(
       padding: const EdgeInsets.all(8.0),
-      child: Row(
-        children: [
-          Expanded(
-            child: TextField(
-              decoration: const InputDecoration(
-                labelText: 'Tìm theo phạm vi (mét)',
-              ),
-              keyboardType: TextInputType.number,
-              onChanged: (value) {
-                setState(() {
-                  searchRadius = double.tryParse(value) ?? 999999999999999.0;
-                });
-              },
+      child: Autocomplete<Map<dynamic, dynamic>>(
+        optionsBuilder: (TextEditingValue textEditingValue) {
+          if (textEditingValue.text.isEmpty) {
+            return const Iterable<Map>.empty();
+          }
+          return [
+            ..._searchThanhSo.where((option) {
+              return createSlug((option['key'] as ValueKey<String>).value)
+                  .contains(createSlug(textEditingValue.text));
+            })
+          ];
+        },
+        displayStringForOption: (Map option) =>
+            (option['key'] as ValueKey<String>).value,
+        onSelected: (Map selection) {
+          setState(() {
+            _searchController.text =
+                (selection['key'] as ValueKey<String>).value;
+            _filteredItems = [
+              ..._searchThanhSo.where((marker) {
+                return createSlug((marker['key'] as ValueKey<String>).value)
+                    .contains(createSlug(
+                        (selection['key'] as ValueKey<String>).value));
+              }),
+              ..._allMarkers.where((marker) {
+                return createSlug((marker['key'] as ValueKey<String>).value)
+                    .contains(createSlug(
+                        (selection['key'] as ValueKey<String>).value));
+              })
+            ].toList();
+            if (_filteredItems.length == 1) {
+              print(_filteredItems.first);
+            }
+          });
+        },
+        fieldViewBuilder: (BuildContext context,
+            TextEditingController textEditingController,
+            FocusNode focusNode,
+            VoidCallback onFieldSubmitted) {
+          return TextField(
+            controller: textEditingController,
+            focusNode: focusNode,
+            onChanged: (value) {
+              setState(() {
+                _searchController = textEditingController;
+                _searchController.text = value;
+                _filteredItems = [
+                  ..._searchThanhSo.where((marker) {
+                    return createSlug((marker['key'] as ValueKey<String>).value)
+                        .contains(createSlug(value));
+                  })
+                ].toList();
+              });
+            },
+            decoration: InputDecoration(
+              labelText: 'Tìm kiếm theo từ khoá',
+              border: const OutlineInputBorder(),
+              suffixIcon: _searchController.text.isNotEmpty
+                  ? IconButton(
+                      icon: Icon(Icons.clear),
+                      onPressed: _clearSearch,
+                    )
+                  : null,
             ),
-          ),
-          ElevatedButton(
-            onPressed: () {},
-            child: const Text('Tìm kiếm'),
-          ),
-        ],
+          );
+        },
       ),
     );
+  }
+
+  void _clearSearch() {
+    _searchController.clear();
+    _filterList();
   }
 
   _clickSearchButton() {
@@ -455,7 +540,8 @@ class _MapsPageState extends State<MapsPage> {
 
   @override
   void dispose() {
-    // Clean up resources here
+    _searchController.removeListener(_filterList);
+    _searchController.dispose();
     super.dispose();
   }
 
@@ -520,15 +606,12 @@ class _MapsPageState extends State<MapsPage> {
                   markers: [
                     Marker(
                       point: _currentPosition,
-                      child: const Icon(
-                        Icons.adjust_rounded,
-                        color: Colors.black
-                      ),
+                      child:
+                          const Icon(Icons.adjust_rounded, color: Colors.black),
                       alignment: Alignment.center,
                     ),
                   ],
                 ),
-
                 MarkerClusterLayerWidget(
                   options: MarkerClusterLayerOptions(
                     maxClusterRadius: 45,
@@ -536,7 +619,7 @@ class _MapsPageState extends State<MapsPage> {
                     alignment: Alignment.center,
                     padding: const EdgeInsets.all(50),
                     maxZoom: 15,
-                    markers: [..._displayMarkers],
+                    markers: [..._allMarkers],
                     builder: (context, markers) {
                       return Container(
                         decoration: BoxDecoration(
