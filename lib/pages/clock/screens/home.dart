@@ -332,56 +332,56 @@ class _AlarmHomeState extends State<AlarmHome> {
                 ],
               ),
             ),
+            SliverList(
+              delegate: SliverChildListDelegate(
+                [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Text(
+                          "Hẹn giờ sắp tới",
+                          style: Theme.of(context).textTheme.titleLarge,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const Divider(),
+                  alarms.isNotEmpty
+                      ? ListView.separated(
+                          physics: const NeverScrollableScrollPhysics(),
+                          itemCount: alarms.length,
+                          separatorBuilder: (context, index) => const Padding(
+                            padding: EdgeInsets.symmetric(horizontal: 8.0),
+                            child: Divider(height: 1),
+                          ),
+                          itemBuilder: (context, index) {
+                            return ExampleAlarmTile(
+                              key: Key(alarms[index].id.toString()),
+                              loopData: {},
+                              dateTime: alarms[index].dateTime,
+                              onPressed: () =>
+                                  navigateToAlarmScreen(alarms[index]),
+                              onDismissed: () {
+                                stopAlarm(alarms[index].id);
+                              },
+                            );
+                          },
+                          shrinkWrap: true,
+                        )
+                      : Center(
+                          child: Text(
+                            'Hẹn giờ sắp tới chưa có',
+                            style: Theme.of(context).textTheme.titleMedium,
+                          ),
+                        ),
+                ],
+              ),
+            ),
             const SliverPadding(
               padding: EdgeInsets.symmetric(vertical: 32),
             ),
-            // SliverList(
-            //   delegate: SliverChildListDelegate(
-            //     [
-            //       Row(
-            //         mainAxisAlignment: MainAxisAlignment.start,
-            //         children: [
-            //           Padding(
-            //             padding: const EdgeInsets.all(8.0),
-            //             child: Text(
-            //               "Hẹn giờ sắp tới",
-            //               style: Theme.of(context).textTheme.titleLarge,
-            //             ),
-            //           ),
-            //         ],
-            //       ),
-            //       const Divider(),
-            //       alarms.isNotEmpty
-            //           ? ListView.separated(
-            //               physics: const NeverScrollableScrollPhysics(),
-            //               itemCount: alarms.length,
-            //               separatorBuilder: (context, index) => const Padding(
-            //                 padding: EdgeInsets.symmetric(horizontal: 8.0),
-            //                 child: Divider(height: 1),
-            //               ),
-            //               itemBuilder: (context, index) {
-            //                 return ExampleAlarmTile(
-            //                   key: Key(alarms[index].id.toString()),
-            //                   loopData: {},
-            //                   dateTime: alarms[index].dateTime,
-            //                   onPressed: () =>
-            //                       navigateToAlarmScreen(alarms[index]),
-            //                   onDismissed: () {
-            //                     stopAlarm(alarms[index].id);
-            //                   },
-            //                 );
-            //               },
-            //               shrinkWrap: true,
-            //             )
-            //           : Center(
-            //               child: Text(
-            //                 'Hẹn giờ sắp tới chưa có',
-            //                 style: Theme.of(context).textTheme.titleMedium,
-            //               ),
-            //             ),
-            //     ],
-            //   ),
-            // ),
           ],
         ),
       ),

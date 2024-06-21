@@ -324,9 +324,11 @@ class _MapsPageState extends State<MapsPage> {
         }
       }
     }
-    setState(() {
-      _displayMarkers = List.from(_allMarkers);
-    });
+    if (mounted) {
+      setState(() {
+        _displayMarkers = List.from(_allMarkers);
+      });
+    }
   }
 
   List<Marker> _searchMarkers(LatLng location, double radius) {
@@ -365,6 +367,12 @@ class _MapsPageState extends State<MapsPage> {
     }
 
     return LatLngBounds(LatLng(minLat, minLng), LatLng(maxLat, maxLng));
+  }
+
+  @override
+  void dispose() {
+    // Clean up resources here
+    super.dispose();
   }
 
   @override

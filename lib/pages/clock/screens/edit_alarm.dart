@@ -264,177 +264,179 @@ class _ExampleAlarmEditScreenState extends State<ExampleAlarmEditScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 30),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              TextButton(
-                onPressed: () => Navigator.pop(context, false),
+    return SingleChildScrollView(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 30),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context, false),
+                  child: Text(
+                    'Đóng',
+                    style: Theme.of(context)
+                        .textTheme
+                        .titleLarge!
+                        .copyWith(color: Colors.blueAccent),
+                  ),
+                ),
+                TextButton(
+                  onPressed: saveAlarm,
+                  child: loading
+                      ? const CircularProgressIndicator()
+                      : Text(
+                          'Lưu',
+                          style: Theme.of(context)
+                              .textTheme
+                              .titleLarge!
+                              .copyWith(color: Colors.blueAccent),
+                        ),
+                ),
+              ],
+            ),
+            Column(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                TextField(
+                  controller: notificationTitleController,
+                  decoration: const InputDecoration(hintText: "Tiêu đề hẹn giờ"),
+                  onChanged: (value) {
+                    setState(
+                      () {
+                        notificationTitle = value;
+                      },
+                    );
+                  },
+                ),
+              ],
+            ),
+            Column(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                TextField(
+                  minLines: 2,
+                  maxLines: null,
+                  keyboardType: TextInputType.multiline,
+                  controller: notificationBodyController,
+                  decoration: const InputDecoration(hintText: "Nội dung hẹn giờ"),
+                  onChanged: (value) {
+                    setState(
+                      () {
+                        notificationBody = value;
+                      },
+                    );
+                  },
+                ),
+              ],
+            ),
+            Text(
+              getDay(),
+              style: Theme.of(context)
+                  .textTheme
+                  .titleMedium!
+                  .copyWith(color: Colors.blueAccent.withOpacity(0.8)),
+            ),
+            RawMaterialButton(
+              onPressed: pickTime,
+              fillColor: Colors.grey[200],
+              child: Container(
+                margin: const EdgeInsets.all(20),
                 child: Text(
-                  'Đóng',
+                  TimeOfDay.fromDateTime(selectedDateTime).format(context),
                   style: Theme.of(context)
                       .textTheme
-                      .titleLarge!
+                      .displayMedium!
                       .copyWith(color: Colors.blueAccent),
                 ),
               ),
-              TextButton(
-                onPressed: saveAlarm,
-                child: loading
-                    ? const CircularProgressIndicator()
-                    : Text(
-                        'Lưu',
-                        style: Theme.of(context)
-                            .textTheme
-                            .titleLarge!
-                            .copyWith(color: Colors.blueAccent),
-                      ),
-              ),
-            ],
-          ),
-          Column(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              TextField(
-                controller: notificationTitleController,
-                decoration: const InputDecoration(hintText: "Tiêu đề hẹn giờ"),
-                onChanged: (value) {
-                  setState(
-                    () {
-                      notificationTitle = value;
-                    },
-                  );
-                },
-              ),
-            ],
-          ),
-          Column(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              TextField(
-                minLines: 2,
-                maxLines: null,
-                keyboardType: TextInputType.multiline,
-                controller: notificationBodyController,
-                decoration: const InputDecoration(hintText: "Nội dung hẹn giờ"),
-                onChanged: (value) {
-                  setState(
-                    () {
-                      notificationBody = value;
-                    },
-                  );
-                },
-              ),
-            ],
-          ),
-          Text(
-            getDay(),
-            style: Theme.of(context)
-                .textTheme
-                .titleMedium!
-                .copyWith(color: Colors.blueAccent.withOpacity(0.8)),
-          ),
-          RawMaterialButton(
-            onPressed: pickTime,
-            fillColor: Colors.grey[200],
-            child: Container(
-              margin: const EdgeInsets.all(20),
-              child: Text(
-                TimeOfDay.fromDateTime(selectedDateTime).format(context),
-                style: Theme.of(context)
-                    .textTheme
-                    .displayMedium!
-                    .copyWith(color: Colors.blueAccent),
-              ),
             ),
-          ),
-          buildDaySelector(),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                'Lặp âm báo',
-                style: Theme.of(context).textTheme.titleMedium,
-              ),
-              Switch(
-                value: loopAudio,
-                onChanged: (value) => setState(() => loopAudio = value),
-              ),
-            ],
-          ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                'Rung',
-                style: Theme.of(context).textTheme.titleMedium,
-              ),
-              Switch(
-                value: vibrate,
-                onChanged: (value) => setState(() => vibrate = value),
-              ),
-            ],
-          ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                'Tùy chỉnh âm lượng',
-                style: Theme.of(context).textTheme.titleMedium,
-              ),
-              Switch(
-                value: isCustomVolume,
-                onChanged: (value) => {
-                  setState(() {
-                    isCustomVolume = value;
-                    volume = value ? AlarmConstants.defaultVolume : 0;
-                  })
-                },
-              ),
-            ],
-          ),
-          SizedBox(
-            height: 30,
-            child: isCustomVolume
-                ? Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Icon(
-                        volume > 0.7
-                            ? Icons.volume_up_rounded
-                            : volume > 0.1
-                                ? Icons.volume_down_rounded
-                                : Icons.volume_mute_rounded,
-                      ),
-                      Expanded(
-                        child: Slider(
-                          value: volume,
-                          onChanged: (value) {
-                            setState(() => volume = value);
-                          },
+            buildDaySelector(),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'Lặp âm báo',
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
+                Switch(
+                  value: loopAudio,
+                  onChanged: (value) => setState(() => loopAudio = value),
+                ),
+              ],
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'Rung',
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
+                Switch(
+                  value: vibrate,
+                  onChanged: (value) => setState(() => vibrate = value),
+                ),
+              ],
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'Tùy chỉnh âm lượng',
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
+                Switch(
+                  value: isCustomVolume,
+                  onChanged: (value) => {
+                    setState(() {
+                      isCustomVolume = value;
+                      volume = value ? AlarmConstants.defaultVolume : 0;
+                    })
+                  },
+                ),
+              ],
+            ),
+            SizedBox(
+              height: 30,
+              child: isCustomVolume
+                  ? Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Icon(
+                          volume > 0.7
+                              ? Icons.volume_up_rounded
+                              : volume > 0.1
+                                  ? Icons.volume_down_rounded
+                                  : Icons.volume_mute_rounded,
                         ),
-                      ),
-                    ],
-                  )
-                : const SizedBox(),
-          ),
-          if (!creating)
-            TextButton(
-              onPressed: deleteAlarm,
-              child: Text(
-                'Xóa hẹn giờ',
-                style: Theme.of(context)
-                    .textTheme
-                    .titleMedium!
-                    .copyWith(color: Colors.red),
-              ),
+                        Expanded(
+                          child: Slider(
+                            value: volume,
+                            onChanged: (value) {
+                              setState(() => volume = value);
+                            },
+                          ),
+                        ),
+                      ],
+                    )
+                  : const SizedBox(),
             ),
-          const SizedBox(),
-        ],
+            if (!creating)
+              TextButton(
+                onPressed: deleteAlarm,
+                child: Text(
+                  'Xóa hẹn giờ',
+                  style: Theme.of(context)
+                      .textTheme
+                      .titleMedium!
+                      .copyWith(color: Colors.red),
+                ),
+              ),
+            const SizedBox(),
+          ],
+        ),
       ),
     );
   }

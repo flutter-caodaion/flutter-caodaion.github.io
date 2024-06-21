@@ -62,10 +62,12 @@ class _CalendarPageState extends State<CalendarPage> {
 
   _loadThanhSoFromSheet() async {
     var thanhSoResponse = await calendarEventService.fetchThanhSo();
-    setState(() {
-      thanhSoList = thanhSoResponse!['data'];
-      _loadSubscribedThanhSo();
-    });
+    if (mounted) {
+      setState(() {
+        thanhSoList = thanhSoResponse!['data'];
+        _loadSubscribedThanhSo();
+      });
+    }
   }
 
   _loadSubscribedThanhSo() async {
@@ -594,6 +596,12 @@ class _CalendarPageState extends State<CalendarPage> {
               }),
             ],
           );
+  }
+
+  @override
+  void dispose() {
+    // Clean up resources here
+    super.dispose();
   }
 
   @override

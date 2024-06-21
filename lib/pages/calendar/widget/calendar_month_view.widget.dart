@@ -112,6 +112,7 @@ class _CalendarMonthViewState extends State<CalendarMonthView> {
                               fontSize: 12,
                               color: isToday ? Colors.white : Colors.black,
                             ),
+                            textAlign: TextAlign.center,
                           ),
                         ],
                       ),

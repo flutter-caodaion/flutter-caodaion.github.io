@@ -45,6 +45,12 @@ class _LibraryPageState extends State<LibraryPage> {
   }
 
   @override
+  void dispose() {
+    // Clean up resources here
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
