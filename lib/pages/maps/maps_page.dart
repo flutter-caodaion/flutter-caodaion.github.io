@@ -523,7 +523,6 @@ class _MapsPageState extends State<MapsPage> {
                       child: const Icon(
                         Icons.adjust_rounded,
                         color: Colors.black,
-                        size: 50,
                       ),
                       alignment: Alignment.topCenter,
                     ),
