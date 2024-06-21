@@ -101,6 +101,7 @@ class _MapsPageState extends State<MapsPage> {
       routeElement = element;
     });
     showModalBottomSheet(
+      backgroundColor: Colors.white,
       barrierColor: Colors.transparent,
       context: context,
       builder: (BuildContext context) {
@@ -265,6 +266,7 @@ class _MapsPageState extends State<MapsPage> {
       0,
     );
     showModalBottomSheet(
+      backgroundColor: Colors.white,
       barrierColor: Colors.transparent,
       context: context,
       builder: (BuildContext context) {
@@ -500,6 +502,20 @@ class _MapsPageState extends State<MapsPage> {
                 // const RichAttributionWidget(
                 //   attributions: [],
                 // ),
+                MarkerLayer(
+                  markers: [
+                    Marker(
+                      point: _currentPosition,
+                      child: const Icon(
+                        Icons.adjust_rounded,
+                        color: Colors.black,
+                        size: 50,
+                      ),
+                      alignment: Alignment.topCenter,
+                    ),
+                  ],
+                ),
+
                 MarkerClusterLayerWidget(
                   options: MarkerClusterLayerOptions(
                     maxClusterRadius: 45,
