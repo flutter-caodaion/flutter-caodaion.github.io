@@ -3,7 +3,7 @@ import 'dart:convert';
 
 import 'package:alarm/alarm.dart';
 import 'package:alarm/model/alarm_settings.dart';
-import 'package:caodaion/constants/constants.dart';
+import 'package:caodaion/constants/alarm.constants.dart';
 import 'package:caodaion/pages/clock/screens/edit_alarm.dart';
 import 'package:caodaion/pages/clock/widgets/tile.dart';
 import 'package:flutter/material.dart';
@@ -70,10 +70,10 @@ class _AlarmHomeState extends State<AlarmHome> {
       });
       for (var element in loopAlarmList) {
         if (element['active'] == true) {
-          if (element['dateTime'].runtimeType is String) {
+          if (element['dateTime'] != null) {
             final nowDateTime = DateTime.now();
             element['dateTime'] =
-                "${DateFormat.y().format(nowDateTime)}-${DateFormat.M().format(nowDateTime)}-${DateFormat.d().format(nowDateTime)} ${element['dateTime'].split(" ")[1]}";
+                "${DateFormat.y().format(nowDateTime)}-${NumberFormat("00").format(nowDateTime.month)}-${NumberFormat("00").format(nowDateTime.day)} ${element['dateTime'].split(" ")[1]}";
           }
           var parseDateTime = DateTime.parse(element['dateTime']);
           var foundAlarm = alarms.firstWhere(
@@ -121,10 +121,7 @@ class _AlarmHomeState extends State<AlarmHome> {
               operatorWeekday++;
             }
           }
-          if (foundAlarm.dateTime.year >= DateTime.now().year &&
-              foundAlarm.dateTime.month >= DateTime.now().month &&
-              foundAlarm.dateTime.day >= DateTime.now().day &&
-              foundAlarm.dateTime.microsecond != DateTime.now().microsecond) {
+          if (foundAlarm.dateTime.microsecond != DateTime.now().microsecond) {
             var addedDate = foundAlarm.dateTime.add(
                 Duration(days: operatorWeekday - foundAlarm.dateTime.weekday));
             var newAlarmSettings = AlarmSettings(

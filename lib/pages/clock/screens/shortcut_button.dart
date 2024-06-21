@@ -2,7 +2,7 @@ import 'dart:io';
 
 import 'package:alarm/alarm.dart';
 import 'package:alarm/model/alarm_settings.dart';
-import 'package:caodaion/constants/constants.dart';
+import 'package:caodaion/constants/alarm.constants.dart';
 import 'package:flutter/material.dart';
 
 class ExampleAlarmHomeShortcutButton extends StatefulWidget {
@@ -24,11 +24,9 @@ class _ExampleAlarmHomeShortcutButtonState
 
   Future<void> onPressButton(int delayInHours) async {
     var dateTime = DateTime.now().add(Duration(hours: delayInHours));
-    double? volume;
 
     if (delayInHours != 0) {
       dateTime = dateTime.copyWith(second: 0, millisecond: 0);
-      volume = AlarmConstants.defaultVolume;
     }
 
     setState(() => showMenu = false);
