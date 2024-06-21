@@ -45,6 +45,8 @@ class _AlarmHomeState extends State<AlarmHome> {
     });
   }
 
+  var newAlarmSetting;
+
   storeLoopAlarm() async {
     final prefs = await SharedPreferences.getInstance();
     // prefs.remove('loopAlarms');
@@ -72,8 +74,12 @@ class _AlarmHomeState extends State<AlarmHome> {
         if (element['active'] == true) {
           if (element['dateTime'] != null) {
             final nowDateTime = DateTime.now();
-            element['dateTime'] =
-                "${DateFormat.y().format(nowDateTime)}-${NumberFormat("00").format(nowDateTime.month)}-${NumberFormat("00").format(nowDateTime.day)} ${element['dateTime'].split(" ")[1]}";
+            if (DateTime.parse(element['dateTime']).year < nowDateTime.year &&
+                DateTime.parse(element['dateTime']).month < nowDateTime.month &&
+                DateTime.parse(element['dateTime']).day < nowDateTime.day) {
+              element['dateTime'] =
+                  "${DateFormat.y().format(nowDateTime)}-${NumberFormat("00").format(nowDateTime.month)}-${NumberFormat("00").format(nowDateTime.day)} ${element['dateTime'].split(" ")[1]}";
+            }
           }
           var parseDateTime = DateTime.parse(element['dateTime']);
           var foundAlarm = alarms.firstWhere(
@@ -257,7 +263,7 @@ class _AlarmHomeState extends State<AlarmHome> {
       var storedLoopAlarm = jsonDecode(prefs.getString('loopAlarms') ?? '[]');
       storedLoopAlarm = [];
       await prefs.setString('loopAlarms', jsonEncode(storedLoopAlarm.toList()));
-      storeLoopAlarm();
+      Alarm.stopAll().then((_) => loadAlarms(0));
     }
   }
 
@@ -336,6 +342,12 @@ class _AlarmHomeState extends State<AlarmHome> {
                                         navigateToAlarmScreen(data),
                                     onDismissed: () {
                                       removeLoopAlarm(data['id']);
+                                    },
+                                    onLoad: (value) {
+                                      setState(() {
+                                        newAlarmSetting = value;
+                                        loadAlarms(0);
+                                      });
                                     },
                                     toggleActiveLoopAlarm: (value) {
                                       toggleActiveLoopAlarm(value);

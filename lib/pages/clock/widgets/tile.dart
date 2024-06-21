@@ -1,7 +1,10 @@
+import 'dart:convert';
+
 import 'package:alarm/model/alarm_settings.dart';
 import 'package:caodaion/constants/constants.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class ExampleAlarmTile extends StatefulWidget {
   const ExampleAlarmTile({
@@ -11,12 +14,14 @@ class ExampleAlarmTile extends StatefulWidget {
     this.onDismissed,
     this.toggleActiveLoopAlarm,
     required this.loopData,
+    this.onLoad,
   });
 
   final DateTime dateTime;
   final Map loopData;
   final void Function() onPressed;
   final void Function()? onDismissed;
+  final ValueChanged? onLoad;
   final ValueChanged? toggleActiveLoopAlarm;
 
   @override
@@ -26,6 +31,7 @@ class ExampleAlarmTile extends StatefulWidget {
 class _ExampleAlarmTileState extends State<ExampleAlarmTile> {
   late List<AlarmSettings> alarms;
   late DateTime nextAlarm = DateTime.now();
+  DateTime? newAlarmDate;
 
   @override
   void initState() {
@@ -40,46 +46,125 @@ class _ExampleAlarmTileState extends State<ExampleAlarmTile> {
   }
 
   void loadAlarms(int? id) {
+    if (widget.loopData.isNotEmpty) {
+      setState(() {
+        var elementWeekday = widget.dateTime.weekday;
+        var operatorWeekday = widget.dateTime.weekday;
+        final nowDate = DateTime.now();
+        if (widget.dateTime.compareTo(DateTime.now()) == -1) {
+          if (nowDate.year == widget.dateTime.year &&
+              nowDate.month == widget.dateTime.month &&
+              nowDate.day == widget.dateTime.day) {
+            elementWeekday += 1;
+            operatorWeekday += 1;
+          }
+          if (widget.loopData['selectedDays'] != null) {
+            while (
+                widget.loopData['selectedDays'][elementWeekday - 1] != true ||
+                    operatorWeekday - widget.dateTime.weekday < 0) {
+              if (elementWeekday == 7) {
+                elementWeekday = 1;
+              } else {
+                elementWeekday++;
+              }
+              operatorWeekday++;
+            }
+          }
+        } else {
+          if (widget.loopData['selectedDays'] != null) {
+            while (
+                widget.loopData['selectedDays'][elementWeekday - 1] != true ||
+                    operatorWeekday - widget.dateTime.weekday < 0) {
+              if (elementWeekday == 7) {
+                elementWeekday = 1;
+              } else {
+                elementWeekday++;
+              }
+              operatorWeekday++;
+            }
+          }
+        }
+        if (widget.dateTime.second != DateTime.now().second) {
+          nextAlarm = widget.dateTime
+              .add(Duration(days: operatorWeekday - widget.dateTime.weekday));
+        }
+      });
+    } else {
+      setState(() {
+        nextAlarm = widget.dateTime;
+      });
+    }
+  }
+
+  bool isShowReoppen = false;
+
+  _isReOpenNextAlarm(value) {
     setState(() {
+      isShowReoppen = false;
+    });
+    if (value == false) {
       var elementWeekday = widget.dateTime.weekday;
-      var operatorWeekday = widget.dateTime.weekday;
-      final nowDate = DateTime.now();
-      if (widget.dateTime.compareTo(DateTime.now()) == -1) {
-        if (nowDate.year == widget.dateTime.year &&
-            nowDate.month == widget.dateTime.month &&
-            nowDate.day == widget.dateTime.day) {
-          elementWeekday += 1;
-          operatorWeekday += 1;
-        }
-        if (widget.loopData['selectedDays'] != null) {
-          while (widget.loopData['selectedDays'][elementWeekday - 1] != true ||
-              operatorWeekday - widget.dateTime.weekday < 0) {
-            if (elementWeekday == 7) {
-              elementWeekday = 1;
-            } else {
-              elementWeekday++;
-            }
-            operatorWeekday++;
+      var operatorWeekday = widget.dateTime.weekday + 1;
+      if (widget.loopData['selectedDays'] != null) {
+        while (widget.loopData['selectedDays']
+                    [elementWeekday == 7 ? 0 : elementWeekday] !=
+                true ||
+            operatorWeekday - widget.dateTime.weekday < 0) {
+          if (elementWeekday == 7) {
+            elementWeekday = 1;
+          } else {
+            elementWeekday++;
           }
-        }
-      } else {
-        if (widget.loopData['selectedDays'] != null) {
-          while (widget.loopData['selectedDays'][elementWeekday - 1] != true ||
-              operatorWeekday - widget.dateTime.weekday < 0) {
-            if (elementWeekday == 7) {
-              elementWeekday = 1;
-            } else {
-              elementWeekday++;
-            }
-            operatorWeekday++;
-          }
+          operatorWeekday++;
         }
       }
       if (widget.dateTime.second != DateTime.now().second) {
-        nextAlarm = widget.dateTime
-            .add(Duration(days: operatorWeekday - widget.dateTime.weekday));
+        setState(() {
+          newAlarmDate = widget.dateTime
+              .add(Duration(days: operatorWeekday - widget.dateTime.weekday));
+          isShowReoppen = true;
+        });
       }
-    });
+    }
+  }
+
+  Future<void> saveAlarm() async {
+    var data = widget.loopData['data'];
+    if (newAlarmDate != null) {
+      Map<dynamic, dynamic> alarmSettings = {
+        'id': data['id'],
+        'dateTime': newAlarmDate.toString(),
+        'loopAudio': data['loopAudio'],
+        'vibrate': data['vibrate'],
+        'volume': data['volume'],
+        'assetAudioPath': data['assetAudioPath'],
+        'notificationTitle': data['notificationTitle'],
+        'notificationBody': data['notificationBody'],
+        'enableNotificationOnKill': data['enableNotificationOnKill'],
+        'fadeDuration': data['fadeDuration'],
+        'selectedDays': widget.loopData['selectedDays'],
+        'active': true,
+      };
+      final prefs = await SharedPreferences.getInstance();
+      final List loopAlarms = jsonDecode(prefs.getString('loopAlarms') ?? '[]');
+      var foundLoopAlarms = loopAlarms.firstWhere(
+        (la) => la['id'] == alarmSettings['id'],
+        orElse: () => {},
+      );
+      if (foundLoopAlarms.isEmpty) {
+        loopAlarms.add(alarmSettings);
+      } else {
+        foundLoopAlarms = alarmSettings;
+        var indexLa =
+            loopAlarms.indexWhere((la) => la['id'] == alarmSettings['id']);
+        loopAlarms[indexLa] = foundLoopAlarms;
+      }
+      await prefs.setString('loopAlarms', jsonEncode(loopAlarms.toList()));
+      setState(() {
+        isShowReoppen = false;
+      });
+      widget.onLoad!({"id": data['id'], "dateTime": newAlarmDate});
+    }
   }
 
   @override
@@ -125,7 +210,7 @@ class _ExampleAlarmTileState extends State<ExampleAlarmTile> {
                                       Text("${TimeOfDay(
                                         hour: nextAlarm.hour,
                                         minute: nextAlarm.minute,
-                                      ).format(context)} ${DateFormat.d().format(nextAlarm)}/${DateFormat.M().format(nextAlarm)}/${DateFormat.y().format(nextAlarm)}"),
+                                      ).format(context)} ${NumberFormat("00").format(nextAlarm.day)}/${NumberFormat("00").format(nextAlarm.month)}/${DateFormat.y().format(nextAlarm)}"),
                                     ],
                                   ),
                                 ],
@@ -176,8 +261,19 @@ class _ExampleAlarmTileState extends State<ExampleAlarmTile> {
                             },
                           )
                         : Text(
-                            "${widget.dateTime.day}/${widget.dateTime.month}/${widget.dateTime.year}",
+                            "${NumberFormat("00").format(widget.dateTime.day)}/${NumberFormat("00").format(widget.dateTime.month)}/${widget.dateTime.year}",
                           ),
+                    isShowReoppen && newAlarmDate != null
+                        ? ElevatedButton(
+                            onPressed: () {
+                              saveAlarm();
+                            },
+                            child: Text(
+                              "Đặt lại vào ngày ${NumberFormat("00").format(newAlarmDate?.day)}/${NumberFormat("00").format(newAlarmDate?.month)}",
+                              style: const TextStyle(color: Colors.black),
+                            ),
+                          )
+                        : const SizedBox()
                   ],
                 ),
               ),
@@ -185,8 +281,10 @@ class _ExampleAlarmTileState extends State<ExampleAlarmTile> {
                   ? Switch(
                       value: widget.loopData['active'] ?? false,
                       activeColor: ColorConstants.clockColor,
-                      onChanged: (value) =>
-                          widget.toggleActiveLoopAlarm!(widget.loopData),
+                      onChanged: (value) {
+                        widget.toggleActiveLoopAlarm!(widget.loopData);
+                        _isReOpenNextAlarm(value);
+                      },
                     )
                   : const Icon(Icons.keyboard_arrow_right_rounded, size: 35),
             ],
