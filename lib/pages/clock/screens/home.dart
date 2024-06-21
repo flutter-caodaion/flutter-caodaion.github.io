@@ -245,6 +245,20 @@ class _AlarmHomeState extends State<AlarmHome> {
       await prefs.setString('loopAlarms', jsonEncode(storedLoopAlarm.toList()));
       storeLoopAlarm();
     }
+    if (value == 'useReadyLoopAlarms') {
+      final prefs = await SharedPreferences.getInstance();
+      var storedLoopAlarm = jsonDecode(prefs.getString('loopAlarms') ?? '[]');
+      storedLoopAlarm = [...storedLoopAlarm, ...AlarmConstants.readLoopAlarms];
+      await prefs.setString('loopAlarms', jsonEncode(storedLoopAlarm.toList()));
+      storeLoopAlarm();
+    }
+    if (value == 'removeAll') {
+      final prefs = await SharedPreferences.getInstance();
+      var storedLoopAlarm = jsonDecode(prefs.getString('loopAlarms') ?? '[]');
+      storedLoopAlarm = [];
+      await prefs.setString('loopAlarms', jsonEncode(storedLoopAlarm.toList()));
+      storeLoopAlarm();
+    }
   }
 
   @override
@@ -280,6 +294,14 @@ class _AlarmHomeState extends State<AlarmHome> {
                             const PopupMenuItem(
                               value: 'useDefaultLoopAlarms',
                               child: Text('Dùng hẹn giờ từ ứng dụng'),
+                            ),
+                            const PopupMenuItem(
+                              value: 'useReadyLoopAlarms',
+                              child: Text('Báo trước hẹn giờ từ ứng dụng'),
+                            ),
+                            const PopupMenuItem(
+                              value: 'removeAll',
+                              child: Text('Xoá tất cả'),
                             ),
                           ];
                         },

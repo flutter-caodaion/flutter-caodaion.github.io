@@ -94,7 +94,7 @@ class _LibraryPageState extends State<LibraryPage> {
                                 (ResponsiveBreakpoints.of(context).isMobile
                                     ? 1
                                     : ResponsiveBreakpoints.of(context).isTablet
-                                        ? 2
+                                        ? 1
                                         : ResponsiveBreakpoints.of(context)
                                                 .isDesktop
                                             ? 5
@@ -217,7 +217,7 @@ class _LibraryPageState extends State<LibraryPage> {
                                       ? 1
                                       : ResponsiveBreakpoints.of(context)
                                               .isTablet
-                                          ? 2
+                                          ? 1
                                           : ResponsiveBreakpoints.of(context)
                                                   .isDesktop
                                               ? 5

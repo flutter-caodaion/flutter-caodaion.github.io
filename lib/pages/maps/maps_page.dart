@@ -522,9 +522,9 @@ class _MapsPageState extends State<MapsPage> {
                       point: _currentPosition,
                       child: const Icon(
                         Icons.adjust_rounded,
-                        color: Colors.black,
+                        color: Colors.black
                       ),
-                      alignment: Alignment.topCenter,
+                      alignment: Alignment.center,
                     ),
                   ],
                 ),

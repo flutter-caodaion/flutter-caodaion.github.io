@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:alarm/alarm.dart';
 import 'package:alarm/model/alarm_settings.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -117,14 +118,18 @@ class _AlarmRingScreenState extends State<AlarmRingScreen> {
                 style: const TextStyle(fontSize: 30),
               ),
             ),
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Text(
-                alarmSettings.notificationBody,
-                textAlign: TextAlign.center,
-                style: const TextStyle(fontSize: 16),
+            if (alarmSettings.notificationBody != null)
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Markdown(
+                  physics: const NeverScrollableScrollPhysics(),
+                  shrinkWrap: true,
+                  data: alarmSettings.notificationBody,
+                  styleSheet: MarkdownStyleSheet(
+                    textAlign: WrapAlignment.center,
+                  ),
+                ),
               ),
-            ),
             const Text('🔔', style: TextStyle(fontSize: 50)),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,

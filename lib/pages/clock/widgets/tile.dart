@@ -1,4 +1,5 @@
 import 'package:alarm/model/alarm_settings.dart';
+import 'package:caodaion/constants/constants.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
@@ -183,6 +184,7 @@ class _ExampleAlarmTileState extends State<ExampleAlarmTile> {
               widget.loopData.isNotEmpty
                   ? Switch(
                       value: widget.loopData['active'] ?? false,
+                      activeColor: ColorConstants.clockColor,
                       onChanged: (value) =>
                           widget.toggleActiveLoopAlarm!(widget.loopData),
                     )
