@@ -121,7 +121,10 @@ class _AlarmHomeState extends State<AlarmHome> {
               operatorWeekday++;
             }
           }
-          if (foundAlarm.dateTime.microsecond != DateTime.now().microsecond) {
+          if (foundAlarm.dateTime.year >= DateTime.now().year &&
+              foundAlarm.dateTime.month >= DateTime.now().month &&
+              foundAlarm.dateTime.day >= DateTime.now().day &&
+              foundAlarm.dateTime.microsecond != DateTime.now().microsecond) {
             var addedDate = foundAlarm.dateTime.add(
                 Duration(days: operatorWeekday - foundAlarm.dateTime.weekday));
             var newAlarmSettings = AlarmSettings(
@@ -380,7 +383,7 @@ class _AlarmHomeState extends State<AlarmHome> {
               ),
             ),
             const SliverPadding(
-              padding: EdgeInsets.symmetric(vertical: 32),
+              padding: EdgeInsets.symmetric(vertical: 48),
             ),
           ],
         ),
