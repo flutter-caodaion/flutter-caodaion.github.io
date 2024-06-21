@@ -64,7 +64,9 @@ class _CalendarPageState extends State<CalendarPage> {
     var thanhSoResponse = await calendarEventService.fetchThanhSo();
     if (mounted) {
       setState(() {
-        thanhSoList = thanhSoResponse!['data'];
+        if (thanhSoResponse != null) {
+          thanhSoList = thanhSoResponse['data'];
+        }
         _loadSubscribedThanhSo();
       });
     }
@@ -87,9 +89,14 @@ class _CalendarPageState extends State<CalendarPage> {
             .firstWhere((tsl) => tsl['thanhSoSheet'] == element['key']);
         foundThanhSo['checked'] = element['checked'];
         setState(() {
-          humaneEvents.add({
-            "data": foundThanhSo,
-          });
+          if (humaneEvents
+              .where(
+                  (test) => test['data'].toString() == foundThanhSo.toString())
+              .isEmpty) {
+            humaneEvents.add({
+              "data": foundThanhSo,
+            });
+          }
           _fetchEventFromThanhSo();
         });
       }
@@ -123,49 +130,51 @@ class _CalendarPageState extends State<CalendarPage> {
   }
 
   _fetchEventFromThanhSo() async {
-    for (var element in humaneEvents) {
-      if (element['events'] != null && element['events'].length > 0) {
-        if (element['data']['checked'] == true) {
-          setState(() {
-            controller.addAll(element['events']);
-          });
-        } else {
-          setState(() {
-            controller.removeAll(element['events']);
-          });
-        }
-      } else {
-        if (element['data']['checked'] == true) {
-          try {
-            var thanhSoResponse = await calendarEventService
-                .fetchThanhSoEvent(element['data']['thanhSoSheet']);
+    if (humaneEvents.isNotEmpty) {
+      for (var element in humaneEvents) {
+        if (element['events'] != null && element['events'].length > 0) {
+          if (element['data']['checked'] == true) {
             setState(() {
-              try {
-                element['events'] = calendarEventsConstants.humaneEvents(
-                    selectedTime, thanhSoResponse!['data']);
-                controller.addAll(element['events']);
-              } catch (e) {
-                print(e);
-              }
+              controller.addAll(element['events']);
             });
-          } catch (e) {
-            print(e);
+          } else {
+            setState(() {
+              controller.removeAll(element['events']);
+            });
+          }
+        } else {
+          if (element['data']['checked'] == true) {
+            try {
+              var thanhSoResponse = await calendarEventService
+                  .fetchThanhSoEvent(element['data']['thanhSoSheet']);
+              setState(() {
+                try {
+                  element['events'] = calendarEventsConstants.humaneEvents(
+                      selectedTime, thanhSoResponse!['data']);
+                  controller.addAll(element['events']);
+                } catch (e) {
+                  print(e);
+                }
+              });
+            } catch (e) {
+              print(e);
+            }
           }
         }
       }
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString(
+        TokenConstants.humane,
+        jsonEncode(
+          humaneEvents
+              .map((toElement) => {
+                    "key": toElement['data']['thanhSoSheet'],
+                    "checked": toElement['data']['checked'],
+                  })
+              .toList(),
+        ),
+      );
     }
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(
-      TokenConstants.humane,
-      jsonEncode(
-        humaneEvents
-            .map((toElement) => {
-                  "key": toElement['data']['thanhSoSheet'],
-                  "checked": toElement['data']['checked'],
-                })
-            .toList(),
-      ),
-    );
   }
 
   _loadGlobalStaticEvents() {

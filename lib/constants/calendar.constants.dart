@@ -99,6 +99,11 @@ class CalendarEventsConstants {
       "tuThoi": true
     },
     {
+      "key": "le-ky-niem-duc-thuong-chuong-phap-le-ba-trang-lieu-dao",
+      "title": "LỄ KỶ NIỆM ĐỨC THƯỢNG CHƯỞNG PHÁP LÊ BÁ TRANG LIỄU ĐẠO",
+      "lunar": "yearly-05-29"
+    },
+    {
       "key": "dai-le-trung-nguong",
       "title": "ĐẠI LỄ TRUNG NGƯƠNG",
       "lunar": "yearly-07-15",
