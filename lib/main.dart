@@ -20,7 +20,6 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-
   @override
   Widget build(BuildContext context) {
     return MaterialApp.router(
@@ -37,6 +36,23 @@ class _MyAppState extends State<MyApp> {
         tabBarTheme: TabBarTheme(
           labelColor: Colors.black,
           indicatorColor: ColorConstants.primaryColor,
+        ),
+        elevatedButtonTheme: ElevatedButtonThemeData(
+          style: ButtonStyle(
+            backgroundColor: WidgetStateProperty.all(
+              ColorConstants.primaryBackground,
+            ),
+            iconColor: WidgetStateProperty.all(
+              Colors.black,
+            ),
+            textStyle: WidgetStateProperty.all(
+              const TextStyle(fontWeight: FontWeight.normal),
+            ),
+          ),
+        ),
+        floatingActionButtonTheme: FloatingActionButtonThemeData(
+          backgroundColor: ColorConstants.primaryBackground,
+          foregroundColor: ColorConstants.primaryColor,
         ),
       ),
       builder: (context, child) => ResponsiveBreakpoints.builder(

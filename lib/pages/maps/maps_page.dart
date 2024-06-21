@@ -126,6 +126,8 @@ class _MapsPageState extends State<MapsPage> {
                 height: 24,
               ),
               Wrap(
+                spacing: 8.0,
+                runSpacing: 8.0,
                 children: [
                   ElevatedButton(
                     onPressed: () {
