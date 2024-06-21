@@ -32,8 +32,9 @@ class _MapsPageState extends State<MapsPage> {
       alignment: Alignment.topCenter,
     )
   ];
+  List _filteredMarkers = [];
 
-  List _filteredItems = [];
+  final List _mapData = [];
   LatLng _currentPosition = LatLng(
     MapsConstants.caodaionLatitute,
     MapsConstants.caodaionLongitute,
@@ -261,13 +262,13 @@ class _MapsPageState extends State<MapsPage> {
     });
   }
 
-  _showMarkerDetails(element) {
+  _showMarkerDetails(element, {double? zoom}) {
     _mapController.moveAndRotate(
       LatLng(
         double.parse(element['latLng'].split(',')[0]),
         double.parse(element['latLng'].split(',')[1]),
       ),
-      15,
+      zoom ?? 15,
       0,
     );
     showModalBottomSheet(
@@ -361,7 +362,7 @@ class _MapsPageState extends State<MapsPage> {
     );
   }
 
-  List<Map<String, ValueKey<String>>> _searchThanhSo = [];
+  List<Map<String, ValueKey<String>>> _searchData = [];
 
   List<Map<String, ValueKey<String>>> removeDuplicateKeys(
       List<Map<String, ValueKey<String>>> list) {
@@ -385,23 +386,24 @@ class _MapsPageState extends State<MapsPage> {
         if (element['key'].isNotEmpty &&
             element['latLng'].isNotEmpty &&
             !element['key'].contains('edit')) {
-          _searchThanhSo.add({
+          _searchData.add({
             "key": ValueKey("Lọc theo ${element['organization']}"),
           });
+          _mapData.add(element);
         }
       }
       for (var element in mapResponse['data']) {
         if (element['key'].isNotEmpty &&
             element['latLng'].isNotEmpty &&
             !element['key'].contains('edit')) {
-          _searchThanhSo.add({
+          _searchData.add({
             "key": ValueKey(
-                "${element['name']} || ${element['address']} || ${element['organization']}")
+                "${element['name']} || ${element['address']} || ${element['organization']}"),
+            "data": ValueKey("${element['key']}"),
           });
           _allMarkers.add(
             Marker(
-              key: Key(
-                  "${element['name']} || ${element['address']} || ${element['organization']}"),
+              key: ValueKey("${element['key']}"),
               point: LatLng(
                 double.parse(element['latLng'].split(',')[0]),
                 double.parse(element['latLng'].split(',')[1]),
@@ -418,20 +420,10 @@ class _MapsPageState extends State<MapsPage> {
     }
     if (mounted) {
       setState(() {
-        _searchThanhSo = removeDuplicateKeys(_searchThanhSo);
-        _filteredItems = _searchThanhSo; // Initially, show all items
-        _searchController.addListener(_filterList);
+        _searchData = removeDuplicateKeys(_searchData);
+        _filteredMarkers = List.from(_allMarkers);
       });
     }
-  }
-
-  void _filterList() {
-    setState(() {
-      _filteredItems = _searchThanhSo.where((marker) {
-        return createSlug((marker['key'] as ValueKey<String>).value)
-            .contains(createSlug(_searchController.text));
-      }).toList();
-    });
   }
 
   LatLngBounds calculateBounds(List<LatLng> points) {
@@ -459,7 +451,7 @@ class _MapsPageState extends State<MapsPage> {
             return const Iterable<Map>.empty();
           }
           return [
-            ..._searchThanhSo.where((option) {
+            ..._searchData.where((option) {
               return createSlug((option['key'] as ValueKey<String>).value)
                   .contains(createSlug(textEditingValue.text));
             })
@@ -471,21 +463,7 @@ class _MapsPageState extends State<MapsPage> {
           setState(() {
             _searchController.text =
                 (selection['key'] as ValueKey<String>).value;
-            _filteredItems = [
-              ..._searchThanhSo.where((marker) {
-                return createSlug((marker['key'] as ValueKey<String>).value)
-                    .contains(createSlug(
-                        (selection['key'] as ValueKey<String>).value));
-              }),
-              ..._allMarkers.where((marker) {
-                return createSlug((marker['key'] as ValueKey<String>).value)
-                    .contains(createSlug(
-                        (selection['key'] as ValueKey<String>).value));
-              })
-            ].toList();
-            if (_filteredItems.length == 1) {
-              print(_filteredItems.first);
-            }
+            _onSelected(selection);
           });
         },
         fieldViewBuilder: (BuildContext context,
@@ -499,12 +477,6 @@ class _MapsPageState extends State<MapsPage> {
               setState(() {
                 _searchController = textEditingController;
                 _searchController.text = value;
-                _filteredItems = [
-                  ..._searchThanhSo.where((marker) {
-                    return createSlug((marker['key'] as ValueKey<String>).value)
-                        .contains(createSlug(value));
-                  })
-                ].toList();
               });
             },
             decoration: InputDecoration(
@@ -512,7 +484,7 @@ class _MapsPageState extends State<MapsPage> {
               border: const OutlineInputBorder(),
               suffixIcon: _searchController.text.isNotEmpty
                   ? IconButton(
-                      icon: Icon(Icons.clear),
+                      icon: const Icon(Icons.clear),
                       onPressed: _clearSearch,
                     )
                   : null,
@@ -523,9 +495,49 @@ class _MapsPageState extends State<MapsPage> {
     );
   }
 
+  _onSelected(selection) {
+    if (selection['data'] != null) {
+      final foundMarker = _mapData.firstWhere((data) =>
+          data['key'] == (selection['data'] as ValueKey<String>).value);
+      if (foundMarker != null) {
+        _showMarkerDetails(foundMarker);
+      }
+    } else {
+      _filteredMarkers = [];
+      final filteredData = _mapData.where((item) =>
+          item['organization'] ==
+          (selection['key'] as ValueKey<String>)
+              .value
+              .replaceFirst("Lọc theo ", ""));
+      if (filteredData.isNotEmpty) {
+        for (var element in filteredData) {
+          _filteredMarkers.add(
+            Marker(
+              key: ValueKey("${element['key']}"),
+              point: LatLng(
+                double.parse(element['latLng'].split(',')[0]),
+                double.parse(element['latLng'].split(',')[1]),
+              ),
+              child: GestureDetector(
+                onTap: () => _showMarkerDetails(element),
+                child: SvgPicture.asset('assets/icons/thanhSo.svg'),
+              ),
+              alignment: Alignment.topCenter,
+            ),
+          );
+        }
+        final nearestMarkerElement =
+            findNearestMarker(_currentPosition, _filteredMarkers);
+        _showMarkerDetails(nearestMarkerElement, zoom: 12);
+      }
+    }
+  }
+
   void _clearSearch() {
-    _searchController.clear();
-    _filterList();
+    _searchController.text = '';
+    setState(() {
+      _filteredMarkers = _allMarkers;
+    });
   }
 
   _clickSearchButton() {
@@ -538,10 +550,27 @@ class _MapsPageState extends State<MapsPage> {
     });
   }
 
+  findNearestMarker(LatLng location, markers) {
+    const Distance distance = Distance();
+    Marker nearestMarker = markers[0];
+    double nearestDistance =
+        distance.as(LengthUnit.Meter, location, markers[0].point);
+
+    for (var marker in markers) {
+      final double currentDistance =
+          distance.as(LengthUnit.Meter, location, marker.point);
+      if (currentDistance < nearestDistance) {
+        nearestDistance = currentDistance;
+        nearestMarker = marker;
+      }
+    }
+    final foundMarker = _mapData.firstWhere(
+        (data) => data['key'] == (nearestMarker.key as ValueKey<String>).value);
+    return foundMarker;
+  }
+
   @override
   void dispose() {
-    _searchController.removeListener(_filterList);
-    _searchController.dispose();
     super.dispose();
   }
 
@@ -619,7 +648,7 @@ class _MapsPageState extends State<MapsPage> {
                     alignment: Alignment.center,
                     padding: const EdgeInsets.all(50),
                     maxZoom: 15,
-                    markers: [..._allMarkers],
+                    markers: [..._filteredMarkers],
                     builder: (context, markers) {
                       return Container(
                         decoration: BoxDecoration(
