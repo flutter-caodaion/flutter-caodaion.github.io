@@ -441,6 +441,16 @@ class _MapsPageState extends State<MapsPage> {
     );
   }
 
+  _clickSearchButton() {
+    setState(() {
+      if (routeElement != null) {
+        _showRoutePoints(routeElement);
+      } else {
+        isShowFilter = !isShowFilter;
+      }
+    });
+  }
+
   @override
   void dispose() {
     // Clean up resources here
@@ -474,11 +484,13 @@ class _MapsPageState extends State<MapsPage> {
             ),
             IconButton(
               onPressed: () {
-                setState(() {
-                  isShowFilter = !isShowFilter;
-                });
+                _clickSearchButton();
               },
-              icon: const Icon(Icons.search_rounded),
+              icon: Icon(
+                routeElement != null
+                    ? Icons.route_rounded
+                    : Icons.search_rounded,
+              ),
             ),
           ],
         ),
