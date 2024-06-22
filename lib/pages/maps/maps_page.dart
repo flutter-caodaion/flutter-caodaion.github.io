@@ -69,6 +69,8 @@ class _MapsPageState extends State<MapsPage> {
     }
   }
 
+  double zoomLevel = 15.0;
+
   List<LatLng> routePoints = [];
   var routeData;
   var routeElement;
@@ -402,18 +404,7 @@ class _MapsPageState extends State<MapsPage> {
             "data": ValueKey("${element['key']}"),
           });
           _allMarkers.add(
-            Marker(
-              key: ValueKey("${element['key']}"),
-              point: LatLng(
-                double.parse(element['latLng'].split(',')[0]),
-                double.parse(element['latLng'].split(',')[1]),
-              ),
-              child: GestureDetector(
-                onTap: () => _showMarkerDetails(element),
-                child: SvgPicture.asset('assets/icons/thanhSo.svg'),
-              ),
-              alignment: Alignment.topCenter,
-            ),
+            _mapDefaultMarker(element),
           );
         }
       }
@@ -511,26 +502,57 @@ class _MapsPageState extends State<MapsPage> {
               .replaceFirst("Lọc theo ", ""));
       if (filteredData.isNotEmpty) {
         for (var element in filteredData) {
-          _filteredMarkers.add(
-            Marker(
-              key: ValueKey("${element['key']}"),
-              point: LatLng(
-                double.parse(element['latLng'].split(',')[0]),
-                double.parse(element['latLng'].split(',')[1]),
-              ),
-              child: GestureDetector(
-                onTap: () => _showMarkerDetails(element),
-                child: SvgPicture.asset('assets/icons/thanhSo.svg'),
-              ),
-              alignment: Alignment.topCenter,
-            ),
-          );
+          _filteredMarkers.add(_mapDefaultMarker(element));
         }
         final nearestMarkerElement =
             findNearestMarker(_currentPosition, _filteredMarkers);
         _showMarkerDetails(nearestMarkerElement, zoom: 12);
       }
     }
+  }
+
+  Marker _mapDefaultMarker(element) {
+    return Marker(
+      key: ValueKey("${element['key']}"),
+      point: LatLng(
+        double.parse(element['latLng'].split(',')[0]),
+        double.parse(element['latLng'].split(',')[1]),
+      ),
+      child: SizedBox(
+        height: 30,
+        width: 30,
+        child: GestureDetector(
+          onTap: () {
+            _showMarkerDetails(element);
+          },
+          child: Stack(
+            clipBehavior: Clip.none,
+            children: <Widget>[
+              Positioned(
+                left: 0,
+                bottom: 0,
+                child: SvgPicture.asset(
+                  'assets/icons/thanhSo.svg',
+                  width: 30,
+                  height: 30,
+                ),
+              ),
+              Positioned(
+                left: 15,
+                top: 30,
+                child: Text(
+                  element['name'],
+                  maxLines: 1,
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(fontSize: 12),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+      alignment: Alignment.topCenter,
+    );
   }
 
   void _clearSearch() {
@@ -622,6 +644,14 @@ class _MapsPageState extends State<MapsPage> {
               options: MapOptions(
                 initialCenter: _currentPosition,
                 initialZoom: 18,
+                keepAlive: true,
+                onPositionChanged: (MapPosition position, bool hasGesture) {
+                  if (position.zoom != null) {
+                    setState(() {
+                      zoomLevel = position.zoom!;
+                    });
+                  }
+                },
               ),
               children: [
                 TileLayer(
@@ -647,7 +677,6 @@ class _MapsPageState extends State<MapsPage> {
                     size: const Size(40, 40),
                     alignment: Alignment.center,
                     padding: const EdgeInsets.all(50),
-                    maxZoom: 15,
                     markers: [..._filteredMarkers],
                     builder: (context, markers) {
                       return Container(
