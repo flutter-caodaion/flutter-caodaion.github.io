@@ -268,7 +268,7 @@ class _MapsPageState extends State<MapsPage> {
         double.parse(element['latLng'].split(',')[0]),
         double.parse(element['latLng'].split(',')[1]),
       ),
-      zoom ?? 15,
+      zoom ?? 18,
       0,
     );
     showModalBottomSheet(
