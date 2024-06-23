@@ -12,7 +12,7 @@ class FontSizeDropdownMenu extends StatefulWidget {
 }
 
 class _FontSizeDropdownMenuState extends State<FontSizeDropdownMenu> {
-  int selectedKinhFontSize = 16;
+  int selectedTNHTFontSize = 16;
   final List<DropdownMenuEntry> fontSizeRange = [
     const DropdownMenuEntry(value: 12, label: '12'),
     const DropdownMenuEntry(value: 13, label: '13'),
@@ -49,19 +49,19 @@ class _FontSizeDropdownMenuState extends State<FontSizeDropdownMenu> {
   void _loadFontSize() async {
     final prefs = await SharedPreferences.getInstance();
     setState(() {
-      selectedKinhFontSize = prefs.getInt(TokenConstants.selectedKinhFontSize) ?? 16;
+      selectedTNHTFontSize = prefs.getInt(TokenConstants.selectedTNHTFontSize) ?? 16;
     });
   }
 
   void _saveFontSize(int fontSize) async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setInt(TokenConstants.selectedKinhFontSize, fontSize);
+    await prefs.setInt(TokenConstants.selectedTNHTFontSize, fontSize);
   }
 
   @override
   Widget build(BuildContext context) {
     return DropdownMenu(
-      initialSelection: selectedKinhFontSize,
+      initialSelection: selectedTNHTFontSize,
       dropdownMenuEntries: fontSizeRange,
       onSelected: (value) {
         widget.onFontSizeChanged(value);

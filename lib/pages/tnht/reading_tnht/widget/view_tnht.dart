@@ -1,24 +1,25 @@
-
 import 'package:caodaion/constants/constants.dart';
-import 'package:caodaion/pages/kinh/model/kinh.model.dart';
 import 'package:caodaion/pages/kinh/reading_kinh/widget/font_size_dropdown_menu.widget.dart';
+import 'package:caodaion/pages/tnht/model/table_content.model.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-class ViewKinhPage extends StatefulWidget {
+class ViewTNHTPage extends StatefulWidget {
   final String id;
+  final String group;
 
-  const ViewKinhPage({super.key, required this.id});
+  const ViewTNHTPage({super.key, required this.id, required this.group});
 
   @override
-  State<ViewKinhPage> createState() => _ViewKinhPageState();
+  State<ViewTNHTPage> createState() => _ViewTNHTPageState();
 }
 
-class _ViewKinhPageState extends State<ViewKinhPage> {
-  List<Map<String, dynamic>> kinhList = KinhModel.kinhList.toList();
+class _ViewTNHTPageState extends State<ViewTNHTPage> {
+  List<Map<String, dynamic>> tableContent =
+      TableContentModel.tableContent.toList();
   String _markdownContent = '';
 
   @override
@@ -28,15 +29,15 @@ class _ViewKinhPageState extends State<ViewKinhPage> {
   }
 
   @override
-  void didUpdateWidget(covariant ViewKinhPage oldWidget) {
+  void didUpdateWidget(covariant ViewTNHTPage oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.id != oldWidget.id) {
+    if (widget.id != oldWidget.id && widget.group != oldWidget.group) {
       loadMarkdownFile();
     }
   }
 
   loadMarkdownFile() async {
-    String path = 'assets/document/kinh/${widget.id}.txt';
+    String path = 'assets/document/TNHT/${widget.group}/${widget.id}.txt';
     final String content = await rootBundle.loadString(path);
     setState(() {
       _markdownContent = content;
@@ -44,9 +45,10 @@ class _ViewKinhPageState extends State<ViewKinhPage> {
     });
   }
 
-  kinhData() {
-    var responseData = kinhList.singleWhere((item) => item['key'] == widget.id);
-    var foundGroup = kinhList
+  TNHTData() {
+    var responseData =
+        tableContent.singleWhere((item) => item['key'] == widget.id);
+    var foundGroup = tableContent
         .where((item) => item['group'] == responseData['group'])
         .toList();
     var currentIndex =
@@ -65,12 +67,11 @@ class _ViewKinhPageState extends State<ViewKinhPage> {
   }
 
   int fontSize = 16;
-  
 
   void _loadFontSize() async {
     final prefs = await SharedPreferences.getInstance();
     setState(() {
-      fontSize = prefs.getInt(TokenConstants.selectedKinhFontSize) ?? 16;
+      fontSize = prefs.getInt(TokenConstants.selectedTNHTFontSize) ?? 16;
     });
   }
 
@@ -82,7 +83,7 @@ class _ViewKinhPageState extends State<ViewKinhPage> {
 
   @override
   Widget build(BuildContext context) {
-    var data = kinhData();
+    var data = TNHTData();
     return Scaffold(
       appBar: AppBar(
         title: Text(data['name']),
@@ -115,7 +116,7 @@ class _ViewKinhPageState extends State<ViewKinhPage> {
                   onPressed: data['prev'] == null
                       ? null
                       : () {
-                          context.go('/kinh/${data['prev']['key']}');
+                          context.go('/TNHT/${data['prev']['key']}');
                         },
                   style: ElevatedButton.styleFrom(
                     shape: const RoundedRectangleBorder(
@@ -140,7 +141,7 @@ class _ViewKinhPageState extends State<ViewKinhPage> {
                   onPressed: data['next'] == null
                       ? null
                       : () {
-                          context.go('/kinh/${data['next']['key']}');
+                          context.go('/TNHT/${data['next']['key']}');
                         },
                   style: ElevatedButton.styleFrom(
                     shape: const RoundedRectangleBorder(
