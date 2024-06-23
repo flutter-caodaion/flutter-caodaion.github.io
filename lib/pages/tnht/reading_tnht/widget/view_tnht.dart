@@ -4,6 +4,7 @@ import 'package:caodaion/pages/tnht/reading_tnht/widget/font_size_dropdown_menu.
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_tts/flutter_tts.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -22,11 +23,67 @@ class _ViewTNHTPageState extends State<ViewTNHTPage> {
   List<Map<String, dynamic>> tableContent =
       TableContentModel.tableContent.toList();
   String _tnhtContent = '';
+  late FlutterTts flutterTts;
+  bool isSpeaking = false;
 
   @override
   void initState() {
     super.initState();
+    initializeTTS();
     loadMarkdownFile();
+  }
+
+  Future<void> initializeTTS() async {
+    flutterTts = FlutterTts();
+
+    // Set TTS parameters
+    await flutterTts.setLanguage("vi-VN");
+    await flutterTts.setSpeechRate(0.5);
+    await flutterTts.setVolume(1.0);
+    await flutterTts.setPitch(1.0);
+
+    // Register event listeners
+    flutterTts.setStartHandler(() {
+      setState(() {
+        isSpeaking = true;
+      });
+    });
+
+    flutterTts.setCompletionHandler(() {
+      setState(() {
+        isSpeaking = false;
+      });
+    });
+
+    flutterTts.setErrorHandler((msg) {
+      setState(() {
+        isSpeaking = false;
+      });
+      print("Error: $msg");
+    });
+    flutterTts.setContinueHandler(() {
+      // Setup continueHandler here if needed
+      flutterTts.continueHandler = () {
+        print("Resumed TTS");
+      };
+    });
+  }
+
+  void _speak(text) async {
+    text = text
+        .replaceAll("&nbsp;", "")
+        .replaceAll("#", "")
+        .replaceAll("---", "")
+        .replaceAll("**", "");
+    await flutterTts.speak(text);
+  }
+
+  void _pause() async {
+    await flutterTts.pause();
+  }
+
+  void _stop() async {
+    await flutterTts.stop();
   }
 
   @override
@@ -202,4 +259,3 @@ class ClickableParagraphBuilder extends MarkdownElementBuilder {
     );
   }
 }
-
