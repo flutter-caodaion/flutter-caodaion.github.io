@@ -1,6 +1,7 @@
 import 'package:caodaion/constants/constants.dart';
 import 'package:caodaion/pages/tnht/model/table_content.model.dart';
 import 'package:caodaion/pages/tnht/reading_tnht/widget/font_size_dropdown_menu.widget.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
@@ -170,19 +171,35 @@ class _ViewTNHTPageState extends State<ViewTNHTPage> {
 class ClickableParagraphBuilder extends MarkdownElementBuilder {
   @override
   Widget visitText(text, TextStyle? preferredStyle) {
-    List<String> sentences = text.text.split('.');
-    return Wrap(
-      children: sentences.map((sentence) {
-        return GestureDetector(
-          onTap: () {
-            print(sentence.trim());
-          },
-          child: Text(
-            sentence.isEmpty ? '' : '$sentence.',
-            style: preferredStyle,
-          ),
-        );
-      }).toList(),
+    String fullText = text.text;
+    List<InlineSpan> spans = [];
+    List<String> sentences = splitSentences(fullText);
+
+    for (String sentence in sentences) {
+      spans.add(buildGestureDetector(sentence.trim(), preferredStyle));
+    }
+
+    return RichText(
+      text: TextSpan(
+        children: spans,
+      ),
+    );
+  }
+
+  List<String> splitSentences(String text) {
+    // Split text into sentences based on period followed by space
+    return text.split(RegExp(r'\.\s+'));
+  }
+
+  TextSpan buildGestureDetector(String sentence, TextStyle? preferredStyle) {
+    return TextSpan(
+      text: "$sentence. ",
+      style: preferredStyle,
+      recognizer: TapGestureRecognizer()
+        ..onTap = () {
+          print(sentence.trim());
+        },
     );
   }
 }
+
