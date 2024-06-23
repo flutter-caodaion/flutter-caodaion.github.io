@@ -1,4 +1,5 @@
 // maps_page.dart
+import 'dart:async';
 import 'dart:convert';
 import 'package:caodaion/constants/constants.dart';
 import 'package:caodaion/pages/maps/service/maps_service.dart';
@@ -106,96 +107,98 @@ class _MapsPageState extends State<MapsPage> {
     setState(() {
       routeElement = element;
     });
-    showModalBottomSheet(
-      backgroundColor: Colors.white,
-      barrierColor: Colors.transparent,
-      context: context,
-      builder: (BuildContext context) {
-        return Container(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              if (legs != null)
+    Timer(const Duration(seconds: 1), () {
+      showModalBottomSheet(
+        backgroundColor: Colors.white,
+        barrierColor: Colors.transparent,
+        context: context,
+        builder: (BuildContext context) {
+          return Container(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                if (legs != null)
+                  Text(
+                    convertDistance(legs['distance']),
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 20.0,
+                    ),
+                  ),
                 Text(
-                  "${convertDuration(legs['duration'])} (${convertDistance(legs['distance'])})",
-                  style: const TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 20.0,
-                  ),
+                  "Chỉ đường từ vị trí của bạn đến ${element['name']} (${element['address']})",
                 ),
-              Text(
-                "Chỉ đường từ vị trí của bạn đến ${element['name']} (${element['address']})",
-              ),
-              const SizedBox(
-                height: 24,
-              ),
-              Wrap(
-                spacing: 8.0,
-                runSpacing: 8.0,
-                children: [
-                  ElevatedButton(
-                    onPressed: () {
-                      _openWithGoogleMaps(element);
-                    },
-                    child: Wrap(
-                      alignment: WrapAlignment.center,
-                      crossAxisAlignment: WrapCrossAlignment.center,
-                      children: [
-                        SvgPicture.asset(
-                          'assets/icons/Google_Maps_icon_(2020).svg',
-                          height: 24,
-                          width: 24,
-                        ),
-                        const SizedBox(
-                          width: 8,
-                        ),
-                        const Text(
-                          "Mở Google Maps",
-                          style: TextStyle(
+                const SizedBox(
+                  height: 24,
+                ),
+                Wrap(
+                  spacing: 8.0,
+                  runSpacing: 8.0,
+                  children: [
+                    ElevatedButton(
+                      onPressed: () {
+                        _openWithGoogleMaps(element);
+                      },
+                      child: Wrap(
+                        alignment: WrapAlignment.center,
+                        crossAxisAlignment: WrapCrossAlignment.center,
+                        children: [
+                          SvgPicture.asset(
+                            'assets/icons/Google_Maps_icon_(2020).svg',
+                            height: 24,
+                            width: 24,
+                          ),
+                          const SizedBox(
+                            width: 8,
+                          ),
+                          const Text(
+                            "Mở Google Maps",
+                            style: TextStyle(
+                              color: Colors.black,
+                            ),
+                          )
+                        ],
+                      ),
+                    ),
+                    ElevatedButton(
+                      onPressed: () {
+                        setState(() {
+                          routePoints = [];
+                          routeData = null;
+                          routeElement = null;
+                          Navigator.of(context).pop();
+                        });
+                      },
+                      child: const Wrap(
+                        alignment: WrapAlignment.center,
+                        crossAxisAlignment: WrapCrossAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.delete_rounded,
                             color: Colors.black,
                           ),
-                        )
-                      ],
-                    ),
-                  ),
-                  ElevatedButton(
-                    onPressed: () {
-                      setState(() {
-                        routePoints = [];
-                        routeData = null;
-                        routeElement = null;
-                        Navigator.of(context).pop();
-                      });
-                    },
-                    child: const Wrap(
-                      alignment: WrapAlignment.center,
-                      crossAxisAlignment: WrapCrossAlignment.center,
-                      children: [
-                        Icon(
-                          Icons.delete_rounded,
-                          color: Colors.black,
-                        ),
-                        SizedBox(
-                          width: 8,
-                        ),
-                        Text(
-                          "Xoá chỉ đường",
-                          style: TextStyle(
-                            color: Colors.black,
+                          SizedBox(
+                            width: 8,
                           ),
-                        )
-                      ],
+                          Text(
+                            "Xoá chỉ đường",
+                            style: TextStyle(
+                              color: Colors.black,
+                            ),
+                          )
+                        ],
+                      ),
                     ),
-                  ),
-                ],
-              )
-            ],
-          ),
-        );
-      },
-    );
+                  ],
+                )
+              ],
+            ),
+          );
+        },
+      );
+    });
   }
 
   Future<void> _getRoute(LatLng start, LatLng end, element) async {
