@@ -1,6 +1,6 @@
 import 'package:caodaion/constants/constants.dart';
-import 'package:caodaion/pages/kinh/reading_kinh/widget/font_size_dropdown_menu.widget.dart';
 import 'package:caodaion/pages/tnht/model/table_content.model.dart';
+import 'package:caodaion/pages/tnht/reading_tnht/widget/font_size_dropdown_menu.widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
@@ -20,7 +20,7 @@ class ViewTNHTPage extends StatefulWidget {
 class _ViewTNHTPageState extends State<ViewTNHTPage> {
   List<Map<String, dynamic>> tableContent =
       TableContentModel.tableContent.toList();
-  String _markdownContent = '';
+  String _tnhtContent = '';
 
   @override
   void initState() {
@@ -31,21 +31,21 @@ class _ViewTNHTPageState extends State<ViewTNHTPage> {
   @override
   void didUpdateWidget(covariant ViewTNHTPage oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.id != oldWidget.id && widget.group != oldWidget.group) {
+    if (widget.id != oldWidget.id || widget.group != oldWidget.group) {
       loadMarkdownFile();
     }
   }
 
-  loadMarkdownFile() async {
+  Future<void> loadMarkdownFile() async {
     String path = 'assets/document/TNHT/${widget.group}/${widget.id}.txt';
     final String content = await rootBundle.loadString(path);
     setState(() {
-      _markdownContent = content;
+      _tnhtContent = content;
       _loadFontSize();
     });
   }
 
-  TNHTData() {
+  Map<String, dynamic> TNHTData() {
     var responseData =
         tableContent.singleWhere((item) => item['key'] == widget.id);
     var foundGroup = tableContent
@@ -96,18 +96,16 @@ class _ViewTNHTPageState extends State<ViewTNHTPage> {
       body: Column(
         children: [
           Expanded(
-            child: _markdownContent.isEmpty
-                ? const Center(child: CircularProgressIndicator())
-                : SelectionArea(
-                    child: Markdown(
-                      data: _markdownContent,
-                      styleSheet: MarkdownStyleSheet(
-                        p: TextStyle(
-                          fontSize: fontSize.toDouble(),
-                        ),
-                      ),
-                    ),
-                  ),
+            child: Markdown(
+              data: _tnhtContent,
+              selectable: true,
+              styleSheet: MarkdownStyleSheet(
+                p: TextStyle(fontSize: fontSize.toDouble()),
+              ),
+              builders: {
+                'p': ClickableParagraphBuilder(),
+              },
+            ),
           ),
           Row(
             children: [
@@ -165,6 +163,26 @@ class _ViewTNHTPageState extends State<ViewTNHTPage> {
           ),
         ],
       ),
+    );
+  }
+}
+
+class ClickableParagraphBuilder extends MarkdownElementBuilder {
+  @override
+  Widget visitText(text, TextStyle? preferredStyle) {
+    List<String> sentences = text.text.split('.');
+    return Wrap(
+      children: sentences.map((sentence) {
+        return GestureDetector(
+          onTap: () {
+            print(sentence.trim());
+          },
+          child: Text(
+            sentence.isEmpty ? '' : '$sentence.',
+            style: preferredStyle,
+          ),
+        );
+      }).toList(),
     );
   }
 }
