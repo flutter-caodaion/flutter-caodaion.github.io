@@ -161,7 +161,7 @@ class _ViewTNHTPageState extends State<ViewTNHTPage> {
                 p: TextStyle(fontSize: fontSize.toDouble()),
               ),
               builders: {
-                'p': IndentedParagraphBuilder(),
+                'p': ClickableParagraphBuilder(),
               },
             ),
           ),
@@ -225,46 +225,36 @@ class _ViewTNHTPageState extends State<ViewTNHTPage> {
   }
 }
 
-
-class IndentedParagraphBuilder extends MarkdownElementBuilder {
+class ClickableParagraphBuilder extends MarkdownElementBuilder {
   @override
   Widget visitText(text, TextStyle? preferredStyle) {
-    String fullText = text.text.trim();
+    String fullText = text.text;
     List<InlineSpan> spans = [];
+    List<String> sentences = splitSentences(fullText);
 
-    // Split content into paragraphs based on indentation
-    List<String> paragraphs = fullText.split('&nbsp;&nbsp;&nbsp;&nbsp;');
-
-    for (String paragraph in paragraphs) {
-      if (paragraph.isNotEmpty) { // Ensure paragraph is not empty
-        spans.add(buildIndentedText(paragraph.trim(), preferredStyle));
-      }
+    for (String sentence in sentences) {
+      spans.add(buildGestureDetector(sentence.trim(), preferredStyle));
     }
 
-    return GestureDetector(
-      onTap: () {
-        // Handle tap on the entire widget if needed
-        // Example: print('Widget tapped');
-      },
-      child: RichText(
-        text: TextSpan(
-          children: spans,
-        ),
+    return RichText(
+      text: TextSpan(
+        children: spans,
       ),
     );
   }
 
-  TextSpan buildIndentedText(String paragraph, TextStyle? preferredStyle) {
-    if (paragraph == null || paragraph.isEmpty) {
-      return TextSpan(text: '');
-    }
+  List<String> splitSentences(String text) {
+    // Split text into sentences based on period followed by space
+    return text.split(RegExp(r'\.\s+'));
+  }
 
+  TextSpan buildGestureDetector(String sentence, TextStyle? preferredStyle) {
     return TextSpan(
-      text: paragraph,
+      text: "$sentence",
       style: preferredStyle,
       recognizer: TapGestureRecognizer()
         ..onTap = () {
-          print(paragraph.trim());
+          print(sentence.trim());
         },
     );
   }
