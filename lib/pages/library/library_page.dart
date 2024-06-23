@@ -38,10 +38,12 @@ class _LibraryPageState extends State<LibraryPage> {
         }
       }
     }
-    setState(() {
-      _displayBooks = List.from(books);
-      libraryService.bookResponse = bookResponse;
-    });
+    if (mounted) {
+      setState(() {
+        _displayBooks = List.from(books);
+        libraryService.bookResponse = bookResponse;
+      });
+    }
   }
 
   @override

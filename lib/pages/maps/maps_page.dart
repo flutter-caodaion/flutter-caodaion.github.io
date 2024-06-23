@@ -1,9 +1,11 @@
 // maps_page.dart
 import 'dart:async';
 import 'dart:convert';
+import 'dart:developer';
 import 'package:caodaion/constants/constants.dart';
 import 'package:caodaion/pages/maps/service/maps_service.dart';
 import 'package:caodaion/util/text.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_map_marker_cluster/flutter_map_marker_cluster.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
@@ -55,11 +57,12 @@ class _MapsPageState extends State<MapsPage> {
 
   Future fetchRoute(LatLng start, LatLng end) async {
     final url =
-        'http://router.project-osrm.org/route/v1/driving/${start.longitude},${start.latitude};${end.longitude},${end.latitude}?geometries=geojson';
+        'http://router.project-osrm.org/route/v1/driving/${start.longitude},${start.latitude};${end.longitude},${end.latitude}?geometries=geojson&overview=full&annotations=true&steps=true';
     final response = await http.get(Uri.parse(url));
 
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body);
+
       final coords = data['routes'][0]['geometry']['coordinates'] as List;
       return {
         "coords": coords.map((c) => LatLng(c[1], c[0])).toList(),
@@ -259,12 +262,13 @@ class _MapsPageState extends State<MapsPage> {
 
     Position position = await Geolocator.getCurrentPosition(
         desiredAccuracy: LocationAccuracy.high);
-
-    setState(() {
-      _currentPosition = LatLng(position.latitude, position.longitude);
-      aPoint['latLng'] = _currentPosition;
-      _mapController.move(_currentPosition, 15.0);
-    });
+    if (mounted) {
+      setState(() {
+        _currentPosition = LatLng(position.latitude, position.longitude);
+        aPoint['latLng'] = _currentPosition;
+        _mapController.move(_currentPosition, 15.0);
+      });
+    }
   }
 
   _showMarkerDetails(element, {double? zoom}) {
@@ -701,7 +705,7 @@ class _MapsPageState extends State<MapsPage> {
                     Polyline(
                       points: routePoints,
                       strokeWidth: 8,
-                      color: const Color(0xff0f53ff),
+                      color: const Color(0xff0f53ff).withOpacity(0.8),
                       borderColor: const Color(0xff0f28f5),
                       borderStrokeWidth: 1,
                     ),

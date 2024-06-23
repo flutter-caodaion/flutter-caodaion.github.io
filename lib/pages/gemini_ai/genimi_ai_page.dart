@@ -1,6 +1,5 @@
 // genimi_ai_page.dart
 import 'package:caodaion/constants/constants.dart';
-import 'package:caodaion/widgets/responsive_scaffold.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:flutter_svg/svg.dart';
@@ -59,49 +58,39 @@ class _GenimiAIPageState extends State<GenimiAIPage> {
 
   @override
   Widget build(BuildContext context) {
-    return ResponsiveScaffold(
-      child: Scaffold(
-        appBar: AppBar(
-          leading: IconButton(
-            icon: const Icon(Icons.arrow_back_ios),
-            onPressed: () {
-              context.go('/apps');
-            },
-          ),
-          title: Row(
-            children: [
-              SvgPicture.asset(
-                'assets/icons/gemini_sparkle_v002_d4735304ff6292a690345.svg',
-              ),
-              const SizedBox(
-                width: 8,
-              ),
-              const Text('Genimi'),
-            ],
-          ),
-          backgroundColor: ColorConstants.whiteBackdround,
+    return Scaffold(
+      appBar: AppBar(
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_ios),
+          onPressed: () {
+            context.go('/apps');
+          },
         ),
-        body: Column(
+        title: Row(
           children: [
-            Expanded(
-              child: ListView.builder(
-                controller: _scrollController,
-                itemCount: chatHistory.length,
-                itemBuilder: (BuildContext context, int index) {
-                  return ListTile(
-                    title: chatHistory[index]['from'] == 'user'
-                        ? Card(
-                            color: ColorConstants.primaryBackground,
-                            child: Padding(
-                              padding: const EdgeInsets.all(8.0),
-                              child: Markdown(
-                                physics: const NeverScrollableScrollPhysics(),
-                                shrinkWrap: true,
-                                data: chatHistory[index]['content'] as String,
-                              ),
-                            ),
-                          )
-                        : Padding(
+            SvgPicture.asset(
+              'assets/icons/gemini_sparkle_v002_d4735304ff6292a690345.svg',
+            ),
+            const SizedBox(
+              width: 8,
+            ),
+            const Text('Genimi'),
+          ],
+        ),
+        backgroundColor: ColorConstants.whiteBackdround,
+      ),
+      body: Column(
+        children: [
+          Expanded(
+            child: ListView.builder(
+              controller: _scrollController,
+              itemCount: chatHistory.length,
+              itemBuilder: (BuildContext context, int index) {
+                return ListTile(
+                  title: chatHistory[index]['from'] == 'user'
+                      ? Card(
+                          color: ColorConstants.primaryBackground,
+                          child: Padding(
                             padding: const EdgeInsets.all(8.0),
                             child: Markdown(
                               physics: const NeverScrollableScrollPhysics(),
@@ -109,64 +98,72 @@ class _GenimiAIPageState extends State<GenimiAIPage> {
                               data: chatHistory[index]['content'] as String,
                             ),
                           ),
-                  );
-                },
+                        )
+                      : Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Markdown(
+                            physics: const NeverScrollableScrollPhysics(),
+                            shrinkWrap: true,
+                            data: chatHistory[index]['content'] as String,
+                          ),
+                        ),
+                );
+              },
+            ),
+          ),
+          if (isLoading)
+            const Padding(
+              padding: EdgeInsets.all(8.0),
+              child: Column(
+                children: [
+                  Markdown(
+                    shrinkWrap: true,
+                    data:
+                        "**LƯU Ý:**\nNội dung trên chỉ mang tính chất tham khảo vì chúng mình vẫn đang trong quá trình thử nghiệm **Đặc biệt là những câu hỏi về Đạo bạn không nên vội tin nhé!**",
+                  ),
+                  CircularProgressIndicator(),
+                ],
               ),
             ),
-            if (isLoading)
-              const Padding(
-                padding: EdgeInsets.all(8.0),
-                child: Column(
-                  children: [
-                    Markdown(
-                      shrinkWrap: true,
-                      data:
-                          "**LƯU Ý:**\nNội dung trên chỉ mang tính chất tham khảo vì chúng mình vẫn đang trong quá trình thử nghiệm **Đặc biệt là những câu hỏi về Đạo bạn không nên vội tin nhé!**",
-                    ),
-                    CircularProgressIndicator(),
-                  ],
+          Padding(
+            padding: const EdgeInsets.all(12.0),
+            child: Card(
+              color: ColorConstants.primaryBackground,
+              child: ListTile(
+                title: TextField(
+                  keyboardType: TextInputType.multiline,
+                  maxLines: null,
+                  controller: controller,
+                  autofocus: true,
+                  decoration:
+                      const InputDecoration(hintText: "Nhập lệnh tại đây"),
+                  onChanged: (value) {
+                    setState(() {
+                      chatContent = value;
+                    });
+                  },
+                  onSubmitted: (value) {
+                    generateContent(chatContent);
+                  },
                 ),
-              ),
-            Padding(
-              padding: const EdgeInsets.all(12.0),
-              child: Card(
-                color: ColorConstants.primaryBackground,
-                child: ListTile(
-                  title: TextField(
-                    keyboardType: TextInputType.multiline,
-                    maxLines: null,
-                    controller: controller,
-                    autofocus: true,
-                    decoration:
-                        const InputDecoration(hintText: "Nhập lệnh tại đây"),
-                    onChanged: (value) {
-                      setState(() {
-                        chatContent = value;
-                      });
+                trailing: Tooltip(
+                  message: "Gửi",
+                  child: IconButton(
+                    onPressed: () {
+                      if (isLoading) {
+                        null;
+                      } else {
+                        generateContent(chatContent);
+                      }
                     },
-                    onSubmitted: (value) {
-                      generateContent(chatContent);
-                    },
-                  ),
-                  trailing: Tooltip(
-                    message: "Gửi",
-                    child: IconButton(
-                      onPressed: () {
-                        if (isLoading) {
-                          null;
-                        } else {
-                          generateContent(chatContent);
-                        }
-                      },
-                      icon: const Icon(Icons.send_rounded),
-                      color: isLoading ? Colors.grey : Colors.black,
-                    ),
+                    icon: const Icon(Icons.send_rounded),
+                    color: isLoading ? Colors.grey : Colors.black,
                   ),
                 ),
               ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

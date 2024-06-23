@@ -54,6 +54,9 @@ class _MyAppState extends State<MyApp> {
           backgroundColor: ColorConstants.primaryBackground,
           foregroundColor: ColorConstants.primaryColor,
         ),
+        bottomSheetTheme: const BottomSheetThemeData(
+          backgroundColor: Colors.white,
+        ),
       ),
       builder: (context, child) => ResponsiveBreakpoints.builder(
         child: child!,

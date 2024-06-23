@@ -97,12 +97,6 @@ class _AppsPageState extends State<AppsPage> {
           color: ColorConstants.chartColor,
         ),
       },
-      if (isPhone())
-        {
-          'name': '/widgets',
-          'label': 'Widgets',
-          'icon': const Icon(Icons.widgets),
-        },
       {
         'name': '/ai',
         'label': 'Gemini AI',
@@ -111,6 +105,17 @@ class _AppsPageState extends State<AppsPage> {
           height: 32,
           width: 32,
         ),
+      },
+      if (isPhone())
+        {
+          'name': '/widgets',
+          'label': 'Widgets',
+          'icon': const Icon(Icons.widgets),
+        },
+      {
+        'name': '/faqs',
+        'label': 'FAQs',
+        'icon': const Icon(Icons.question_mark_rounded),
       },
     ];
 
@@ -207,13 +212,16 @@ class _AppsPageState extends State<AppsPage> {
                                     const BorderRadius.all(Radius.circular(12)),
                                 boxShadow: [
                                   BoxShadow(
-                                    color: Colors.black
-                                        .withOpacity(index == 0 ? 0 : 0.25),
+                                    color: Colors.black.withOpacity(
+                                      index == pinnedApps.length - 1 ? 0 : 0.25,
+                                    ),
                                     blurRadius: 4,
                                   ),
                                 ],
                                 border: Border.all(
-                                  color: ColorConstants.primaryColor,
+                                  color: index == pinnedApps.length - 1
+                                      ? Colors.transparent
+                                      : ColorConstants.primaryColor,
                                 ),
                               ),
                               child: Center(

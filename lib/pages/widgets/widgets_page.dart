@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:home_widget/home_widget.dart';
 
 const String appGroupId = 'com.example.caodaion';
@@ -33,6 +34,12 @@ class _WidgetsPageState extends State<WidgetsPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_ios),
+          onPressed: () {
+            context.go('/apps');
+          },
+        ),
         title: const Text('Widgets'),
         centerTitle: false,
       ),
