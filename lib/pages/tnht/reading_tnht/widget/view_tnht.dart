@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:caodaion/constants/constants.dart';
 import 'package:caodaion/pages/tnht/model/table_content.model.dart';
 import 'package:caodaion/pages/tnht/reading_tnht/widget/font_size_dropdown_menu.widget.dart';
@@ -23,6 +25,7 @@ class _ViewTNHTPageState extends State<ViewTNHTPage> {
   List<Map<String, dynamic>> tableContent =
       TableContentModel.tableContent.toList();
   String _tnhtContent = '';
+  String? _selectedContent;
   late FlutterTts flutterTts;
   bool isSpeaking = false;
 
@@ -55,6 +58,12 @@ class _ViewTNHTPageState extends State<ViewTNHTPage> {
       });
     });
 
+    flutterTts.setPauseHandler(() {
+      setState(() {
+        isSpeaking = false;
+      });
+    });
+
     flutterTts.setErrorHandler((msg) {
       setState(() {
         isSpeaking = false;
@@ -66,11 +75,14 @@ class _ViewTNHTPageState extends State<ViewTNHTPage> {
       flutterTts.continueHandler = () {
         print("Resumed TTS");
       };
+      setState(() {
+        isSpeaking = true;
+      });
     });
   }
 
-  void _speak(text) async {
-    text = text
+  void _speak() async {
+    final text = (_selectedContent ?? _tnhtContent)
         .replaceAll("&nbsp;", "")
         .replaceAll("#", "")
         .replaceAll("---", "")
@@ -84,12 +96,16 @@ class _ViewTNHTPageState extends State<ViewTNHTPage> {
 
   void _stop() async {
     await flutterTts.stop();
+    setState(() {
+      _selectedContent = null;
+    });
   }
 
   @override
   void didUpdateWidget(covariant ViewTNHTPage oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.id != oldWidget.id || widget.group != oldWidget.group) {
+      initializeTTS();
       loadMarkdownFile();
     }
   }
@@ -140,12 +156,39 @@ class _ViewTNHTPageState extends State<ViewTNHTPage> {
   }
 
   @override
+  void dispose() {
+    _stop();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     var data = TNHTData();
     return Scaffold(
       appBar: AppBar(
         title: Text(data['name']),
         actions: [
+          Tooltip(
+            message: _selectedContent != null ? "Đọc đoạn đã chọn" : "Đọc cả",
+            child: IconButton(
+              onPressed: isSpeaking ? null : _speak,
+              icon: const Icon(Icons.play_arrow_rounded),
+            ),
+          ),
+          Tooltip(
+            message: "Tạm dùng",
+            child: IconButton(
+              onPressed: isSpeaking ? _pause : null,
+              icon: const Icon(Icons.pause_circle_outline_rounded),
+            ),
+          ),
+          Tooltip(
+            message: "Kết thúc",
+            child: IconButton(
+              onPressed: _stop,
+              icon: const Icon(Icons.stop_circle_rounded),
+            ),
+          ),
           FontSizeDropdownMenu(
             onFontSizeChanged: _updateFontSize,
           ),
@@ -158,10 +201,19 @@ class _ViewTNHTPageState extends State<ViewTNHTPage> {
               data: _tnhtContent,
               selectable: true,
               styleSheet: MarkdownStyleSheet(
-                p: TextStyle(fontSize: fontSize.toDouble()),
+                p: TextStyle(fontSize: fontSize.toDouble() ?? 16),
               ),
-              builders: {
-                'p': ClickableParagraphBuilder(),
+              onTapLink: (text, href, title) {
+                // Handle taps on links if needed
+              },
+              onSelectionChanged: (text, selection, cause) {
+                if (!selection.baseOffset.isNaN) {
+                  var speekValue = text!
+                      .substring(selection.baseOffset, selection.extentOffset);
+                  setState(() {
+                    _selectedContent = speekValue;
+                  });
+                }
               },
             ),
           ),
@@ -172,7 +224,8 @@ class _ViewTNHTPageState extends State<ViewTNHTPage> {
                   onPressed: data['prev'] == null
                       ? null
                       : () {
-                          context.go('/TNHT/${data['prev']['key']}');
+                          context.go(
+                              '/tnht/${data['prev']['group']}/${data['prev']['key']}');
                         },
                   style: ElevatedButton.styleFrom(
                     shape: const RoundedRectangleBorder(
@@ -197,7 +250,8 @@ class _ViewTNHTPageState extends State<ViewTNHTPage> {
                   onPressed: data['next'] == null
                       ? null
                       : () {
-                          context.go('/TNHT/${data['next']['key']}');
+                          context.go(
+                              '/tnht/${data['next']['group']}/${data['next']['key']}');
                         },
                   style: ElevatedButton.styleFrom(
                     shape: const RoundedRectangleBorder(
@@ -221,41 +275,6 @@ class _ViewTNHTPageState extends State<ViewTNHTPage> {
           ),
         ],
       ),
-    );
-  }
-}
-
-class ClickableParagraphBuilder extends MarkdownElementBuilder {
-  @override
-  Widget visitText(text, TextStyle? preferredStyle) {
-    String fullText = text.text;
-    List<InlineSpan> spans = [];
-    List<String> sentences = splitSentences(fullText);
-
-    for (String sentence in sentences) {
-      spans.add(buildGestureDetector(sentence.trim(), preferredStyle));
-    }
-
-    return RichText(
-      text: TextSpan(
-        children: spans,
-      ),
-    );
-  }
-
-  List<String> splitSentences(String text) {
-    // Split text into sentences based on period followed by space
-    return text.split(RegExp(r'\.\s+'));
-  }
-
-  TextSpan buildGestureDetector(String sentence, TextStyle? preferredStyle) {
-    return TextSpan(
-      text: "$sentence. ",
-      style: preferredStyle,
-      recognizer: TapGestureRecognizer()
-        ..onTap = () {
-          print(sentence.trim());
-        },
     );
   }
 }
