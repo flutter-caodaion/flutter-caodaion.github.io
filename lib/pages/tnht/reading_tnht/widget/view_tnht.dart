@@ -250,7 +250,7 @@ class ClickableParagraphBuilder extends MarkdownElementBuilder {
 
   TextSpan buildGestureDetector(String sentence, TextStyle? preferredStyle) {
     return TextSpan(
-      text: "$sentence",
+      text: "$sentence. ",
       style: preferredStyle,
       recognizer: TapGestureRecognizer()
         ..onTap = () {
