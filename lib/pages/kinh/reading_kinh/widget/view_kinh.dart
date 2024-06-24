@@ -70,7 +70,7 @@ class _ViewKinhPageState extends State<ViewKinhPage> {
   void _loadFontSize() async {
     final prefs = await SharedPreferences.getInstance();
     setState(() {
-      fontSize = prefs.getInt(TokenConstants.selectedFontSize) ?? 16;
+      fontSize = prefs.getInt(TokenConstants.selectedKinhFontSize) ?? 16;
     });
   }
 

@@ -13,6 +13,7 @@ import 'package:caodaion/pages/profile/profile_page.dart';
 import 'package:caodaion/pages/qr/qr_page.dart';
 import 'package:caodaion/pages/self_chart/self_chart_page.dart';
 import 'package:caodaion/pages/settings/settings_page.dart';
+import 'package:caodaion/pages/tnht/reading_tnht/reading_tnht.dart';
 import 'package:caodaion/pages/tnht/tnht_page.dart';
 import 'package:caodaion/pages/widgets/widgets_page.dart';
 import 'package:go_router/go_router.dart';
@@ -59,6 +60,16 @@ final GoRouter router = GoRouter(
       path: '/tnht',
       pageBuilder: (context, state) =>
           NoTransitionPage(child: const TNHTPage(), name: '/tnht'),
+    ),
+    GoRoute(
+      path: '/tnht/:group/:id',
+      pageBuilder: (context, state) {
+        final group = state.pathParameters['group'] as String;
+        final id = state.pathParameters['id'] as String;
+        return NoTransitionPage(
+          child: ReadingTNHTPage(id: id, group: group),
+        );
+      },
     ),
     GoRoute(
       path: '/lich',
