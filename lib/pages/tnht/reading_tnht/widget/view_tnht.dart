@@ -86,6 +86,8 @@ class _ViewTNHTPageState extends State<ViewTNHTPage> {
         .replaceAll("---", "")
         .replaceAll("<center>", "")
         .replaceAll(">", "")
+        .replaceAll("</", "")
+        .replaceAll("center", "")
         .replaceAll("</center>", "")
         .replaceAll("Décembre", "Đì-xem-bờ")
         .replaceAll("NOEL", "Nô-en")
