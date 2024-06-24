@@ -1,9 +1,7 @@
 import 'dart:developer';
-
 import 'package:caodaion/constants/constants.dart';
 import 'package:caodaion/pages/tnht/model/table_content.model.dart';
 import 'package:caodaion/pages/tnht/reading_tnht/widget/font_size_dropdown_menu.widget.dart';
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_tts/flutter_tts.dart';
@@ -225,6 +223,11 @@ class _ViewTNHTPageState extends State<ViewTNHTPage> {
               selectable: true,
               styleSheet: MarkdownStyleSheet(
                 p: TextStyle(fontSize: fontSize.toDouble() ?? 16),
+                h1: const TextStyle().copyWith(fontWeight: FontWeight.bold),
+                blockquotePadding: const EdgeInsets.only(left: 50),
+                blockquoteDecoration: const BoxDecoration(
+                  color: Colors.transparent
+                )
               ),
               onTapLink: (text, href, title) {
                 // Handle taps on links if needed
