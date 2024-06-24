@@ -71,13 +71,13 @@ class _ViewTNHTPageState extends State<ViewTNHTPage> {
       print("Error: $msg");
     });
     flutterTts.setContinueHandler(() {
-      // Setup continueHandler here if needed
-      flutterTts.continueHandler = () {
-        print("Resumed TTS");
-      };
       setState(() {
         isSpeaking = true;
       });
+      flutterTts.continueHandler = () {
+        print("Resumed TTS");
+        log("Resumed TTS $isSpeaking");
+      };
     });
   }
 
@@ -86,19 +86,30 @@ class _ViewTNHTPageState extends State<ViewTNHTPage> {
         .replaceAll("&nbsp;", "")
         .replaceAll("#", "")
         .replaceAll("---", "")
+        .replaceAll("<center>", "")
+        .replaceAll("</center>", "")
         .replaceAll("**", "");
     await flutterTts.speak(text);
+    setState(() {
+      isSpeaking = true;
+    });
   }
 
   void _pause() async {
     await flutterTts.pause();
+    setState(() {
+      isSpeaking = false;
+    });
   }
 
   void _stop() async {
     await flutterTts.stop();
-    setState(() {
-      _selectedContent = null;
-    });
+    if (mounted) {
+      setState(() {
+        _selectedContent = null;
+        isSpeaking = false;
+      });
+    }
   }
 
   @override
@@ -111,7 +122,7 @@ class _ViewTNHTPageState extends State<ViewTNHTPage> {
   }
 
   Future<void> loadMarkdownFile() async {
-    String path = 'assets/document/TNHT/${widget.group}/${widget.id}.txt';
+    String path = 'assets/document/tnht/${widget.group}/${widget.id}.txt';
     final String content = await rootBundle.loadString(path);
     setState(() {
       _tnhtContent = content;
@@ -166,33 +177,45 @@ class _ViewTNHTPageState extends State<ViewTNHTPage> {
     var data = TNHTData();
     return Scaffold(
       appBar: AppBar(
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_ios),
+          onPressed: () {
+            context.go('/tnht');
+          },
+        ),
         title: Text(data['name']),
-        actions: [
-          Tooltip(
-            message: _selectedContent != null ? "Đọc đoạn đã chọn" : "Đọc cả",
-            child: IconButton(
-              onPressed: isSpeaking ? null : _speak,
-              icon: const Icon(Icons.play_arrow_rounded),
-            ),
+        bottom: PreferredSize(
+          preferredSize: Size.fromHeight(50),
+          child: Wrap(
+            children: [
+              Tooltip(
+                message:
+                    _selectedContent != null ? "Đọc đoạn đã chọn" : "Đọc cả",
+                child: IconButton(
+                  onPressed: isSpeaking ? null : _speak,
+                  icon: const Icon(Icons.play_arrow_rounded),
+                ),
+              ),
+              Tooltip(
+                message: "Tạm dùng",
+                child: IconButton(
+                  onPressed: isSpeaking ? _pause : null,
+                  icon: const Icon(Icons.pause_circle_outline_rounded),
+                ),
+              ),
+              Tooltip(
+                message: "Kết thúc",
+                child: IconButton(
+                  onPressed: _stop,
+                  icon: const Icon(Icons.stop_circle_rounded),
+                ),
+              ),
+              FontSizeDropdownMenu(
+                onFontSizeChanged: _updateFontSize,
+              ),
+            ],
           ),
-          Tooltip(
-            message: "Tạm dùng",
-            child: IconButton(
-              onPressed: isSpeaking ? _pause : null,
-              icon: const Icon(Icons.pause_circle_outline_rounded),
-            ),
-          ),
-          Tooltip(
-            message: "Kết thúc",
-            child: IconButton(
-              onPressed: _stop,
-              icon: const Icon(Icons.stop_circle_rounded),
-            ),
-          ),
-          FontSizeDropdownMenu(
-            onFontSizeChanged: _updateFontSize,
-          ),
-        ],
+        ),
       ),
       body: Column(
         children: [
