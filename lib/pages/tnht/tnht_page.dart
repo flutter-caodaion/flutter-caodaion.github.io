@@ -3,6 +3,7 @@ import 'package:caodaion/constants/constants.dart';
 import 'package:caodaion/pages/kinh/widget/kinh_list.dart';
 import 'package:caodaion/pages/tnht/model/table_content.model.dart';
 import 'package:caodaion/pages/tnht/widget/table_content.dart';
+import 'package:caodaion/util/text.dart';
 import 'package:caodaion/widgets/responsive_scaffold.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -16,8 +17,10 @@ class TNHTPage extends StatefulWidget {
 
 class _TNHTPageState extends State<TNHTPage> {
   List<bool> isSelected = [true, false];
-  List<Map<String, dynamic>> tnhtTableContent = TableContentModel.tableContent.toList();
-  List<Map<String, dynamic>> searchTNHTResult = TableContentModel.tableContent;
+  List<Map<String, dynamic>> tnhtTableContent =
+      TableContentModel.tableContent.toList();
+  List<Map<String, dynamic>> searchTNHTResult =
+      TableContentModel.tableContent.toList();
 
   TextEditingController controller = TextEditingController();
   String searchText = '';
@@ -50,18 +53,19 @@ class _TNHTPageState extends State<TNHTPage> {
       searchText = text;
       searchTNHTResult.clear();
       if (text.isEmpty) {
-        searchTNHTResult = tnhtTableContent;
-        setState(() {});
-        return;
-      }
-      text = text.toLowerCase();
-      for (var tnht in tnhtTableContent) {
-        var nameField = (tnht['name'] as String).toLowerCase();
-        if (nameField.contains(text)) {
-          searchTNHTResult.add(tnht);
+        setState(() {
+          searchTNHTResult = TableContentModel.tableContent.toList();
+        });
+      } else {
+        text = text.toLowerCase();
+        for (var tnht in TableContentModel.tableContent) {
+          var nameField = createSlug((tnht['name'] as String));
+          if (nameField.contains(createSlug(text))) {
+            searchTNHTResult.add(tnht);
+          }
         }
+        setState(() {});
       }
-      setState(() {});
     }
 
     return ResponsiveScaffold(
@@ -167,28 +171,30 @@ class _TNHTPageState extends State<TNHTPage> {
                 isSelected: isSelected,
                 tableContent: searchTNHTResult,
               )
-            : Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Text(
-                    'Không thể tìm thấy kinh với từ khóa của bạn:',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontSize: 18,
+            : Center(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Text(
+                      'Không thể tìm thấy bài học với từ khóa của bạn:',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 18,
+                      ),
                     ),
-                  ),
-                  Text(
-                    '"$searchText"',
-                    textAlign: TextAlign.center,
-                    style: const TextStyle(
-                        fontSize: 20, fontWeight: FontWeight.bold),
-                  ),
-                  const Text(
-                    'Hãy thử nhập chính xác dấu để tìm kiếm dễ hơn bạn nhé!',
-                    textAlign: TextAlign.center,
-                  ),
-                ],
+                    Text(
+                      '"$searchText"',
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(
+                          fontSize: 20, fontWeight: FontWeight.bold),
+                    ),
+                    const Text(
+                      'Hãy thử nhập chính xác dấu để tìm kiếm dễ hơn bạn nhé!',
+                      textAlign: TextAlign.center,
+                    ),
+                  ],
+                ),
               ),
       ),
     );

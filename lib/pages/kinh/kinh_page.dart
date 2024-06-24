@@ -2,10 +2,10 @@
 import 'package:caodaion/constants/constants.dart';
 import 'package:caodaion/pages/kinh/model/kinh.model.dart';
 import 'package:caodaion/pages/kinh/widget/kinh_list.dart';
+import 'package:caodaion/util/text.dart';
 import 'package:caodaion/widgets/responsive_scaffold.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
 
 class KinhPage extends StatefulWidget {
   const KinhPage({super.key});
@@ -63,23 +63,24 @@ class _KinhPageState extends State<KinhPage> {
             .where((item) => item['group'] == 'quan_hon_tang_te')
             .toList();
         setState(() {});
-        return;
-      }
-      text = text.toLowerCase();
-      for (var kinhDetail in kinhList) {
-        var nameField = (kinhDetail['name'] as String).toLowerCase();
-        if (kinhDetail['group'] == 'cung_tu_thoi' && nameField.contains(text)) {
-          searchTuThoiResult.add(kinhDetail);
+      } else {
+        text = text.toLowerCase();
+        for (var kinhDetail in kinhList) {
+          var nameField = createSlug(kinhDetail['name'] as String);
+          if (kinhDetail['group'] == 'cung_tu_thoi' &&
+              nameField.contains(createSlug(text))) {
+            searchTuThoiResult.add(kinhDetail);
+          }
         }
-      }
-      for (var kinhDetail in kinhList) {
-        var nameField = (kinhDetail['name'] as String).toLowerCase();
-        if (kinhDetail['group'] == 'quan_hon_tang_te' &&
-            nameField.contains(text)) {
-          searchQuanHonTangTeResult.add(kinhDetail);
+        for (var kinhDetail in kinhList) {
+          var nameField = createSlug(kinhDetail['name'] as String);
+          if (kinhDetail['group'] == 'quan_hon_tang_te' &&
+              nameField.contains(createSlug(text))) {
+            searchQuanHonTangTeResult.add(kinhDetail);
+          }
         }
+        setState(() {});
       }
-      setState(() {});
     }
 
     return ResponsiveScaffold(
