@@ -85,8 +85,11 @@ class _ViewTNHTPageState extends State<ViewTNHTPage> {
         .replaceAll("#", "")
         .replaceAll("---", "")
         .replaceAll("<center>", "")
+        .replaceAll(">", "")
         .replaceAll("</center>", "")
-        .replaceAll("**", "");
+        .replaceAll("Décembre", "Đì xem bờ")
+        .replaceAll("Europe", "Ơ rốp")
+        .replaceAll("*", "");
     await flutterTts.speak(text);
     setState(() {
       isSpeaking = true;
