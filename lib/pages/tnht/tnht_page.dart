@@ -16,7 +16,7 @@ class TNHTPage extends StatefulWidget {
 
 class _TNHTPageState extends State<TNHTPage> {
   List<bool> isSelected = [true, false];
-  List<Map<String, dynamic>> kinhList = TableContentModel.tableContent.toList();
+  List<Map<String, dynamic>> tnhtTableContent = TableContentModel.tableContent.toList();
   List<Map<String, dynamic>> searchTNHTResult = TableContentModel.tableContent;
 
   TextEditingController controller = TextEditingController();
@@ -50,15 +50,15 @@ class _TNHTPageState extends State<TNHTPage> {
       searchText = text;
       searchTNHTResult.clear();
       if (text.isEmpty) {
-        searchTNHTResult = TableContentModel.tableContent.toList();
+        searchTNHTResult = tnhtTableContent;
         setState(() {});
         return;
       }
       text = text.toLowerCase();
-      for (var kinhDetail in kinhList) {
-        var nameField = (kinhDetail['name'] as String).toLowerCase();
+      for (var tnht in tnhtTableContent) {
+        var nameField = (tnht['name'] as String).toLowerCase();
         if (nameField.contains(text)) {
-          searchTNHTResult.add(kinhDetail);
+          searchTNHTResult.add(tnht);
         }
       }
       setState(() {});
