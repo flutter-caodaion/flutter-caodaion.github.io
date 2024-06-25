@@ -7,6 +7,7 @@ import 'package:caodaion/constants/alarm.constants.dart';
 import 'package:caodaion/pages/clock/screens/edit_alarm.dart';
 import 'package:caodaion/pages/clock/widgets/tile.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -254,7 +255,29 @@ class _AlarmHomeState extends State<AlarmHome> {
     if (value == 'useReadyLoopAlarms') {
       final prefs = await SharedPreferences.getInstance();
       var storedLoopAlarm = jsonDecode(prefs.getString('loopAlarms') ?? '[]');
-      storedLoopAlarm = [...storedLoopAlarm, ...AlarmConstants.readLoopAlarms];
+      storedLoopAlarm = [...storedLoopAlarm, ...AlarmConstants.readyLoopAlarms];
+      await prefs.setString('loopAlarms', jsonEncode(storedLoopAlarm.toList()));
+      storeLoopAlarm();
+    }
+    if (value == 'readAll') {
+      final prefs = await SharedPreferences.getInstance();
+      var storedLoopAlarm = jsonDecode(prefs.getString('loopAlarms') ?? '[]');
+      storedLoopAlarm = [...storedLoopAlarm];
+      for (var element in storedLoopAlarm) {
+        element['tts1'] = true;
+        element['tts2'] = true;
+      }
+      await prefs.setString('loopAlarms', jsonEncode(storedLoopAlarm.toList()));
+      storeLoopAlarm();
+    }
+    if (value == 'unReadAll') {
+      final prefs = await SharedPreferences.getInstance();
+      var storedLoopAlarm = jsonDecode(prefs.getString('loopAlarms') ?? '[]');
+      storedLoopAlarm = [...storedLoopAlarm];
+      for (var element in storedLoopAlarm) {
+        element['tts1'] = false;
+        element['tts2'] = false;
+      }
       await prefs.setString('loopAlarms', jsonEncode(storedLoopAlarm.toList()));
       storeLoopAlarm();
     }
@@ -306,6 +329,14 @@ class _AlarmHomeState extends State<AlarmHome> {
                               child: Text('Báo trước hẹn giờ từ ứng dụng'),
                             ),
                             const PopupMenuItem(
+                              value: 'readAll',
+                              child: Text('Đọc tất cả'),
+                            ),
+                            const PopupMenuItem(
+                              value: 'unReadAll',
+                              child: Text('Huỷ đọc tất cả'),
+                            ),
+                            const PopupMenuItem(
                               value: 'removeAll',
                               child: Text('Xoá tất cả'),
                             ),
@@ -338,8 +369,9 @@ class _AlarmHomeState extends State<AlarmHome> {
                                       "active": data['active'] ?? false,
                                       "data": data,
                                     },
-                                    onPressed: () =>
-                                        navigateToAlarmScreen(data),
+                                    onPressed: () => 
+                                    navigateToAlarmScreen(data),
+                                    // GoRouter.of(context).go('/dong-ho/${data['id']}'),
                                     onDismissed: () {
                                       removeLoopAlarm(data['id']);
                                     },
