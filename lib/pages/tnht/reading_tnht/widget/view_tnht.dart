@@ -77,6 +77,7 @@ class _ViewTNHTPageState extends State<ViewTNHTPage> {
         log("Resumed TTS $isSpeaking");
       };
     });
+    _stop();
   }
 
   void _speak() async {
