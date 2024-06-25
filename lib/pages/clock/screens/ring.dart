@@ -1,10 +1,12 @@
 import 'dart:convert';
+import 'dart:developer';
 import 'dart:io';
 
 import 'package:alarm/alarm.dart';
 import 'package:alarm/model/alarm_settings.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
+import 'package:flutter_tts/flutter_tts.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -26,10 +28,99 @@ class _AlarmRingScreenState extends State<AlarmRingScreen> {
     notificationBody: '',
   );
 
+  late FlutterTts flutterTts;
+  bool isSpeaking = false;
+
   @override
   void initState() {
     super.initState();
+    initializeTTS();
     getRingData();
+  }
+
+  Future<void> initializeTTS() async {
+    flutterTts = FlutterTts();
+
+    // Set TTS parameters
+    await flutterTts.setLanguage("vi-VN");
+    await flutterTts.setSpeechRate(0.5);
+    await flutterTts.setVolume(1.0);
+    await flutterTts.setPitch(1.0);
+
+    // Register event listeners
+    flutterTts.setStartHandler(() {
+      setState(() {
+        isSpeaking = true;
+      });
+    });
+
+    flutterTts.setCompletionHandler(() {
+      setState(() {
+        isSpeaking = false;
+      });
+    });
+
+    flutterTts.setPauseHandler(() {
+      setState(() {
+        isSpeaking = false;
+      });
+    });
+
+    flutterTts.setErrorHandler((msg) {
+      setState(() {
+        isSpeaking = false;
+      });
+      print("Error: $msg");
+    });
+    flutterTts.setContinueHandler(() {
+      setState(() {
+        isSpeaking = true;
+      });
+      flutterTts.continueHandler = () {
+        print("Resumed TTS");
+        log("Resumed TTS $isSpeaking");
+      };
+    });
+  }
+
+  speakSpecify() {
+
+  }
+
+  void _speak(text) async {
+    text = text
+        .replaceAll("&nbsp;", "")
+        .replaceAll("#", "")
+        .replaceAll("---", "")
+        .replaceAll("<center>", "")
+        .replaceAll(">", "")
+        .replaceAll("</", "")
+        .replaceAll("center", "")
+        .replaceAll("</center>", "")
+        .replaceAll("Décembre", "Đì-xem-bờ")
+        .replaceAll("NOEL", "Nô-en")
+        .replaceAll("Europe", "Ơ-rốp")
+        .replaceAll("*", "");
+    await flutterTts.speak(text);
+    setState(() {
+      isSpeaking = true;
+    });
+  }
+
+  void _pause() async {
+    await flutterTts.pause();
+    setState(() {
+      isSpeaking = false;
+    });
+  }
+
+  void _stop() async {
+    await flutterTts.stop();
+    if (mounted) {
+      setState(() {
+        isSpeaking = false;
+      });
+    }
   }
 
   getRingData() async {
@@ -103,6 +194,11 @@ class _AlarmRingScreenState extends State<AlarmRingScreen> {
     }
   }
 
+  _onStopAlarm() {
+    speakSpecify();
+    Alarm.stop(int.parse(widget.id)).then((_) => context.go('/dong-ho'));
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -156,8 +252,7 @@ class _AlarmRingScreenState extends State<AlarmRingScreen> {
                 // ),
                 RawMaterialButton(
                   onPressed: () {
-                    Alarm.stop(int.parse(widget.id))
-                        .then((_) => context.go('/dong-ho'));
+                    _onStopAlarm();
                   },
                   child: Text(
                     'Dừng',
