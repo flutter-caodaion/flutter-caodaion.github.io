@@ -33,7 +33,7 @@ class AlarmConstants {
       "assetAudioPath": defaultAudio,
       "notificationTitle": "Thức dậy ⏰",
       "notificationBody":
-          "Đến giờ thức dậy rồi 🕓⏰! Chúc bạn có một ngày mới vui vẻ hạnh phúc 😊!",
+          "Đến giờ thức dậy rồi 🕓⏰! Chúc bạn một ngày mới vui vẻ hạnh phúc 😊! Đừng quên đọc kinh thức dậy bạn nhé!",
       "enableNotificationOnKill": false,
       "fadeDuration": 12.0,
       "selectedDays": [true, true, true, true, true, true, true],
@@ -119,7 +119,7 @@ class AlarmConstants {
       "active": true
     },
   ];
-  static List readLoopAlarms = [
+  static List readyLoopAlarms = [
     {
       "id": 3913,
       "dateTime":

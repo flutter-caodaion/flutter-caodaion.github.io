@@ -37,6 +37,8 @@ class _ExampleAlarmEditScreenState extends State<ExampleAlarmEditScreen> {
   late bool active = true;
   var alarmSettings;
   var loopData;
+  late bool tts1 = true;
+  late bool tts2 = true;
 
   @override
   void initState() {
@@ -45,6 +47,8 @@ class _ExampleAlarmEditScreenState extends State<ExampleAlarmEditScreen> {
 
     selectedDays = List.filled(7, false);
     active = true;
+    tts1 = false;
+    tts2 = false;
     if (creating) {
       selectedDateTime = DateTime.now().add(const Duration(minutes: 1));
       selectedDateTime = selectedDateTime.copyWith(second: 0, millisecond: 0);
@@ -69,6 +73,8 @@ class _ExampleAlarmEditScreenState extends State<ExampleAlarmEditScreen> {
           'fadeDuration': widget.alarmSettings.fadeDuration,
           'selectedDays': List.filled(7, false),
           'active': true,
+          'tts1': tts1,
+          'tts2': tts2,
         };
         alarmSettings = widgetAlarmSettings;
         loopData = widgetAlarmSettings;
@@ -87,6 +93,8 @@ class _ExampleAlarmEditScreenState extends State<ExampleAlarmEditScreen> {
         selectedDays[i] = loopData['selectedDays'][i].toString() == 'true';
       }
       active = loopData['active'];
+      tts1 = loopData['tts1'] ?? false;
+      tts2 = loopData['tts2'] ?? false;
       setState(() {
         if (loopData['notificationTitle'] != null) {
           notificationTitle = loopData['notificationTitle'];
@@ -222,6 +230,8 @@ class _ExampleAlarmEditScreenState extends State<ExampleAlarmEditScreen> {
         'fadeDuration': buildedAlarmSettings.fadeDuration,
         'selectedDays': selectedDays,
         'active': true,
+        'tts1': tts1,
+        'tts2': tts2,
       };
       final prefs = await SharedPreferences.getInstance();
       final List loopAlarms = jsonDecode(prefs.getString('loopAlarms') ?? '[]');
@@ -302,7 +312,8 @@ class _ExampleAlarmEditScreenState extends State<ExampleAlarmEditScreen> {
               children: [
                 TextField(
                   controller: notificationTitleController,
-                  decoration: const InputDecoration(hintText: "Tiêu đề hẹn giờ"),
+                  decoration:
+                      const InputDecoration(hintText: "Tiêu đề hẹn giờ"),
                   onChanged: (value) {
                     setState(
                       () {
@@ -321,7 +332,8 @@ class _ExampleAlarmEditScreenState extends State<ExampleAlarmEditScreen> {
                   maxLines: null,
                   keyboardType: TextInputType.multiline,
                   controller: notificationBodyController,
-                  decoration: const InputDecoration(hintText: "Nội dung hẹn giờ"),
+                  decoration:
+                      const InputDecoration(hintText: "Nội dung hẹn giờ"),
                   onChanged: (value) {
                     setState(
                       () {
@@ -377,6 +389,40 @@ class _ExampleAlarmEditScreenState extends State<ExampleAlarmEditScreen> {
                 Switch(
                   value: vibrate,
                   onChanged: (value) => setState(() => vibrate = value),
+                ),
+              ],
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'Đọc tiêu đề hẹn giờ',
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
+                Switch(
+                  value: tts1,
+                  onChanged: (value) => {
+                    setState(() {
+                      tts1 = value;
+                    })
+                  },
+                ),
+              ],
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'Đọc nội dung hẹn giờ',
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
+                Switch(
+                  value: tts2,
+                  onChanged: (value) => {
+                    setState(() {
+                      tts2 = value;
+                    })
+                  },
                 ),
               ],
             ),

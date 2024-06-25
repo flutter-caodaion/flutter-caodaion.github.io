@@ -171,6 +171,34 @@ class _ExampleAlarmTileState extends State<ExampleAlarmTile> {
   Widget build(BuildContext context) {
     var data = widget.loopData['data'];
     return Dismissible(
+      confirmDismiss: (direction) async {
+        return await showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return AlertDialog(
+              title: const Text('Xác nhận xoá hẹn giờ'),
+              content: Text('Bạn có chắc là muốn xoá hẹn giờ lúc ${TimeOfDay(
+                hour: nextAlarm.hour,
+                minute: nextAlarm.minute,
+              ).format(context)} ${NumberFormat("00").format(nextAlarm.day)}/${NumberFormat("00").format(nextAlarm.month)}/${DateFormat.y().format(nextAlarm)} không?'),
+              actions: <Widget>[
+                TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pop(false);
+                  },
+                  child: const Text('Huỷ'),
+                ),
+                TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pop(true);
+                  },
+                  child: const Text('Xác nhận'),
+                ),
+              ],
+            );
+          },
+        );
+      },
       key: widget.key!,
       direction: widget.onDismissed != null
           ? DismissDirection.endToStart
