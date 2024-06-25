@@ -178,6 +178,7 @@ class KinhModel {
       "group": "quan_hon_tang_te"
     },
     {"key": "dong-quan", "name": "Động Quan", "group": "quan_hon_tang_te"},
+    {"key": "tong-linh-cuu", "name": "Tống Linh Cửu", "group": "quan_hon_tang_te"},
     {"key": "dua-linh", "name": "Đưa Linh", "group": "quan_hon_tang_te"},
     {"key": "cao-hau-tho", "name": "Cáo Hậu Thổ", "group": "quan_hon_tang_te"},
     {"key": "ha-rong", "name": "Hạ Rộng", "group": "quan_hon_tang_te"},
