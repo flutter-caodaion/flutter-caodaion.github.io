@@ -93,6 +93,7 @@ class _ViewTNHTPageState extends State<ViewTNHTPage> {
         .replaceAll("Décembre", "Đì-xem-bờ")
         .replaceAll("NOEL", "Nô-en")
         .replaceAll("Europe", "Ơ-rốp")
+        .replaceAll("périsprit", "perispirit")
         .replaceAll("*", "");
     await flutterTts.speak(text);
     setState(() {
